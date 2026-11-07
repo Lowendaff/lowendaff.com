@@ -1,0 +1,7 @@
+---
+import { getAds } from '../../lib/commercial';
+import AdStack from './AdStack.astro';
+const ads = await getAds('articleBottomAds');
+---
+
+<AdStack ads={ads} placement="article-bottom" />

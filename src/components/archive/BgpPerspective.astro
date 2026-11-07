@@ -1,0 +1,100 @@
+---
+import ArchiveBlock from './ArchiveBlock.astro';
+import type { ReviewSection } from '../../lib/review-model';
+interface Props {
+  section: ReviewSection;
+}
+const { section } = Astro.props;
+const versions = ['IPv4', 'IPv6'];
+const images = section.blocks.filter((block) => block.type === 'image');
+---
+
+<section class="bgp-perspective" data-bgp aria-label="BGP 透视">
+  <div class="bgp-heading">
+    <h3>BGP 透视</h3>
+    <div class="bgp-tabs" role="tablist" aria-label="BGP IP 协议">
+      {versions.map((version, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${section.id}-${version}-tab`}
+          aria-controls={`${section.id}-${version}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-bgp-tab={version}
+        >
+          {version}
+        </button>
+      ))}
+    </div>
+  </div>
+  {versions.map((version) => {
+    const image = images.find((block) => block.alt?.includes(version));
+    return (
+      <div
+        class="bgp-panel"
+        id={`${section.id}-${version}`}
+        role="tabpanel"
+        aria-labelledby={`${section.id}-${version}-tab`}
+        tabindex="0"
+        data-bgp-panel={version}
+      >
+        {image ? (
+          <ArchiveBlock block={image} sectionTitle="BGP 透视" />
+        ) : (
+          <div class="bgp-empty">
+            <span class="mono">{version}</span>
+            <strong>暂无 {version} BGP 图</strong>
+            <p>可切换 IPv4 查看。</p>
+          </div>
+        )}
+      </div>
+    );
+  })}
+</section>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-bgp]').forEach((root) => {
+    const tabs = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('[data-bgp-tab]'),
+    );
+    const panels = Array.from(
+      root.querySelectorAll<HTMLElement>('[data-bgp-panel]'),
+    );
+    let selected =
+      new URLSearchParams(location.search).get('bgp') === 'IPv6' ? 1 : 0;
+    const render = () => {
+      tabs.forEach((tab, i) => {
+        tab.setAttribute('aria-selected', String(i === selected));
+        tab.tabIndex = i === selected ? 0 : -1;
+      });
+      panels.forEach((panel, i) => {
+        panel.hidden = i !== selected;
+      });
+    };
+    const choose = (i: number) => {
+      selected = i;
+      render();
+      const url = new URL(location.href);
+      url.searchParams.set('bgp', tabs[i].dataset.bgpTab!);
+      history.replaceState(null, '', url);
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => choose(i));
+      tab.addEventListener('keydown', (event) => {
+        const next =
+          event.key === 'ArrowRight' || event.key === 'ArrowLeft'
+            ? 1 - i
+            : event.key === 'Home'
+              ? 0
+              : event.key === 'End'
+                ? 1
+                : -1;
+        if (next < 0) return;
+        event.preventDefault();
+        choose(next);
+        tabs[next].focus();
+      });
+    });
+    render();
+  });
+</script>

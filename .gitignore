@@ -147,3 +147,16 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# LowEndAFF local tools and validation output
+dist/
+coverage/
+__pycache__/
+*.py[cod]
+.DS_Store
+.openviking/
+.agents/
+.playwright-mcp/
+test-results/
+playwright-report/
+docs/evidence/

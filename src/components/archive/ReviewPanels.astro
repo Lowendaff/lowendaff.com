@@ -1,0 +1,147 @@
+---
+import BgpPerspective from './BgpPerspective.astro';
+import ArchiveBlock from './ArchiveBlock.astro';
+import RouteExplorer from './RouteExplorer.astro';
+import type { ReviewPanel } from '../../lib/review-model';
+interface Props {
+  id: string;
+  label: string;
+  panels: ReviewPanel[];
+}
+const { id, label, panels } = Astro.props;
+---
+
+<div class="review-panels" data-review-panels={id}>
+  <div class="review-tablist" role="tablist" aria-label={label}>
+    {panels.map((panel, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`${id}-tab-${i}`}
+        aria-controls={`${id}-content-${i}`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        data-review-tab={panel.id}
+      >
+        {panel.label}
+      </button>
+    ))}
+  </div>
+  {panels.map((panel, i) => (
+    <div
+      id={`${id}-content-${i}`}
+      class="review-panel"
+      role="tabpanel"
+      aria-labelledby={`${id}-tab-${i}`}
+      tabindex="0"
+      data-review-panel={panel.id}
+    >
+      {panel.sections.map((section) => (
+        <div
+          id={section.id}
+          class="source-section"
+          data-source-section={section.title}
+        >
+          {panel.route ? (
+            <RouteExplorer
+              blocks={section.blocks}
+              id={panel.route === 'return' ? 'return-route' : 'outbound-route'}
+              inbound={panel.route === 'outbound'}
+            />
+          ) : section.title === 'BGP 透视' ? (
+            <BgpPerspective section={section} />
+          ) : (
+            <>
+              {id !== 'speed' && (
+                <h3 class="panel-source-title">{section.title}</h3>
+              )}
+              {section.blocks.map((block) => (
+                <ArchiveBlock block={block} sectionTitle={section.title} />
+              ))}
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  ))}
+</div>
+<script>
+  document
+    .querySelectorAll<HTMLElement>('[data-review-panels]')
+    .forEach((root) => {
+      const key = root.dataset.reviewPanels!;
+      const tabs = Array.from(
+        root.querySelectorAll<HTMLButtonElement>('[data-review-tab]'),
+      );
+      const panels = Array.from(
+        root.querySelectorAll<HTMLElement>('[data-review-panel]'),
+      );
+      const params = new URLSearchParams(location.search);
+      let selected = Math.max(
+        0,
+        tabs.findIndex((tab) => tab.dataset.reviewTab === params.get(key)),
+      );
+      const render = (sync = false) => {
+        panels.forEach((panel, i) => {
+          panel.hidden = i !== selected;
+        });
+        tabs.forEach((tab, i) => {
+          tab.setAttribute('aria-selected', String(i === selected));
+          tab.tabIndex = i === selected ? 0 : -1;
+        });
+        if (sync) {
+          const url = new URL(location.href);
+          url.searchParams.set(key, tabs[selected].dataset.reviewTab!);
+          history.replaceState(null, '', url);
+        }
+      };
+      const choose = (i: number) => {
+        selected = i;
+        render(true);
+      };
+      tabs.forEach((tab, i) => {
+        tab.addEventListener('click', () => choose(i));
+        tab.addEventListener('keydown', (event) => {
+          const next =
+            event.key === 'ArrowRight'
+              ? (i + 1) % tabs.length
+              : event.key === 'ArrowLeft'
+                ? (i - 1 + tabs.length) % tabs.length
+                : event.key === 'Home'
+                  ? 0
+                  : event.key === 'End'
+                    ? tabs.length - 1
+                    : -1;
+          if (next < 0) return;
+          event.preventDefault();
+          choose(next);
+          tabs[next].focus();
+        });
+      });
+      const revealHash = () => {
+        let hash = '';
+        try {
+          hash = decodeURIComponent(location.hash.slice(1));
+        } catch {
+          return;
+        }
+        const target = document.getElementById(hash);
+        const index = panels.findIndex(
+          (p) => target && (p === target || p.contains(target)),
+        );
+        if (index >= 0) {
+          selected = index;
+          render();
+          target?.closest('details')?.setAttribute('open', '');
+          target?.querySelector('details')?.setAttribute('open', '');
+          requestAnimationFrame(() =>
+            target?.scrollIntoView({ behavior: 'instant', block: 'start' }),
+          );
+        }
+      };
+      window.addEventListener('hashchange', revealHash);
+      root.classList.add('enhanced');
+      render();
+      revealHash();
+    });
+</script>

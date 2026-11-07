@@ -1,0 +1,190 @@
+---
+import Icon from './Icon.astro';
+const options = [
+  { value: 'system', label: '跟随系统', icon: 'monitor' },
+  { value: 'light', label: '浅色', icon: 'sun' },
+  { value: 'dark', label: '深色', icon: 'moon' },
+];
+---
+
+<details class="theme-picker" hidden>
+  <summary id="theme-toggle" aria-label="外观：跟随系统" title="外观：跟随系统">
+    {options.map((option) => (
+      <span data-theme-icon={option.value}>
+        <Icon name={option.icon} />
+      </span>
+    ))}
+  </summary>
+  <div class="theme-options" role="group" aria-label="选择主题外观">
+    {options.map((option) => (
+      <button
+        type="button"
+        data-appearance-option={option.value}
+        aria-pressed={option.value === 'system'}
+      >
+        <Icon name={option.icon} size={18} />
+        <span>{option.label}</span>
+        <span class="theme-check">
+          <Icon name="check" size={16} />
+        </span>
+      </button>
+    ))}
+  </div>
+</details>
+
+<script>
+  const picker = document.querySelector<HTMLDetailsElement>('.theme-picker');
+  const summary = picker?.querySelector('summary');
+  const buttons = picker?.querySelectorAll<HTMLButtonElement>(
+    '[data-appearance-option]',
+  );
+  const root = document.documentElement;
+  const key = 'lowendaff-appearance';
+  const normalize = (value: string | null | undefined) =>
+    value === 'light' || value === 'dark' ? value : 'system';
+  const apply = (value: string | null | undefined) => {
+    const appearance = normalize(value);
+    root.dataset.appearance = appearance;
+    if (appearance === 'system') delete root.dataset.theme;
+    else root.dataset.theme = appearance;
+    document
+      .querySelectorAll<HTMLMetaElement>('[data-theme-color]')
+      .forEach((meta) => {
+        const mode =
+          appearance === 'system' ? meta.dataset.themeColor : appearance;
+        meta.content = mode === 'dark' ? '#1a1b26' : '#e1e2e7';
+      });
+    const label = { system: '跟随系统', light: '浅色', dark: '深色' }[
+      appearance
+    ];
+    summary?.setAttribute('aria-label', `外观：${label}`);
+    summary?.setAttribute('title', `外观：${label}`);
+    buttons?.forEach((button) =>
+      button.setAttribute(
+        'aria-pressed',
+        String(button.dataset.appearanceOption === appearance),
+      ),
+    );
+  };
+  apply(root.dataset.appearance);
+  if (picker) picker.hidden = false;
+  buttons?.forEach((button) =>
+    button.addEventListener('click', () => {
+      const appearance = normalize(button.dataset.appearanceOption);
+      apply(appearance);
+      try {
+        if (appearance === 'system') localStorage.removeItem(key);
+        else localStorage.setItem(key, appearance);
+      } catch {
+        /* Current-page switching still works when storage is unavailable. */
+      }
+      if (picker) picker.open = false;
+      // Restore keyboard focus without moving the current reading position.
+      summary?.focus({ preventScroll: true });
+    }),
+  );
+  window.addEventListener('storage', (event) => {
+    if (event.key === key || event.key === null) apply(event.newValue);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && picker?.open) {
+      picker.open = false;
+      summary?.focus({ preventScroll: true });
+    }
+  });
+  document.addEventListener('click', (event) => {
+    if (
+      picker?.open &&
+      event.target instanceof Node &&
+      !picker.contains(event.target)
+    )
+      picker.open = false;
+  });
+  picker?.addEventListener('focusout', (event) => {
+    if (
+      event.relatedTarget instanceof Node &&
+      !picker.contains(event.relatedTarget)
+    )
+      picker.open = false;
+  });
+  const mobileNav = document.querySelector<HTMLDetailsElement>('.mobile-nav');
+  picker?.addEventListener('toggle', () => {
+    if (picker.open && mobileNav) mobileNav.open = false;
+  });
+  mobileNav?.addEventListener('toggle', () => {
+    if (mobileNav.open && picker) picker.open = false;
+  });
+</script>
+
+<style>
+  .theme-picker {
+    position: relative;
+  }
+  .theme-picker summary {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    list-style: none;
+    color: var(--muted);
+  }
+  .theme-picker summary::-webkit-details-marker {
+    display: none;
+  }
+  .theme-picker summary:hover,
+  .theme-picker[open] summary {
+    color: var(--accent);
+    background: var(--subtle);
+  }
+  [data-theme-icon] {
+    display: none;
+  }
+  :global([data-appearance='system']) [data-theme-icon='system'],
+  :global([data-appearance='light']) [data-theme-icon='light'],
+  :global([data-appearance='dark']) [data-theme-icon='dark'] {
+    display: flex;
+  }
+  .theme-options {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 184px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--raised);
+    box-shadow: var(--shadow);
+  }
+  .theme-options button {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    text-align: left;
+    background: transparent;
+    color: var(--text);
+  }
+  .theme-options button:hover {
+    background: var(--subtle);
+  }
+  .theme-options button[aria-pressed='true'] {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .theme-check {
+    display: flex;
+    margin-left: auto;
+    visibility: hidden;
+  }
+  [aria-pressed='true'] .theme-check {
+    visibility: visible;
+  }
+  .theme-options button:focus-visible {
+    outline-offset: -2px;
+  }
+</style>

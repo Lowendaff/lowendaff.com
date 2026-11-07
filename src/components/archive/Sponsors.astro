@@ -1,0 +1,39 @@
+---
+import { getSponsors } from '../../lib/commercial';
+const sponsors = await getSponsors('article-sidebar');
+// Owned, static SVG wordmarks. Never inline untrusted remote SVG markup.
+const marks = import.meta.glob('../../assets/sponsors/*.svg', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+}) as Record<string, string>;
+for (const sponsor of sponsors) {
+  if (!marks[`../../assets/sponsors/${sponsor.logo}`])
+    throw new Error(`Missing sponsor SVG: ${sponsor.logo}`);
+}
+---
+
+{sponsors.length > 0 && (
+  <section class="sponsor-wall" aria-labelledby="sponsor-title">
+    <div class="section-heading">
+      <h2 id="sponsor-title">Sponsors</h2>
+      <span>赞助商</span>
+    </div>
+    <div class="sponsor-grid">
+      {sponsors.map((s) => (
+        <a
+          href={s.url}
+          target="_blank"
+          rel="sponsored nofollow noopener noreferrer"
+          aria-label={`${s.name} 赞助商网站`}
+        >
+          <span
+            class="sponsor-mark"
+            translate="no"
+            set:html={marks[`../../assets/sponsors/${s.logo}`]}
+          />
+        </a>
+      ))}
+    </div>
+  </section>
+)}

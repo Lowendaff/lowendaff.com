@@ -1,0 +1,47 @@
+---
+interface Props {
+  headers: string[];
+  rows: string[][];
+  caption: string;
+}
+const { headers, rows, caption } = Astro.props;
+---
+
+<div
+  class="data-table panel"
+  tabindex="0"
+  role="region"
+  aria-label={caption}
+  data-component="BenchmarkResultsTable"
+>
+  <table>
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        {headers.map((header) => (
+          <th scope="col">{header}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr>
+          {row.map((cell, i) =>
+            i === 0 ? (
+              <th scope="row">{cell}</th>
+            ) : (
+              <td
+                class:list={{
+                  'data-missing': ['busy', 'N/A', '–', '—'].includes(cell),
+                }}
+              >
+                {cell}
+              </td>
+            ),
+          )}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  {!rows.length && <p class="empty-table">暂无测试数据，稍后补充。</p>}
+</div>

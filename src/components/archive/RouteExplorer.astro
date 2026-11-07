@@ -1,0 +1,199 @@
+---
+import RouteSelect from './RouteSelect.astro';
+import BenchmarkResultsTable from '../mdx/BenchmarkResultsTable.astro';
+interface Block {
+  type: string;
+  id?: string;
+  line: number;
+  headings?: string[];
+  headers?: string[];
+  rows?: string[][];
+  html?: string;
+}
+interface Props {
+  blocks: Block[];
+  id: string;
+  inbound?: boolean;
+}
+const { blocks, id, inbound = false } = Astro.props;
+const tables = blocks.filter((b) => b.type === 'table');
+const sectionNotes = blocks.filter(
+  (b, i) => b.type === 'paragraph' && blocks[i + 1]?.type !== 'table',
+);
+const groupFor = (b: Block) => {
+  const h = b.headings || [];
+  const title = h.at(-1) || '';
+  if (inbound) return h[0] || '其他';
+  if (h[0] === '中国境内目标')
+    return title.includes('电信')
+      ? '中国电信'
+      : title.includes('联通')
+        ? '中国联通'
+        : '中国移动';
+  return h[0] === '主要公共服务' ? '公共服务' : '国际网络';
+};
+const groupNames = [...new Set(tables.map(groupFor))].sort(
+  (a, b) =>
+    ['中国电信', '中国联通', '中国移动', '公共服务', '国际网络'].indexOf(a) -
+    ['中国电信', '中国联通', '中国移动', '公共服务', '国际网络'].indexOf(b),
+);
+const groups = groupNames.map((name) => ({
+  name,
+  tables: tables.filter((b) => groupFor(b) === name),
+}));
+---
+
+<div class="route-explorer" data-route-explorer={id}>
+  {sectionNotes.map((note) => (
+    <p class="route-origin" set:html={note.html} />
+  ))}
+  <div class="route-toolbar">
+    <div
+      class="route-tabs"
+      role="tablist"
+      aria-label={inbound ? '去程来源' : '回程运营商'}
+    >
+      {groups.map((group, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${id}-tab-${i}`}
+          aria-controls={`${id}-panel-${i}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-route-tab={i}
+        >
+          {group.name}
+          <span>{group.tables.length}</span>
+        </button>
+      ))}
+    </div>
+  </div>
+  {groups.map((group, i) => (
+    <section
+      id={`${id}-panel-${i}`}
+      role="tabpanel"
+      aria-labelledby={`${id}-tab-${i}`}
+      data-route-panel={i}
+      tabindex="0"
+    >
+      <RouteSelect
+        id={`${id}-select-${i}`}
+        label={inbound ? '来源节点' : '城市与线路'}
+        options={group.tables.map(
+          (table) => table.headings?.at(-1) || '未命名节点',
+        )}
+        group={i}
+      />
+      {group.tables.map((table, j) => {
+        const index = blocks.indexOf(table);
+        const note =
+          blocks[index - 1]?.type === 'paragraph'
+            ? blocks[index - 1].html
+            : undefined;
+        return (
+          <div data-route-record={j} data-source-table={table.id}>
+            <h4 class="route-record-title">{table.headings?.at(-1)}</h4>
+            {note && <p class="route-origin" set:html={note} />}
+            <BenchmarkResultsTable
+              headers={table.headers || []}
+              rows={table.rows || []}
+              caption={table.headings?.at(-1) || '路由测试'}
+            />
+          </div>
+        );
+      })}
+    </section>
+  ))}
+</div>
+<script>
+  document
+    .querySelectorAll<HTMLElement>('[data-route-explorer]')
+    .forEach((root) => {
+      const tabs = Array.from(
+        root.querySelectorAll<HTMLButtonElement>('[data-route-tab]'),
+      );
+      const panels = Array.from(
+        root.querySelectorAll<HTMLElement>('[data-route-panel]'),
+      );
+      const selectors = Array.from(
+        root.querySelectorAll<HTMLElement>('[data-route-picker]'),
+      );
+      let selected = 0;
+      const key = root.dataset.routeExplorer || 'routes';
+      const restore = () => {
+        const initial = new URLSearchParams(location.search)
+          .get(key)
+          ?.split(':');
+        if (!initial) return;
+        const group = Number(initial[0]);
+        selected =
+          Number.isInteger(group) && group >= 0 && group < tabs.length
+            ? group
+            : 0;
+        const target = Number(initial[1]);
+        const count = selectors[selected].querySelectorAll(
+          '[data-picker-option]',
+        ).length;
+        selectors[selected].dataset.value = String(
+          Number.isInteger(target) && target >= 0 && target < count
+            ? target
+            : 0,
+        );
+      };
+      const render = (sync = true) => {
+        tabs.forEach((tab, i) => {
+          tab.setAttribute('aria-selected', String(i === selected));
+          tab.tabIndex = i === selected ? 0 : -1;
+        });
+        panels.forEach((panel, i) => {
+          panel.hidden = i !== selected;
+          selectors[i].dispatchEvent(new Event('route-picker-close'));
+          selectors[i].dispatchEvent(new Event('route-picker-sync'));
+          panel
+            .querySelectorAll<HTMLElement>('[data-route-record]')
+            .forEach((record) => {
+              record.hidden =
+                record.dataset.routeRecord !== selectors[i].dataset.value;
+            });
+        });
+        if (sync) {
+          const url = new URL(location.href);
+          url.searchParams.set(
+            key,
+            `${selected}:${selectors[selected].dataset.value}`,
+          );
+          history.replaceState(null, '', url);
+        }
+      };
+      tabs.forEach((tab, i) => {
+        tab.addEventListener('click', () => {
+          selected = i;
+          render();
+        });
+        tab.addEventListener('keydown', (event) => {
+          const next =
+            event.key === 'ArrowRight'
+              ? (i + 1) % tabs.length
+              : event.key === 'ArrowLeft'
+                ? (i - 1 + tabs.length) % tabs.length
+                : event.key === 'Home'
+                  ? 0
+                  : event.key === 'End'
+                    ? tabs.length - 1
+                    : -1;
+          if (next < 0) return;
+          event.preventDefault();
+          selected = next;
+          render();
+          tabs[next].focus();
+        });
+      });
+      selectors.forEach((select) =>
+        select.addEventListener('route-select', () => render()),
+      );
+      root.classList.add('enhanced');
+      restore();
+      render(false);
+    });
+</script>

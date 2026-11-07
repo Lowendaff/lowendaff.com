@@ -1,0 +1,40 @@
+# 验证指南
+
+## 常规检查
+
+使用锁文件安装依赖：`npm ci`。提交前运行：
+
+```sh
+npm run format:check
+npm run check
+npm run build
+npm run verify:content
+npm run verify:release
+npm run verify:readable
+```
+
+`verify:content` 使用 `tests/fixtures/wordpress/` 的原始 HTML，逐项比较两篇测评的 211 张表、15,988 单元格和 51 段正文；仅豁免用户明确要求删除的 IP 质量分析表及 Generated at 时间戳。`scripts/archive_html.py` 只解析 HTML，不执行脚本或网络请求。
+
+`verify:readable` 使用 Node 内置测试框架，验证 Markdown 表格、段落、稳定 ID 和错误输入。当前没有覆盖率百分比要求。
+
+修改内容集合、加载器或商业内容结构时，额外按顺序运行 `npm run verify:pipeline` 和 `npm run verify:markdown`。它们会暂改样本并在结束时恢复、重建默认预览；不能与其他构建或内容编辑并行运行。Markdown 检查结果默认写入 `test-results/markdown/`。
+
+## 浏览器检查
+
+以下文件是 Playwright MCP 的 `async function …(page) { … }` 回调，不是独立 Node CLI。先运行对应服务，再将整个文件交给 `browser_run_code_unsafe` 的 `filename` 参数；回调返回 JSON 报告。报告与截图存入 `test-results/`，不要提交。
+
+| 脚本 | 服务 | 范围 |
+| --- | --- | --- |
+| `scripts/verify-pages.js` | preview :4323 | 六页、四种宽度、明暗主题、分页、筛选、BGP 和文案 |
+| `scripts/verify-routes.js` | dev :4321 | 路由目标遍历、键盘、URL 恢复、无 JS |
+| `scripts/verify-review-interactions.js` | dev :4321 | 分组、提示、自定义选择器、触摸 |
+| `scripts/verify-theme-scroll.js` | dev :4321 | 主题切换保持阅读位置、系统/键盘/跨页行为 |
+| `scripts/verify-carousel-layout.js` | dev :4321 | 单卡、居中箭头、随机顺序、无 JS/减少动效 |
+| `scripts/verify-carousel-autoplay.js` | dev :4321 | 连续自动循环、方向、缓动、暂停恢复 |
+| `scripts/verify-carousel-controls.js` | dev :4321 | 双向循环、键盘、广告链接隔离 |
+
+运行 `npm run preview -- --port 4323` 启动构建预览。浏览器脚本包含当前内容基线数量；有意增删内容时同步调整预期，不能为通过测试删减真实数据。
+
+## 发布边界
+
+默认构建 noindex，Figma 捕获脚本不可进入生产输出。`verify:release` 检查 SEO 元数据、RSS、sitemap 和旧 URL 回退；不代表实际主机已部署 HTTP 301。公开发布另按 `release-guide.md` 执行。

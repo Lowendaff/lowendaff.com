@@ -1,0 +1,30 @@
+---
+import Icon from '../Icon.astro';
+interface Props {
+  specs: { label: string; value: string; detail?: string }[];
+  title?: string;
+}
+const { specs, title = '配置速览' } = Astro.props;
+---
+
+<section
+  class="spec-card panel"
+  aria-label={title}
+  data-component="VpsSpecCard"
+>
+  <div class="component-heading">
+    <span>
+      <Icon name="chip" size={18} />
+      {title}
+    </span>
+  </div>
+  <dl class="spec-grid">
+    {specs.map((spec) => (
+      <div>
+        <dt>{spec.label}</dt>
+        <dd translate="no">{spec.value}</dd>
+        {spec.detail && <small>{spec.detail}</small>}
+      </div>
+    ))}
+  </dl>
+</section>

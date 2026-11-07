@@ -1,0 +1,57 @@
+---
+import type { Ad } from '../../lib/commercial';
+import Icon from '../Icon.astro';
+interface Props {
+  ads: Ad[];
+  placement: 'sidebar' | 'article-top' | 'article-bottom';
+}
+const { placement, ads } = Astro.props;
+---
+
+{ads.length > 0 && (
+  <aside
+    class:list={['commercial-slot', `commercial-${placement}`]}
+    aria-label="广告"
+    data-ad-slot={placement}
+  >
+    <div class="commercial-stack" data-ad-stack>
+      {ads.map((ad) => {
+        return (
+          <a
+            href={ad.url}
+            target="_blank"
+            rel="sponsored nofollow noopener noreferrer"
+            class:list={['commercial-creative', `creative-${ad.theme}`]}
+            data-ad-brand={ad.name}
+            aria-label={`${ad.name}：了解产品`}
+          >
+            <div class="creative-brand" translate="no">
+              {ad.name}
+            </div>
+            <div class="creative-copy">
+              <strong>{ad.title}</strong>
+              <p>{ad.description}</p>
+            </div>
+            <span class="creative-cta">
+              <span class="creative-cta-label">了解产品</span>
+              <span class="creative-cta-icon" aria-hidden="true">
+                <Icon name="arrow" size={18} />
+              </span>
+            </span>
+          </a>
+        );
+      })}
+    </div>
+  </aside>
+)}
+<script>
+  // Shuffle each placement once on load. Keep every creative visible and DOM/tab order aligned.
+  document.querySelectorAll<HTMLElement>('[data-ad-stack]').forEach((stack) => {
+    const creatives = Array.from(stack.children);
+    for (let i = creatives.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [creatives[i], creatives[j]] = [creatives[j], creatives[i]];
+    }
+    stack.append(...creatives);
+  });
+</script>

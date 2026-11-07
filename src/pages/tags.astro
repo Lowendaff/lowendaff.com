@@ -1,0 +1,136 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RecordList from '../components/RecordList.astro';
+import {
+  recordTags,
+  countryEmoji,
+  countryLabel,
+  getRecords,
+} from '../lib/records';
+const records = getRecords(await getCollection('posts'));
+const merchants = recordTags(records, 'merchant');
+const countries = recordTags(records, 'countryTag');
+---
+
+<BaseLayout
+  title="标签云"
+  active="tags"
+  description="按商家与国家浏览 LowEndAFF 的 VPS 测试记录。"
+>
+  <div class="shell directory-page home-revision">
+    <header class="directory-heading">
+      <h1>
+        标签云<span class="accent-text">.</span>
+      </h1>
+      <p>从商家出发，或看看下一个目的地。</p>
+    </header>
+    <section
+      class="tag-filters panel"
+      aria-label="按商家与国家筛选"
+      data-tag-filters
+      hidden
+    >
+      <div class="tag-tabs" role="tablist" aria-label="标签分类">
+        <button
+          type="button"
+          id="merchant-heading"
+          role="tab"
+          data-tag-tab="merchant"
+          aria-selected="true"
+          aria-controls="merchant-tags"
+        >
+          商家 <span>{merchants.length}</span>
+        </button>
+        <button
+          type="button"
+          id="country-heading"
+          role="tab"
+          data-tag-tab="country"
+          aria-selected="false"
+          aria-controls="country-tags"
+          tabindex="-1"
+        >
+          国家 <span>{countries.length}</span>
+        </button>
+      </div>
+      <div
+        class="tag-group"
+        id="merchant-tags"
+        role="tabpanel"
+        aria-labelledby="merchant-heading"
+        data-tag-panel="merchant"
+      >
+        <div class="tag-cloud">
+          <button
+            type="button"
+            data-tag-kind="merchant"
+            data-tag-value=""
+            aria-pressed="true"
+          >
+            全部 <span>{records.length}</span>
+          </button>
+          {merchants.map(({ value, count }) => (
+            <button
+              type="button"
+              data-tag-kind="merchant"
+              data-tag-value={value}
+              aria-pressed="false"
+            >
+              <span class="tag-name" translate="no">
+                {value}
+              </span>
+              <span>{count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div
+        class="tag-group"
+        id="country-tags"
+        role="tabpanel"
+        aria-labelledby="country-heading"
+        data-tag-panel="country"
+        hidden
+      >
+        <div class="tag-cloud">
+          <button
+            type="button"
+            data-tag-kind="country"
+            data-tag-value=""
+            aria-pressed="true"
+          >
+            全部 <span>{records.length}</span>
+          </button>
+          {countries.map(({ value, count }) => (
+            <button
+              type="button"
+              data-tag-kind="country"
+              data-tag-value={value}
+              data-tag-label={countryLabel(value)}
+              aria-pressed="false"
+            >
+              <span aria-hidden="true">{countryEmoji(value)}</span>
+              <span class="tag-name">{countryLabel(value)}</span>
+              <span>{count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div class="tag-selection">
+        <div>
+          <p data-selection-summary aria-live="polite">
+            全部记录
+          </p>
+          <a href="#reviews" class="text-action" data-tag-results>
+            查看 {records.length} 条记录 ↓
+          </a>
+        </div>
+        <button type="button" class="text-action" data-clear-tags disabled>
+          清除筛选
+        </button>
+      </div>
+    </section>
+    <RecordList filters records={records} />
+  </div>
+</BaseLayout>

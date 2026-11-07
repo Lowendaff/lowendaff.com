@@ -1,0 +1,38 @@
+---
+const { compact = false } = Astro.props;
+---
+
+<div class:list={['route-art', { compact }]} aria-hidden="true">
+  <div class="orbit orbit-one"></div>
+  <div class="orbit orbit-two"></div>
+  <div class="orbit orbit-three"></div>
+  <div class="route-line line-one"></div>
+  <div class="route-line line-two"></div>
+  <div class="map-node node-a">
+    <i></i>
+    <span>LOS ANGELES</span>
+  </div>
+  <div class="map-node node-b">
+    <i></i>
+    <span>SINGAPORE</span>
+  </div>
+  <div class="map-node node-c">
+    <i></i>
+    <span>TOKYO</span>
+  </div>
+  <div class="network-core">
+    <img
+      class="brand-avatar"
+      src="/brand/lowendaff-avatar.jpg"
+      width="56"
+      height="56"
+      alt=""
+      decoding="async"
+    />
+    <b>lowendaff</b>
+    <small>我们评测全世界</small>
+  </div>
+  {!compact && (
+    <span class="map-caption">GLOBAL PERSPECTIVE · LOCAL INSIGHT</span>
+  )}
+</div>

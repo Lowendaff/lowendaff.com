@@ -1,0 +1,39 @@
+---
+import friends from '../data/friends.json';
+import Icon from './Icon.astro';
+---
+
+<section class="friend-links" id="friends" aria-labelledby="friends-title">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">AROUND THE COMMUNITY</span>
+      <h2 id="friends-title">友情链接</h2>
+    </div>
+    <p>看看朋友们在写什么。</p>
+  </div>
+  <div class="friend-grid">
+    {friends.map((friend) =>
+      friend.url ? (
+        <a
+          class="friend-button"
+          href={friend.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`访问 ${friend.name}（在新标签页打开）`}
+        >
+          <span class="friend-name" translate="no">
+            {friend.name}
+          </span>
+          <span class="friend-arrow" aria-hidden="true">
+            <Icon name="external" size={17} />
+          </span>
+        </a>
+      ) : (
+        <span class="friend-unavailable">
+          <span>{friend.name}</span>
+          <small>暂无链接</small>
+        </span>
+      ),
+    )}
+  </div>
+</section>

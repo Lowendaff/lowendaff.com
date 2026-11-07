@@ -1,0 +1,258 @@
+---
+import { getAds } from '../../lib/commercial';
+const products = await getAds('homeAds');
+---
+
+{products.length > 0 && (
+  <section class="sponsor-products" aria-labelledby="products-title">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">PARTNER SPOTLIGHT</span>
+        <h2 id="products-title">赞助商产品精选</h2>
+      </div>
+      <span class="section-note">赞助推广</span>
+    </div>
+    <div class="product-carousel">
+      <div
+        class="product-viewport"
+        id="sponsor-product-cards"
+        tabindex={products.length > 1 ? 0 : undefined}
+        role="region"
+        aria-label={
+          products.length > 1
+            ? '赞助商产品自动轮播，悬停或聚焦暂停，Escape 停止，空格继续'
+            : '赞助商产品'
+        }
+        aria-roledescription={products.length > 1 ? '轮播' : undefined}
+      >
+        <div class="product-grid">
+          {products.map((product) => (
+            <a
+              href={product.url}
+              data-product-brand={product.name}
+              class:list={['product-card', 'panel', `product-${product.theme}`]}
+              target="_blank"
+              rel="sponsored nofollow noopener noreferrer"
+            >
+              <div class="product-brand">
+                <strong translate="no">{product.name}</strong>
+              </div>
+              <div class="product-copy">
+                <h3>{product.title}</h3>
+                <p>{product.description}</p>
+                <ul>
+                  {product.tags.map((tag) => (
+                    <li translate="no">{tag}</li>
+                  ))}
+                </ul>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+      <div class="product-overlay-controls" hidden>
+        <button
+          type="button"
+          data-product-prev
+          aria-label="上一家赞助商"
+          aria-controls="sponsor-product-cards"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <path d="m14 5-7 7 7 7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          data-product-next
+          aria-label="下一家赞助商"
+          aria-controls="sponsor-product-cards"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            aria-hidden="true"
+          >
+            <path d="m10 5 7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+)}
+<script>
+  const viewport = document.querySelector<HTMLElement>(
+    '#sponsor-product-cards',
+  );
+  const track = viewport?.querySelector<HTMLElement>('.product-grid');
+  if (viewport && track && track.querySelectorAll('.product-card').length > 1) {
+    const carousel = viewport.closest<HTMLElement>('.product-carousel')!;
+    const cards = Array.from(
+      track.querySelectorAll<HTMLElement>('.product-card'),
+    );
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cards[i], cards[j]] = [cards[j], cards[i]];
+    }
+    track.append(...cards);
+    const clone = cards[0].cloneNode(true) as HTMLElement;
+    clone.dataset.carouselClone = '';
+    clone.removeAttribute('data-product-brand');
+    clone.inert = true;
+    clone.setAttribute('aria-hidden', 'true');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let current = 0;
+    let hovering = false;
+    let focused = false;
+    let stopped = false;
+    let onScreen = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let animation: Animation | undefined;
+    const updateActive = () => {
+      cards.forEach((card, index) => {
+        card.inert = !reducedMotion.matches && index !== current;
+        if (card.inert) card.setAttribute('aria-hidden', 'true');
+        else card.removeAttribute('aria-hidden');
+      });
+      viewport.dataset.activeProduct = cards[current].dataset.productBrand;
+    };
+    const schedule = () => {
+      clearTimeout(timer);
+      if (
+        reducedMotion.matches ||
+        hovering ||
+        focused ||
+        stopped ||
+        !onScreen ||
+        document.hidden ||
+        animation
+      )
+        return;
+      timer = setTimeout(advance, 5000);
+    };
+    const advance = (direction = 1) => {
+      if (animation) return;
+      clearTimeout(timer);
+      if (reducedMotion.matches) {
+        current =
+          (Math.round(viewport.scrollLeft / viewport.clientWidth) +
+            direction +
+            cards.length) %
+          cards.length;
+        viewport.scrollTo({
+          left: current * viewport.clientWidth,
+          behavior: 'instant',
+        });
+        updateActive();
+        return;
+      }
+      const start = direction < 0 && current === 0 ? cards.length : current;
+      const next = start + direction;
+      // The duplicate first card follows the last card, so every move goes forward.
+      animation = track.animate(
+        [
+          { transform: `translateX(-${start * 100}%)` },
+          { transform: `translateX(-${next * 100}%)` },
+        ],
+        {
+          duration: 650,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'forwards',
+        },
+      );
+      animation.onfinish = () => {
+        current = next % cards.length;
+        // Swap the duplicate for the identical original without a reverse animation.
+        track.style.transform = `translateX(-${current * 100}%)`;
+        animation?.cancel();
+        animation = undefined;
+        updateActive();
+        schedule();
+      };
+    };
+    carousel
+      .querySelector<HTMLButtonElement>('[data-product-prev]')
+      ?.addEventListener('click', (event) => {
+        if (event.detail > 0) focused = false;
+        advance(-1);
+      });
+    carousel
+      .querySelector<HTMLButtonElement>('[data-product-next]')
+      ?.addEventListener('click', (event) => {
+        if (event.detail > 0) focused = false;
+        advance(1);
+      });
+    carousel
+      .querySelector('.product-overlay-controls')
+      ?.removeAttribute('hidden');
+    const applyMotionPreference = () => {
+      clearTimeout(timer);
+      animation?.cancel();
+      animation = undefined;
+      if (reducedMotion.matches) {
+        clone.remove();
+        delete viewport.dataset.carouselReady;
+        track.style.transform = '';
+      } else {
+        track.append(clone);
+        viewport.scrollLeft = 0;
+        viewport.dataset.carouselReady = '';
+        track.style.transform = `translateX(-${current * 100}%)`;
+      }
+      updateActive();
+      schedule();
+    };
+    carousel.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'mouse') return;
+      hovering = true;
+      schedule();
+    });
+    carousel.addEventListener('pointerleave', () => {
+      hovering = false;
+      schedule();
+    });
+    carousel.addEventListener('focusin', () => {
+      focused = true;
+      schedule();
+    });
+    carousel.addEventListener('focusout', (event) => {
+      if (
+        event.relatedTarget instanceof Node &&
+        carousel.contains(event.relatedTarget)
+      )
+        return;
+      focused = false;
+      schedule();
+    });
+    viewport.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') stopped = true;
+      else if (event.key === ' ' && event.target === viewport) {
+        event.preventDefault();
+        stopped = false;
+        viewport.blur();
+      } else return;
+      schedule();
+    });
+    document.addEventListener('visibilitychange', schedule);
+    reducedMotion.addEventListener('change', applyMotionPreference);
+    new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting && entry.intersectionRatio >= 0.25;
+        schedule();
+      },
+      { threshold: [0, 0.25] },
+    ).observe(viewport);
+    applyMotionPreference();
+  }
+</script>

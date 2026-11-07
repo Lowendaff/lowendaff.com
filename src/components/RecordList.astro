@@ -1,0 +1,94 @@
+---
+import Icon from './Icon.astro';
+import { getRecords, countryEmoji } from '../lib/records';
+interface Props {
+  filters?: boolean;
+  records: ReturnType<typeof getRecords>;
+}
+const { filters = false, records } = Astro.props;
+const dateFormat = new Intl.DateTimeFormat('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'UTC',
+});
+---
+
+<section
+  class="latest-section"
+  id="reviews"
+  aria-labelledby="reviews-title"
+  data-record-list
+  data-filters={filters}
+>
+  <div class="section-heading">
+    <div>
+      <h2 id="reviews-title" tabindex="-1">
+        测试记录
+      </h2>
+    </div>
+    <p class="result-count" aria-live="polite" id="result-count">
+      {records.length} 条记录 · 每页 20 条
+    </p>
+  </div>
+  <div class="article-list panel">
+    {records.map((post) => (
+      <a
+        class="article-row"
+        href={post.href}
+        target={post.external ? '_blank' : undefined}
+        rel={post.external ? 'noopener noreferrer' : undefined}
+        data-article
+        data-region={post.countryTag}
+        data-merchant={post.merchant}
+        data-id={post.id}
+      >
+        <div class="location-icon country-emoji" aria-hidden="true">
+          {countryEmoji(post.country)}
+        </div>
+        <div class="article-main">
+          <div class="article-meta">
+            <span>{post.location}</span>
+            <span class="meta-dot">·</span>
+            <time datetime={post.date}>
+              {dateFormat.format(new Date(`${post.date}T00:00:00Z`))}
+            </time>
+          </div>
+          <h3>
+            {post.title
+              .replace(' VPS 测试记录', '')
+              .replace(/ VPS$/, '')
+              .replace('（CN2）', 'CN2')}
+          </h3>
+        </div>
+        <Icon name={post.external ? 'external' : 'arrow'} size={19} />
+      </a>
+    ))}
+    <div class="empty-results" id="empty-results" hidden>
+      <h3>这个组合还没有测试记录</h3>
+      <p>换一个商家或国家，也可以清除筛选。</p>
+      <button class="button secondary" data-reset-filters type="button">
+        清除筛选
+      </button>
+    </div>
+  </div>
+  <nav class="record-pagination" aria-label="测试记录分页" hidden>
+    <button class="button secondary" type="button" data-page-prev>
+      上一页
+    </button>
+    <span
+      class="pagination-status mono"
+      aria-live="polite"
+      data-page-status
+    ></span>
+    <button class="button secondary" type="button" data-page-next>
+      下一页
+    </button>
+  </nav>
+  <noscript>
+    <p class="archive-note">已显示全部测试记录。</p>
+  </noscript>
+</section>
+<script>
+  import '../scripts/records';
+</script>

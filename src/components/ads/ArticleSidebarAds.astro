@@ -1,0 +1,7 @@
+---
+import { getAds } from '../../lib/commercial';
+import AdStack from './AdStack.astro';
+const ads = await getAds('articleSidebarAds');
+---
+
+<AdStack ads={ads} placement="sidebar" />

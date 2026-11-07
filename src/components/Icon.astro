@@ -1,0 +1,40 @@
+---
+interface Props {
+  name?: string;
+  size?: number;
+}
+const { name = 'arrow', size = 20 } = Astro.props;
+const paths: Record<string, string> = {
+  arrow: 'M5 12h14m-6-6 6 6-6 6',
+  external: 'M7 17 17 7M7 7h10v10',
+  search: 'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',
+  monitor: 'M3 4h18v13H3zM8 21h8m-4-4v4',
+  moon: 'M20.9 13a9 9 0 0 1-9.9-9.9A9 9 0 1 0 20.9 13Z',
+  sun: 'M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 1.4 1.4m10 10 1.4 1.4M5.6 18.4 1.4-1.4m10-10 1.4-1.4M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',
+  copy: 'M8 4H5v14h11v-3M9 2h10v12H9z',
+  clock: 'M12 8v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',
+  globe:
+    'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18',
+  chip: 'M7 7h10v10H7zM9 3v4m6-4v4M9 17v4m6-4v4M3 9h4m-4 6h4m10-6h4m-4 6h4',
+  route: 'M5 5h10a4 4 0 0 1 0 8H9a3 3 0 0 0 0 6h10M3 3h4v4H3zM17 17h4v4h-4z',
+  chevron: 'm8 10 4 4 4-4',
+  check: 'm5 12 4 4L19 6',
+  rss: 'M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16M5 19h.01',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  shield: 'm12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6',
+};
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.65"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d={paths[name] ?? paths.arrow} />
+</svg>

@@ -1,0 +1,457 @@
+{
+  "version": "0.13.0",
+  "modes": {
+    "light": {
+      "canvas": "#e1e2e7",
+      "surface": "#ebedf3",
+      "raised": "#f4f5f8",
+      "subtle": "#dcdfea",
+      "text": "#343b58",
+      "muted": "#53618a",
+      "accent": "#295fba",
+      "accent-soft": "#dce4f5",
+      "on-accent": "#f4f5f8",
+      "border": "#bec5d7",
+      "success": "#48652d",
+      "warning": "#785c2c",
+      "danger": "#b52650",
+      "brand-orange": "#965027",
+      "brand-teal": "#006783",
+      "highlight": "#f4f5f880",
+      "ad-text": "#e6eaff",
+      "ad-cta": "#ebedf3",
+      "ad-cta-text": "#343b58"
+    },
+    "dark": {
+      "canvas": "#1a1b26",
+      "surface": "#202230",
+      "raised": "#292e42",
+      "subtle": "#24283b",
+      "text": "#c0caf5",
+      "muted": "#9aa5ce",
+      "accent": "#7aa2f7",
+      "accent-soft": "#283451",
+      "on-accent": "#1a1b26",
+      "border": "#3b4261",
+      "success": "#9ece6a",
+      "warning": "#e0af68",
+      "danger": "#f7768e",
+      "brand-orange": "#ff9e64",
+      "brand-teal": "#73daca",
+      "highlight": "#c0caf51a"
+    }
+  },
+  "font": {
+    "body": [
+      "Inter",
+      "Noto Sans SC",
+      "sans-serif"
+    ],
+    "mono": [
+      "JetBrains Mono",
+      "monospace"
+    ]
+  },
+  "radius": {
+    "card": 24,
+    "inset": 12,
+    "control": 12,
+    "pill": 999
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    80
+  ],
+  "type": {
+    "hero": 64,
+    "hero-mobile": 38,
+    "title": 36,
+    "section": 26,
+    "card": 22,
+    "body": 16,
+    "reading": 17,
+    "small": 13
+  },
+  "layout": {
+    "content": 1200,
+    "reading-ch": 70,
+    "desktop": 1440,
+    "mobile": 390
+  },
+  "implementation": {
+    "css": "src/styles/global.css + src/styles/editorial.css + src/styles/compact.css",
+    "mobilePageMargin": 18,
+    "articleBodyPx": 17,
+    "mobileTablePx": 14,
+    "sidebarPx": 300,
+    "columnGapPx": 36,
+    "breakpoints": [
+      760,
+      900,
+      1100
+    ],
+    "figmaStatus": "Revision 13 native delivery; one semantic color collection with Light/Dark modes; screenshots and representative contexts verified"
+  },
+  "revision3": {
+    "homeProducts": {
+      "desktopColumns": 3,
+      "mobileColumns": 1,
+      "manualCarousel": true
+    },
+    "searchFields": [
+      "q",
+      "country"
+    ],
+    "reviewGroups": [
+      "overview",
+      "hardware",
+      "unlock",
+      "speed",
+      "routing"
+    ],
+    "tabRadius": 12,
+    "tabInnerRadius": 6,
+    "tabPadding": 5,
+    "controlMinHeight": 44,
+    "routeMaxHeight": {
+      "desktop": 420,
+      "mobile": 360
+    },
+    "commercialSlots": [
+      "article-top",
+      "sidebar",
+      "article-bottom"
+    ],
+    "sponsorsOnHome": false,
+    "commercialBrandText": {
+      "light": {
+        "orange": "#B84018",
+        "teal": "#23716A"
+      },
+      "dark": {
+        "orange": "#FFB59A",
+        "teal": "#89D9CC"
+      }
+    }
+  },
+  "revision4": {
+    "recordPageSize": 20,
+    "recordMinHeight": 88,
+    "recordTitleDesktop": 16,
+    "recordTitleMobile": 15,
+    "recordEmojiSize": 26,
+    "adStackGap": 10,
+    "sponsorMark": {
+      "viewBox": "0 0 180 48",
+      "fill": "currentColor",
+      "weight": 650,
+      "assetType": "typographic SVG, not official logo"
+    },
+    "bgpTabs": {
+      "minHeight": 44,
+      "parentRadius": 10,
+      "padding": 4,
+      "childRadius": 5
+    }
+  },
+  "revision5": {
+    "routePicker": {
+      "triggerMinHeight": 50,
+      "optionMinHeight": 44,
+      "radius": 12,
+      "padding": 5,
+      "optionRadius": 6,
+      "maxMenuHeight": 320,
+      "surface": "raised",
+      "selection": "accent-soft"
+    },
+    "headingTooltip": {
+      "fontSize": 13,
+      "radius": 10,
+      "maxWidth": 320,
+      "activation": [
+        "hover",
+        "focus",
+        "tap"
+      ],
+      "dismiss": "Escape"
+    },
+    "expandAll": false
+  },
+  "revision6": {
+    "navigation": [
+      "首页",
+      "广告",
+      "标签云"
+    ],
+    "searchEnabled": false,
+    "adInformationPage": "/ads/",
+    "tagDirectory": {
+      "path": "/tags/",
+      "dimensions": [
+        "merchant",
+        "country"
+      ],
+      "categoryTabs": true,
+      "combination": "AND",
+      "recordPageSize": 20,
+      "controlMinHeight": 44,
+      "tagRadius": 9,
+      "panelDesktop": {
+        "radius": 30,
+        "padding": 20
+      },
+      "panelMobile": {
+        "radius": 28,
+        "padding": 18
+      },
+      "tabContainer": {
+        "radius": 12,
+        "padding": 4,
+        "childRadius": 8
+      },
+      "numericVariant": "tabular-nums"
+    },
+    "historicalRevisionKeys": "revision3/4/5 describe history; revision6 supersedes search and navigation"
+  },
+  "revision7": {
+    "avatar": {
+      "asset": "/brand/lowendaff-avatar.jpg",
+      "desktop": 40,
+      "mobile": 32,
+      "hero": 56,
+      "radius": "50%"
+    },
+    "headline": {
+      "desktopMax": 56,
+      "mobileRange": [
+        29,
+        40
+      ]
+    },
+    "friendLinks": {
+      "radius": 16,
+      "desktopColumns": 3,
+      "tabletColumns": 2,
+      "mobileColumns": 1,
+      "minHeight": 72,
+      "mobileMinHeight": 64
+    },
+    "footerFriendLink": false,
+    "homeTelegramButton": false
+  },
+  "revision8": {
+    "homeSponsors": {
+      "count": 4,
+      "randomOrder": "Fisher-Yates once per page load",
+      "desktopColumns": 2,
+      "mobile": "manual carousel",
+      "autoplay": false
+    },
+    "articleCTA": {
+      "minHeight": 46,
+      "fontSize": 14,
+      "radius": 10,
+      "background": "#FFFFFF",
+      "text": "#17202F",
+      "mobile": "full width below copy"
+    },
+    "sidebarCTA": {
+      "minHeight": 54,
+      "style": "full-width footer with separator",
+      "arrowSize": 32
+    },
+    "arrowMotion": {
+      "distance": 2,
+      "duration": 160,
+      "reducedMotion": "off"
+    }
+  },
+  "revision9": {
+    "homeSponsors": {
+      "layout": "single-row automatic carousel",
+      "count": 4,
+      "desktopVisible": 3,
+      "tabletVisible": 2,
+      "mobileVisible": 1,
+      "breakpoints": [
+        760,
+        1100
+      ],
+      "gapDesktop": 20,
+      "gapMobile": 14,
+      "randomOrder": "Fisher-Yates once per page load; unchanged by resize or navigation",
+      "autoplay": true,
+      "counter": "visible range / total",
+      "keyboard": [
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End"
+      ],
+      "controlMinSize": 44,
+      "noJavaScript": "horizontal scroll with all four links; controls hidden",
+      "intervalMs": 5000,
+      "loop": true,
+      "pause": [
+        "hover",
+        "keyboard focus",
+        "manual navigation",
+        "page hidden",
+        "offscreen"
+      ],
+      "resume": "hover exit or explicit play; focus/manual pause requires explicit play",
+      "reducedMotion": "autoplay initially disabled; explicit play supported"
+    }
+  },
+  "revision10": {
+    "homeSponsors": {
+      "visible": 1,
+      "allViewports": true,
+      "order": "Fisher-Yates once per page load",
+      "dwellMs": 5000,
+      "transitionMs": 650,
+      "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "loop": "forward 1-2-3-4-1 with inert first-card duplicate and invisible reset",
+      "manualButtons": "two overlay arrows at vertical center; sibling controls outside link",
+      "counter": false,
+      "pause": [
+        "hover",
+        "focus",
+        "Escape",
+        "hidden document",
+        "offscreen"
+      ],
+      "keyboardResume": "Space on carousel region",
+      "reducedMotion": "static single-card native horizontal scroller, all four original links accessible",
+      "desktopMinHeight": 190,
+      "desktopPadding": [
+        24,
+        76
+      ],
+      "mobilePadding": [
+        22,
+        28
+      ],
+      "desktopBrandWidth": 160,
+      "desktopContentMaxWidth": 640,
+      "columnGap": 24,
+      "desktopBrandFont": 30,
+      "desktopTitleFont": 26,
+      "desktopBodyFont": 16,
+      "mobileBrandFont": 22,
+      "mobileTitleFont": 23,
+      "mobileBodyFont": 15,
+      "arrowSize": 44,
+      "arrowDesktopInset": 16,
+      "arrowMobileInset": -16,
+      "redundantCTAs": false
+    }
+  },
+  "revision11": {
+    "scope": [
+      "homepage spacing",
+      "shared footer spacing"
+    ],
+    "homeOnlyClass": "home-page",
+    "heroPaddingDesktop": [
+      32,
+      24
+    ],
+    "heroPaddingMobile": [
+      24,
+      20
+    ],
+    "heroNextMarginDesktop": 24,
+    "heroNextMarginMobile": 20,
+    "recordSectionTop": 28,
+    "sectionHeadingBottom": 16,
+    "recordMinHeightDesktop": 76,
+    "recordMinHeightMobile": 80,
+    "recordPaddingBlock": 12,
+    "followMarginDesktop": 32,
+    "followMarginMobile": 28,
+    "friendsBoundaryDesktop": [
+      32,
+      24
+    ],
+    "friendsBoundaryMobile": [
+      24,
+      20
+    ],
+    "footerMarginTopDesktop": 32,
+    "footerPaddingTopDesktop": 32,
+    "footerMarginTopMobile": 24,
+    "footerPaddingTopMobile": 24,
+    "footerPaddingBottom": 32,
+    "recordTypography": "unchanged; desktop 16px, mobile 15px; natural wrapping",
+    "carousel": "revision10 unchanged"
+  },
+  "revision12": {
+    "themeNames": {
+      "light": "Tokyo Night Day (reading adaptation)",
+      "dark": "Tokyo Night (reading adaptation)"
+    },
+    "source": "https://github.com/folke/tokyonight.nvim",
+    "systemAppearance": "Default CSS prefers-color-scheme; explicit user override takes precedence; live system switching resumes in system mode",
+    "manualToggle": true,
+    "legacyPreferences": "old lowendaff-theme is ignored, not deleted; invalid new values fall back to system",
+    "browserChrome": "media-qualified theme-color meta, updated for explicit override before paint",
+    "terminal": "adaptive semantic surfaces",
+    "commercialArtwork": "fixed dark Tokyo-tinted gradients; preserved brand categories and CTA layout",
+    "spacing": "revision11 unchanged",
+    "appearanceOptions": [
+      "system",
+      "light",
+      "dark"
+    ],
+    "storageKey": "lowendaff-appearance",
+    "storageFailure": "switches for the current page; future loads fall back to system",
+    "noJavaScript": "system mode works; manual UI hidden",
+    "crossTab": "storage event synchronizes changes",
+    "commercialGradients": {
+      "ad-indigo": "linear-gradient(110deg, #242e52, #304473)",
+      "ad-orange": "linear-gradient(110deg, #58302f, #753d35)",
+      "ad-teal": "linear-gradient(110deg, #203b43, #28515a)",
+      "ad-slate": "linear-gradient(110deg, #292e42, #3b4261)"
+    }
+  },
+  "revision13": {
+    "articleTableHeaderAlign": "left",
+    "articleTableCellAlign": "left",
+    "scope": ".full-review .data-table th, .full-review .data-table td",
+    "tabularNumbers": "preserved"
+  },
+  "figmaDelivery": {
+    "revision": 13,
+    "date": "2026-11-07",
+    "fileKey": "vZ3h8djsL9yAt0WIlhyCSm",
+    "pageId": "0:1",
+    "sessionId": "e9bfd6b9-ae6f-42be-8b79-131b823f98b4",
+    "frames": {
+      "uiKit": "40:15216",
+      "homepage": "40:15217",
+      "review": "40:15218"
+    },
+    "colorCollection": "VariableCollectionId:18:5",
+    "colorModes": {
+      "light": "18:3",
+      "dark": "32:0"
+    },
+    "masterComponents": 10,
+    "screens": 8,
+    "latestOnly": true,
+    "report": "docs/stage-3-figma-delivery.md",
+    "status": "delivered; awaiting Figma design review before stage 4",
+    "interactionBoundary": "Figma editable default-state designs; full carousel, filtering and article tab interactions remain in the local Astro prototype"
+  }
+}

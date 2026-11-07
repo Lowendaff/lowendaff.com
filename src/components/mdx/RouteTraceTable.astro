@@ -1,0 +1,29 @@
+---
+import BenchmarkResultsTable from './BenchmarkResultsTable.astro';
+interface Props {
+  headers: string[];
+  rows: string[][];
+  target: string;
+  direction?: string;
+  protocol?: string;
+}
+const {
+  headers,
+  rows,
+  target,
+  direction = 'VPS → 目标节点',
+  protocol = 'IPv4',
+} = Astro.props;
+---
+
+<section class="route-table" data-component="RouteTraceTable">
+  <div class="route-caption">
+    <span class="tag">
+      <span class="dot"></span>
+      {protocol}
+    </span>
+    <strong>{target}</strong>
+    <span>{direction}</span>
+  </div>
+  <BenchmarkResultsTable headers={headers} rows={rows} caption="路由逐跳结果" />
+</section>

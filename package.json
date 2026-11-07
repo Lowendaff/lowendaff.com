@@ -1,0 +1,47 @@
+{
+  "name": "lowendaff-ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build && node scripts/finalize-build.mjs",
+    "preview": "astro preview --host 127.0.0.1",
+    "check": "astro check",
+    "format": "prettier --write src astro.config.mjs package.json \"scripts/*.{js,mjs}\"",
+    "format:check": "prettier --check src astro.config.mjs package.json \"scripts/*.{js,mjs}\"",
+    "verify:content": "python3 scripts/verify-content.py",
+    "verify:release": "node scripts/verify-release.mjs",
+    "verify:pipeline": "node scripts/verify-content-pipeline.mjs",
+    "verify:markdown": "node scripts/verify-markdown-content.mjs",
+    "verify:readable": "node --experimental-strip-types --test scripts/verify-readable-review.mjs"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "8.1.3",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/jetbrains-mono": "5.3.0",
+    "@fontsource-variable/noto-sans-sc": "5.3.1",
+    "@tailwindcss/vite": "4.3.5",
+    "astro": "7.4.7",
+    "mdast-util-to-string": "4.0.0",
+    "rehype-stringify": "10.0.1",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "remark-rehype": "11.1.2",
+    "tailwindcss": "4.3.5",
+    "unified": "11.0.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@types/hast": "3.0.5",
+    "@types/mdast": "4.0.4",
+    "@types/node": "24.19.2",
+    "prettier": "3.9.10",
+    "prettier-plugin-astro": "1.1.2",
+    "typescript": "6.0.3",
+    "yaml": "2.9.1"
+  }
+}

@@ -1,0 +1,91 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { reviewNavigation } from '../lib/review-model';
+import ArticleTopAds from '../components/ads/ArticleTopAds.astro';
+import ArticleBottomAds from '../components/ads/ArticleBottomAds.astro';
+import ArticleSidebarAds from '../components/ads/ArticleSidebarAds.astro';
+import Sponsors from '../components/archive/Sponsors.astro';
+interface Props {
+  post: CollectionEntry<'posts'>;
+  headings: { depth: number; slug: string; text: string }[];
+}
+const { post, headings } = Astro.props;
+const p = post.data;
+const review = p.review;
+const navigation = review
+  ? reviewNavigation
+  : headings
+      .filter((h) => h.depth === 2)
+      .map((h) => ({ id: h.slug, label: h.text }));
+---
+
+<BaseLayout
+  title={p.title}
+  description={p.description}
+  active="review"
+  article={{
+    publishedAt: p.publishedAt,
+    author: p.author,
+    source: p.originalUrl,
+  }}
+>
+  <div class="shell review-shell review-revision">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="/">首页</a>
+      <Icon name="chevron" size={12} />
+      <a href="/#reviews">主机测评</a>
+      <Icon name="chevron" size={12} />
+      <span translate="no">{p.vendor}</span>
+    </nav>
+    <div class="review-grid complete-review-grid">
+      <article class="review-body">
+        <header class="review-heading">
+          <span class="tag accent-tag">
+            {p.location} · {p.route}
+          </span>
+          <h1>
+            {p.title}
+            <br class="desktop-only" /> VPS 测试记录
+          </h1>
+          <div class="review-meta">
+            <span>{p.author}</span>
+            <time datetime={p.publishedAt}>{p.publishedAt} 发布</time>
+          </div>
+        </header>
+        <ArticleTopAds />
+        <details class="mobile-toc">
+          <summary>
+            本文目录 <span>{navigation.length} 个阅读章节</span>
+          </summary>
+          <nav aria-label="移动端文章目录">
+            {navigation.map((s) => (
+              <a href={`#${s.id}`}>{s.label}</a>
+            ))}
+          </nav>
+        </details>
+        {p.testedAt && (
+          <p class="review-introduction">
+            测试时间：<strong>{p.testedAt}</strong>
+          </p>
+        )}
+        <slot />
+        <ArticleBottomAds />
+        <a href="/#reviews" class="button secondary review-back">
+          返回测试记录 <Icon name="arrow" size={16} />
+        </a>
+      </article>
+      <aside class="review-sidebar full-sidebar">
+        <Sponsors />
+        <ArticleSidebarAds />
+        <nav class="toc sticky-toc" aria-label="文章目录">
+          <h2>本文目录</h2>
+          {navigation.map((s) => (
+            <a href={`#${s.id}`}>{s.label}</a>
+          ))}
+        </nav>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

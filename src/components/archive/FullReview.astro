@@ -1,0 +1,115 @@
+---
+import type { Review } from '../../lib/review-model';
+import HintHeading from './HintHeading.astro';
+import ArchiveBlock from './ArchiveBlock.astro';
+import ReviewPanels from './ReviewPanels.astro';
+import { reviewModel, reviewNavigation } from '../../lib/review-model';
+interface Props {
+  review: Review;
+}
+const { review } = Astro.props;
+const model = reviewModel(review);
+const groups = [model.hardware, model.unlock, model.speed, model.routing];
+const hints: Record<string, string> = {
+  speed: '不同工具分别查看，带宽与延迟不混作同一项成绩。',
+  routing: '先选方向，再选运营商与城市。',
+};
+const verdict = model.section('评');
+---
+
+<script is:inline define:vars={{ aliases: review.legacyAnchors }}>
+  // WordPress used percent-encoded TOC IDs; normalize before tab enhancement.
+  (() => {
+    const restore = () => {
+      let key = location.hash.slice(1);
+      try {
+        key = decodeURIComponent(key);
+        key = decodeURIComponent(key);
+      } catch {
+        return;
+      }
+      if (!Object.hasOwn(aliases, key)) return;
+      const url = new URL(location.href);
+      url.hash = aliases[key];
+      history.replaceState(null, '', url);
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    };
+    restore();
+    window.addEventListener('hashchange', restore);
+  })();
+</script>
+<div class="full-review">
+  <section
+    class="purchase-details"
+    id="purchase"
+    aria-labelledby="purchase-title"
+  >
+    <h2 id="purchase-title">套餐与购买</h2>
+    <div id={model.section('买').id}>
+      {model.section('买').blocks.map((block) => (
+        <ArchiveBlock block={block} sectionTitle="套餐与购买" />
+      ))}
+    </div>
+    <div id={verdict.id} class="article-attachments">
+      {verdict.blocks.map((block) => (
+        <ArchiveBlock block={block} sectionTitle="原作者配图与备注" />
+      ))}
+    </div>
+  </section>
+  {groups.map((panels, i) => (
+    <section class="review-chapter" id={reviewNavigation[i + 1].id}>
+      <header class="chapter-heading">
+        <div>
+          <span class="chapter-index mono">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+          {hints[reviewNavigation[i + 1].id] ? (
+            <HintHeading
+              id={`${reviewNavigation[i + 1].id}-hint`}
+              label={reviewNavigation[i + 1].label}
+              text={hints[reviewNavigation[i + 1].id]}
+            />
+          ) : (
+            <h2>{reviewNavigation[i + 1].label}</h2>
+          )}
+        </div>
+      </header>
+      {reviewNavigation[i + 1].id === 'unlock' && (
+        <div id={model.section('服务解锁测试').id}>
+          {model
+            .section('服务解锁测试')
+            .blocks.filter((b) => b.type !== 'table' && b.type !== 'heading')
+            .map((block) => (
+              <ArchiveBlock block={block} sectionTitle="服务解锁测试" />
+            ))}
+        </div>
+      )}
+      <ReviewPanels
+        id={reviewNavigation[i + 1].id}
+        label={reviewNavigation[i + 1].label}
+        panels={panels}
+      />
+    </section>
+  ))}
+</div>
+<script>
+  // Retire former expand-all URLs without changing selected tabs or targets.
+  const url = new URL(location.href);
+  let changed = url.searchParams.has('view');
+  url.searchParams.delete('view');
+  for (const key of ['return-route', 'outbound-route']) {
+    const value = url.searchParams.get(key);
+    if (value?.endsWith(':all')) {
+      url.searchParams.set(key, value.slice(0, -4));
+      changed = true;
+    }
+  }
+  if (url.hash === '#offer' || url.hash === '#overview') {
+    url.hash = 'purchase';
+    changed = true;
+    requestAnimationFrame(() =>
+      document.getElementById('purchase')?.scrollIntoView(),
+    );
+  }
+  if (changed) history.replaceState(null, '', url);
+</script>

@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { getEntry } from 'astro:content';
+const entry = await getEntry('advertising', 'policy');
+if (!entry) throw new Error('Missing src/content/advertising/policy.md');
+const policy = entry.data;
+const { placements } = policy;
+const money = new Intl.NumberFormat('zh-CN', {
+  style: 'currency',
+  currency: 'CNY',
+  maximumFractionDigits: 0,
+});
+---
+
+<BaseLayout
+  title="广告"
+  active="ads"
+  description="了解 LowEndAFF 的广告位置、赞助权益与合作方式。"
+>
+  <div class="shell directory-page ads-page">
+    <header class="directory-heading ads-heading">
+      <div>
+        <h1>
+          让好产品，
+          <br />
+          被对的人看见<span class="accent-text">.</span>
+        </h1>
+        <p>面向关注服务器、网络与基础设施的读者。</p>
+      </div>
+      <a
+        class="button primary"
+        href={policy.contactUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        联系广告合作 <Icon name="external" size={17} />
+      </a>
+    </header>
+    <section aria-labelledby="placements-heading">
+      <div class="section-heading">
+        <h2 id="placements-heading">广告位置</h2>
+      </div>
+      <p class="ads-reference">{policy.reference}</p>
+      <div class="placement-grid">
+        {placements.map((item) => (
+          <article class="placement-card panel">
+            <div
+              class:list={['placement-diagram', `placement-${item.type}`]}
+              aria-hidden="true"
+            >
+              <div class="diagram-bar">
+                <i></i>
+                <i></i>
+                <i></i>
+              </div>
+              <div class="diagram-content">
+                <div class="diagram-main">
+                  <b></b>
+                  <i></i>
+                  <i></i>
+                  <i></i>
+                  <b></b>
+                </div>
+                <div class="diagram-side">
+                  <b></b>
+                  <i></i>
+                  <i></i>
+                </div>
+              </div>
+            </div>
+            <div class="placement-title">
+              <h3>{item.name}</h3>
+              <p>
+                <strong>{money.format(item.price)}</strong>
+                <span> / 月</span>
+              </p>
+            </div>
+            <p>{item.copy}</p>
+            <p class="placement-spec">{item.spec}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+    <section class="bundle-panel panel" aria-labelledby="bundle-heading">
+      <div>
+        <h2 id="bundle-heading">组合投放</h2>
+        <p>{policy.bundle.description}</p>
+      </div>
+      <div class="bundle-price">
+        <strong>{money.format(policy.bundle.price)}</strong>
+        <span> / 月</span>
+        <p>{policy.bundle.availability}</p>
+      </div>
+    </section>
+    <div class="ads-details-grid">
+      <section aria-labelledby="benefits-heading">
+        <h2 id="benefits-heading">赞助权益</h2>
+        <dl class="ads-details">
+          {policy.benefits.map((item) => (
+            <div>
+              <dt>{item.title}</dt>
+              <dd>{item.description}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+      <section aria-labelledby="policy-heading">
+        <h2 id="policy-heading">投放规则</h2>
+        <dl class="ads-details">
+          {policy.policies.map((item) => (
+            <div>
+              <dt>{item.title}</dt>
+              <dd>{item.description}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    </div>
+    <section class="terms-panel panel" aria-labelledby="terms-heading">
+      <h2 id="terms-heading">合作须知</h2>
+      <dl class="ads-details">
+        {policy.terms.map((item) => (
+          <div>
+            <dt>{item.title}</dt>
+            <dd>{item.description}</dd>
+          </div>
+        ))}
+      </dl>
+      <div class="ads-contact">
+        <a
+          class="button primary"
+          href={policy.contactUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Telegram <span translate="no">{policy.contactLabel}</span>
+          <Icon name="external" size={16} />
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

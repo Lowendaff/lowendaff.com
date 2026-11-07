@@ -1,0 +1,81 @@
+---
+interface Props {
+  id: string;
+  label: string;
+  text: string;
+}
+const { id, label, text } = Astro.props;
+---
+
+<div class="hint-heading" data-heading-hint>
+  <h2>
+    <button
+      type="button"
+      class="heading-hint-trigger"
+      aria-describedby={id}
+      data-hint-trigger
+    >
+      {label}
+      <span aria-hidden="true">ⓘ</span>
+    </button>
+  </h2>
+  <div class="heading-tooltip" id={id} role="tooltip" data-hint-content hidden>
+    {text}
+  </div>
+</div>
+<script>
+  document
+    .querySelectorAll<HTMLElement>('[data-heading-hint]')
+    .forEach((root) => {
+      const trigger = root.querySelector<HTMLButtonElement>(
+        '[data-hint-trigger]',
+      )!;
+      const content = root.querySelector<HTMLElement>('[data-hint-content]')!;
+      let pinned = false;
+      let hovering = false;
+      let dismissed = false;
+      const render = () => {
+        content.hidden =
+          dismissed ||
+          !(pinned || hovering || root.contains(document.activeElement));
+      };
+      root.addEventListener('pointerenter', (event) => {
+        if (event.pointerType === 'mouse') {
+          hovering = true;
+          dismissed = false;
+          render();
+        }
+      });
+      root.addEventListener('pointerleave', () => {
+        hovering = false;
+        render();
+      });
+      root.addEventListener('focusin', () => {
+        dismissed = false;
+        render();
+      });
+      root.addEventListener('focusout', () => {
+        pinned = false;
+        queueMicrotask(render);
+      });
+      trigger.addEventListener('click', () => {
+        pinned = !pinned;
+        dismissed = !pinned;
+        render();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          pinned = false;
+          dismissed = true;
+          render();
+        }
+      });
+      document.addEventListener('pointerdown', (event) => {
+        if (!root.contains(event.target as Node)) {
+          pinned = false;
+          dismissed = true;
+          render();
+        }
+      });
+    });
+</script>

@@ -1,0 +1,256 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/noto-sans-sc';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import '../styles/editorial.css';
+import '../styles/compact.css';
+import '../styles/records.css';
+import '../styles/reading.css';
+import '../styles/directory.css';
+import '../styles/home.css';
+import '../styles/advertising.css';
+import Icon from '../components/Icon.astro';
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import { siteIndexable } from '../lib/site';
+interface Props {
+  title: string;
+  description?: string;
+  active?: string;
+  noindex?: boolean;
+  article?: { publishedAt: string; author: string; source?: string };
+}
+const {
+  title,
+  description = '我们评测全世界。全球 VPS、三网路由与硬件性能的实测记录。',
+  active = 'home',
+  noindex = false,
+  article,
+} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const image = new URL('/brand/lowendaff-avatar.jpg', Astro.site);
+const pageTitle = `${title} · LowEndAFF`;
+const structuredData = article
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: title,
+      description,
+      datePublished: article.publishedAt,
+      author: { '@type': 'Person', name: article.author },
+      mainEntityOfPage: canonical.href,
+      inLanguage: 'zh-CN',
+      ...(article.source ? { isBasedOn: article.source } : {}),
+    }
+  : null;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    {import.meta.env.DEV && import.meta.env.PUBLIC_FIGMA_CAPTURE === 'true' && (
+      <script
+        is:inline
+        src="https://mcp.figma.com/mcp/html-to-design/capture.js"
+        async
+      ></script>
+    )}
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/brand/lowendaff-avatar.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      data-theme-color="light"
+      content="#e1e2e7"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      data-theme-color="dark"
+      content="#1a1b26"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="robots"
+      content={siteIndexable && !noindex ? 'index,follow' : 'noindex,nofollow'}
+    />
+    <link rel="canonical" href={canonical} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="LowEndAFF"
+      href="/rss.xml"
+    />
+    <meta property="og:site_name" content="LowEndAFF" />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:image" content={image.href} />
+    <meta property="og:image:alt" content="LowEndAFF" />
+    <meta name="twitter:card" content="summary" />
+    {article && (
+      <meta property="article:published_time" content={article.publishedAt} />
+    )}
+    {structuredData && (
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')}
+      />
+    )}
+    <title>{pageTitle}</title>
+    <script is:inline>
+      // Apply explicit preferences before paint; no preference uses CSS media queries.
+      let appearance = 'system';
+      try {
+        const saved = localStorage.getItem('lowendaff-appearance');
+        if (saved === 'light' || saved === 'dark') appearance = saved;
+      } catch {}
+      document.documentElement.dataset.appearance = appearance;
+      if (appearance !== 'system') {
+        document.documentElement.dataset.theme = appearance;
+        document.querySelectorAll('[data-theme-color]').forEach((meta) => {
+          meta.setAttribute(
+            'content',
+            appearance === 'dark' ? '#1a1b26' : '#e1e2e7',
+          );
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      跳到正文
+    </a>
+    <header class="site-header">
+      <div class="nav-shell">
+        <a class="brand" href="/" aria-label="LowEndAFF 首页">
+          <img
+            class="brand-avatar"
+            src="/brand/lowendaff-avatar.jpg"
+            width="40"
+            height="40"
+            alt=""
+            decoding="async"
+          />
+          <span translate="no">
+            lowendaff<span class="brand-dot">.</span>
+          </span>
+        </a>
+        <nav class="desktop-nav" aria-label="主导航">
+          <a href="/" aria-current={active === 'home' ? 'page' : undefined}>
+            首页
+          </a>
+          <a href="/ads/" aria-current={active === 'ads' ? 'page' : undefined}>
+            广告
+          </a>
+          <a
+            href="/tags/"
+            aria-current={active === 'tags' ? 'page' : undefined}
+          >
+            标签云
+          </a>
+        </nav>
+        <div class="nav-actions">
+          <ThemeSwitcher />
+          <a
+            class="nav-subscribe"
+            href="https://t.me/lowendaff_blog"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            关注更新 <Icon name="external" size={15} />
+          </a>
+          <details class="mobile-nav">
+            <summary aria-label="打开导航">
+              <Icon name="menu" />
+            </summary>
+            <nav aria-label="移动导航">
+              <a href="/" aria-current={active === 'home' ? 'page' : undefined}>
+                首页
+              </a>
+              <a
+                href="/ads/"
+                aria-current={active === 'ads' ? 'page' : undefined}
+              >
+                广告
+              </a>
+              <a
+                href="/tags/"
+                aria-current={active === 'tags' ? 'page' : undefined}
+              >
+                标签云
+              </a>
+            </nav>
+          </details>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer shell">
+      <div>
+        <a class="brand" href="/" translate="no">
+          <img
+            class="brand-avatar"
+            src="/brand/lowendaff-avatar.jpg"
+            width="40"
+            height="40"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span>
+            lowendaff<span class="brand-dot">.</span>
+          </span>
+        </a>
+        <p>我们评测全世界，让每一次选择都有依据。</p>
+      </div>
+      <div class="footer-right">
+        <div>
+          <a href="/rss.xml" aria-label="订阅 RSS">
+            <Icon name="rss" size={16} /> RSS
+          </a>
+          <a href="https://t.me/lowendaff_blog">Telegram ↗</a>
+        </div>
+      </div>
+    </footer>
+    <script>
+      const mobileNav =
+        document.querySelector<HTMLDetailsElement>('.mobile-nav');
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && mobileNav?.open) {
+          mobileNav.open = false;
+          mobileNav.querySelector('summary')?.focus();
+        }
+      });
+      document.addEventListener('click', (event) => {
+        if (
+          mobileNav?.open &&
+          event.target instanceof Node &&
+          !mobileNav.contains(event.target)
+        )
+          mobileNav.open = false;
+      });
+      document
+        .querySelectorAll<HTMLButtonElement>('[data-copy]')
+        .forEach((button) =>
+          button.addEventListener('click', async () => {
+            const status =
+              button.parentElement?.querySelector<HTMLElement>(
+                '[data-copy-status]',
+              );
+            try {
+              await navigator.clipboard.writeText(button.dataset.copy || '');
+              if (status) status.textContent = '已复制';
+            } catch {
+              if (status) status.textContent = '复制失败，请选中文字手动复制';
+            }
+          }),
+        );
+    </script>
+  </body>
+</html>

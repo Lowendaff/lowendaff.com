@@ -1,0 +1,62 @@
+---
+import BenchmarkResultsTable from '../mdx/BenchmarkResultsTable.astro';
+import type { ReviewBlock } from '../../lib/review-model';
+interface Props {
+  block: ReviewBlock;
+  sectionTitle: string;
+}
+const { block, sectionTitle } = Astro.props;
+const asset = block.asset;
+---
+
+{block.type === 'table' && (
+  <div data-source-table={block.id}>
+    <BenchmarkResultsTable
+      headers={block.headers || []}
+      rows={block.rows || []}
+      caption={block.headings?.at(-1) || sectionTitle}
+    />
+  </div>
+)}
+{block.type === 'paragraph' && (
+  <div class="archive-prose" set:html={`<p>${block.html}</p>`} />
+)}
+{block.type === 'quote' && (
+  <blockquote class="archive-quote" set:html={block.html} />
+)}
+{block.type === 'heading' &&
+  (block.level === 3 ? (
+    <h3 class="archive-subheading">{block.text}</h3>
+  ) : (
+    <h4 class="archive-subheading small">{block.text}</h4>
+  ))}
+{block.type === 'image' && (
+  <figure class="archive-image">
+    {asset?.local ? (
+      <a href={asset.local} target="_blank" aria-label="打开原图查看">
+        <img
+          src={asset.local}
+          alt={block.alt?.endsWith('.png') ? '原作者测评配图' : block.alt}
+          loading="lazy"
+          width={asset.width}
+          height={asset.height}
+          decoding="async"
+        />
+      </a>
+    ) : (
+      <div class="unavailable-image">
+        <strong>
+          {block.alt?.includes('BGP') ? 'BGP 透视图暂不可用' : '图片暂不可用'}
+        </strong>
+        <a href={block.src} target="_blank" rel="noopener noreferrer">
+          查看图片 ↗
+        </a>
+      </div>
+    )}
+    {asset?.local && (
+      <figcaption>
+        {sectionTitle === 'BGP 透视' ? 'BGP 透视' : '测评配图 · 点击查看原图'}
+      </figcaption>
+    )}
+  </figure>
+)}

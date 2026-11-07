@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import RouteArt from '../components/RouteArt.astro';
+import HomeAds from '../components/ads/HomeAds.astro';
+import FriendLinks from '../components/FriendLinks.astro';
+import RecordList from '../components/RecordList.astro';
+import { getRecords } from '../lib/records';
+const records = getRecords(await getCollection('posts'));
+---
+
+<BaseLayout title="我们评测全世界，让每一次选择都有依据。">
+  <div class="shell home-revision home-page">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">
+          <span class="tiny-line"></span> INDEPENDENT HOSTING JOURNAL
+        </p>
+        <h1>
+          我们评测全世界，<span>让每一次选择都有依据。</span>
+        </h1>
+        <p class="hero-description">
+          从全球机房到三网回程，
+          <br class="mobile-break" />
+          我们认真测试，你安心选择。
+        </p>
+        <div class="hero-meta">
+          <span>
+            <Icon name="globe" size={15} /> 全球视野
+          </span>
+          <span>
+            <Icon name="route" size={15} /> 线路实测
+          </span>
+          <span>
+            <Icon name="shield" size={15} /> 证据可查
+          </span>
+        </div>
+      </div>
+      <RouteArt />
+    </section>
+    <div class="home-layout">
+      <div class="home-editorial">
+        <HomeAds />
+        <RecordList records={records} />
+        <section class="follow-banner panel">
+          <div class="follow-icon">
+            <Icon name="rss" size={28} />
+          </div>
+          <div>
+            <h2>下一台值得关注的服务器，别错过。</h2>
+            <p>新测评、新节点，保持好奇，也保持判断。</p>
+          </div>
+        </section>
+      </div>
+    </div>
+    <FriendLinks />
+  </div>
+</BaseLayout>

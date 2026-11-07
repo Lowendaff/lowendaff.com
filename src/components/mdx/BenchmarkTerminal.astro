@@ -1,0 +1,32 @@
+---
+import Icon from '../Icon.astro';
+interface Props {
+  output: string;
+  title?: string;
+  format?: 'raw' | 'normalized';
+}
+const {
+  output,
+  title = 'system-report.txt',
+  format = 'normalized',
+} = Astro.props;
+---
+
+<figure class="terminal" data-component="BenchmarkTerminal">
+  <figcaption>
+    <span>
+      <i></i>
+      <i></i>
+      <i></i>
+    </span>
+    <span translate="no">{title}</span>
+    <small>{format === 'normalized' ? '测试摘要' : '测试输出'}</small>
+  </figcaption>
+  <pre><code translate="no">{output}</code></pre>
+  <div class="terminal-footer">
+    <button class="copy-button" data-copy={output} aria-label="复制测试摘要">
+      <Icon name="copy" size={14} /> 复制
+    </button>
+    <span class="sr-only" data-copy-status aria-live="polite"></span>
+  </div>
+</figure>
