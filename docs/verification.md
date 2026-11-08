@@ -23,6 +23,10 @@ npm run verify:readable
 
 ## 浏览器检查
 
+类型筛选回归使用 `npm run verify:types` 创建 22 篇 VPS、3 篇独服及草稿夹具，验证类型 Schema 和静态标识，并在 `finally` 中删除夹具、重建原站。独立浏览器样本站保存在忽略目录 `test-results/review-types/site/`，附带数量清单供分页断言使用；不导入真实历史文章。
+
+运行 `python3 -m http.server 4399 --bind 127.0.0.1 --directory test-results/review-types/site`，再将 `scripts/verify-review-type-browser.js` 交给 Playwright MCP。它检查分页、URL/历史恢复、组合筛选、计数、键盘、无 JS 降级、文章标签及 320/390/1440px 双主题布局。测试完成后停止该专用服务；所有内容变更验证串行运行。
+
 以下文件是 Playwright MCP 的 `async function …(page) { … }` 回调，不是独立 Node CLI。先运行对应服务，再将整个文件交给 `browser_run_code_unsafe` 的 `filename` 参数；回调返回 JSON 报告。报告与截图存入 `test-results/`，不要提交。
 
 | 脚本 | 服务 | 范围 |

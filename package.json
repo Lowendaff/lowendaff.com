@@ -15,7 +15,8 @@
     "verify:pipeline": "node scripts/verify-content-pipeline.mjs",
     "verify:markdown": "node scripts/verify-markdown-content.mjs",
     "verify:readable": "node --experimental-strip-types --test scripts/verify-readable-review.mjs",
-    "verify:templates": "node scripts/verify-review-templates.mjs"
+    "verify:templates": "node scripts/verify-review-templates.mjs",
+    "verify:types": "node scripts/verify-review-types.mjs"
   },
   "engines": {
     "node": ">=22.12.0"

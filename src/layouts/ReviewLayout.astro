@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import Icon from '../components/Icon.astro';
 import { reviewModel } from '../lib/review-model';
+import { reviewTypeLabels } from '../lib/review-types';
 import ArticleTopAds from '../components/ads/ArticleTopAds.astro';
 import ArticleBottomAds from '../components/ads/ArticleBottomAds.astro';
 import ArticleSidebarAds from '../components/ads/ArticleSidebarAds.astro';
@@ -35,7 +36,9 @@ const navigation = review
     <nav class="breadcrumb" aria-label="面包屑">
       <a href="/">首页</a>
       <Icon name="chevron" size={12} />
-      <a href="/#reviews">主机测评</a>
+      <a href={`/?type=${p.reviewType}#reviews`}>
+        {reviewTypeLabels[p.reviewType]} 测评
+      </a>
       <Icon name="chevron" size={12} />
       <span translate="no">{p.vendor}</span>
     </nav>
@@ -49,12 +52,19 @@ const navigation = review
             {p.title}
             {!p.title.endsWith('测试记录') && (
               <>
-                <br class="desktop-only" />{' '}
-                {p.reviewType === 'dedicated' ? '独立服务器' : 'VPS'} 测试记录
+                <br class="desktop-only" /> {reviewTypeLabels[p.reviewType]}{' '}
+                测试记录
               </>
             )}
           </h1>
           <div class="review-meta">
+            <span
+              class="review-type-label"
+              data-review-kind={p.reviewType}
+              translate="no"
+            >
+              {reviewTypeLabels[p.reviewType]}
+            </span>
             <span>{p.author}</span>
             <time datetime={p.publishedAt}>{p.publishedAt} 发布</time>
           </div>
@@ -77,7 +87,10 @@ const navigation = review
         )}
         <slot />
         <ArticleBottomAds />
-        <a href="/#reviews" class="button secondary review-back">
+        <a
+          href={`/?type=${p.reviewType}#reviews`}
+          class="button secondary review-back"
+        >
           返回测试记录 <Icon name="arrow" size={16} />
         </a>
       </article>

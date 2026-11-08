@@ -1,4 +1,8 @@
-export {};
+import {
+  isReviewType,
+  reviewTypeLabels,
+  type ReviewType,
+} from '../lib/review-types';
 const root = document.querySelector<HTMLElement>('[data-record-list]');
 if (root) {
   const PAGE_SIZE = 20;
@@ -12,6 +16,10 @@ if (root) {
   const tabs = [
     ...document.querySelectorAll<HTMLButtonElement>('[data-tag-tab]'),
   ];
+  const typeButtons = [
+    ...document.querySelectorAll<HTMLButtonElement>('[data-review-type]'),
+  ];
+  let reviewType: ReviewType | '' = '';
   let category = 'merchant';
   let merchant = '';
   let country = '';
@@ -23,6 +31,8 @@ if (root) {
     );
   const restore = () => {
     const params = new URLSearchParams(location.search);
+    const requestedType = params.get('type');
+    reviewType = isReviewType(requestedType) ? requestedType : '';
     category = params.get('by') === 'country' ? 'country' : 'merchant';
     merchant =
       filters && valid('merchant', params.get('merchant') || '')
@@ -39,6 +49,12 @@ if (root) {
         : 1;
   };
   const render = (mode: 'push' | 'replace') => {
+    typeButtons.forEach((button) =>
+      button.setAttribute(
+        'aria-pressed',
+        String(button.dataset.reviewType === reviewType),
+      ),
+    );
     tabs.forEach((tab) => {
       const selected = tab.dataset.tagTab === category;
       tab.setAttribute('aria-selected', String(selected));
@@ -52,6 +68,7 @@ if (root) {
     const resultLink = document.querySelector('[data-tag-results]');
     const matches = rows.filter(
       (row) =>
+        (!reviewType || row.dataset.type === reviewType) &&
         (!merchant || row.dataset.merchant === merchant) &&
         (!country || row.dataset.region === country),
     );
@@ -69,6 +86,21 @@ if (root) {
         chip.dataset.tagValue ===
         (chip.dataset.tagKind === 'merchant' ? merchant : country);
       chip.setAttribute('aria-pressed', String(selected));
+      const count = chip.querySelector('[data-tag-count]');
+      const kind = chip.dataset.tagKind;
+      const value = chip.dataset.tagValue || '';
+      if (count)
+        count.textContent = String(
+          rows.filter(
+            (row) =>
+              (!reviewType || row.dataset.type === reviewType) &&
+              (kind === 'merchant'
+                ? (!country || row.dataset.region === country) &&
+                  (!value || row.dataset.merchant === value)
+                : (!merchant || row.dataset.merchant === merchant) &&
+                  (!value || row.dataset.region === value)),
+          ).length,
+        );
     });
     const count = root.querySelector('#result-count');
     if (count)
@@ -83,7 +115,7 @@ if (root) {
     if (status) status.textContent = `${page} / ${pages}`;
     const reset =
       document.querySelector<HTMLButtonElement>('[data-clear-tags]');
-    if (reset) reset.disabled = !merchant && !country;
+    if (reset) reset.disabled = !merchant && !country && !reviewType;
     const selection = document.querySelector('[data-selection-summary]');
     if (selection) {
       const countryChip = chips.find(
@@ -92,17 +124,22 @@ if (root) {
           chip.dataset.tagValue === country,
       );
       selection.textContent =
-        [merchant, country ? countryChip?.dataset.tagLabel : '']
+        [
+          reviewType ? reviewTypeLabels[reviewType] : '',
+          merchant,
+          country ? countryChip?.dataset.tagLabel : '',
+        ]
           .filter(Boolean)
           .join(' · ') || '全部记录';
     }
     const url = new URL(location.href);
     // Retired search parameters must not leave invisible filters behind.
-    ['q', 'region', 'country', 'merchant', 'page', 'by'].forEach((key) =>
-      url.searchParams.delete(key),
+    ['q', 'region', 'country', 'merchant', 'page', 'by', 'type'].forEach(
+      (key) => url.searchParams.delete(key),
     );
     if (filters && category === 'country') url.searchParams.set('by', category);
     if (merchant) url.searchParams.set('merchant', merchant);
+    if (reviewType) url.searchParams.set('type', reviewType);
     if (country) url.searchParams.set('country', country);
     if (page > 1) url.searchParams.set('page', String(page));
     if (url.href !== location.href)
@@ -121,6 +158,31 @@ if (root) {
     category = tab.dataset.tagTab || 'merchant';
     render('push');
   };
+  const selectType = (button: HTMLButtonElement) => {
+    const value = button.dataset.reviewType ?? '';
+    reviewType = isReviewType(value) ? value : '';
+    page = 1;
+    render('push');
+  };
+  typeButtons.forEach((button, index) => {
+    button.addEventListener('click', () => selectType(button));
+    button.addEventListener('keydown', (event) => {
+      const target =
+        event.key === 'ArrowRight'
+          ? (index + 1) % typeButtons.length
+          : event.key === 'ArrowLeft'
+            ? (index - 1 + typeButtons.length) % typeButtons.length
+            : event.key === 'Home'
+              ? 0
+              : event.key === 'End'
+                ? typeButtons.length - 1
+                : -1;
+      if (target < 0) return;
+      event.preventDefault();
+      selectType(typeButtons[target]);
+      typeButtons[target].focus({ preventScroll: true });
+    });
+  });
   tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => selectTab(tab));
     tab.addEventListener('keydown', (event) => {
@@ -155,11 +217,10 @@ if (root) {
     .forEach((button) =>
       button.addEventListener('click', () => {
         merchant = country = '';
+        reviewType = '';
         page = 1;
         render('push');
-        document
-          .querySelector<HTMLButtonElement>(`[data-tag-kind="${category}"]`)
-          ?.focus();
+        typeButtons[0]?.focus({ preventScroll: true });
       }),
     );
   previous?.addEventListener('click', () => {
@@ -178,6 +239,9 @@ if (root) {
   });
   restore();
   render('replace');
+  document
+    .querySelector<HTMLElement>('[data-type-filter]')
+    ?.removeAttribute('hidden');
   document
     .querySelector<HTMLElement>('[data-tag-filters]')
     ?.removeAttribute('hidden');

@@ -6,6 +6,8 @@
 
 原有 42 篇 MDX 已按用户要求撤下，当前文章集合为空；新增内容使用 VPS / 独服模板。撤下记录见 `changes/remove-existing-posts.md`。广告四个独立集合，Sponsors 单独维护。当前测试数据、广告和样式以源码为准；历史说明不覆盖 `AGENTS.md`。
 
+VPS / 独服类型区分已完成：首页筛选、列表/文章类型标签及标签云组合筛选，详见 `changes/review-types.md`。未实现置顶。OpenViking：`viking://resources/projects/lowendaff-ui/review-types.md`（全文回读一致，回执在 `test-results/review-types/openviking-receipt.json`）；Git 同步回执见 `test-results/review-types/git-push-receipt.json`。未部署或同步本次 Figma 画布。
+
 ## 当前文档
 
 - `content-authoring.md`：文章、广告及 Sponsors 维护。

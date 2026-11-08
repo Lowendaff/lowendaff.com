@@ -1,11 +1,13 @@
 ---
 import Icon from './Icon.astro';
+import ReviewTypeFilter from './ReviewTypeFilter.astro';
 import { getRecords, countryEmoji } from '../lib/records';
 interface Props {
   filters?: boolean;
+  showTypeFilter?: boolean;
   records: ReturnType<typeof getRecords>;
 }
-const { filters = false, records } = Astro.props;
+const { filters = false, showTypeFilter = true, records } = Astro.props;
 const dateFormat = new Intl.DateTimeFormat('zh-CN', {
   year: 'numeric',
   month: '2-digit',
@@ -31,6 +33,7 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
       {records.length} 条记录 · 每页 20 条
     </p>
   </div>
+  {showTypeFilter && <ReviewTypeFilter />}
   <div class="article-list panel">
     {records.map((post) => (
       <a
@@ -42,12 +45,16 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
         data-region={post.countryTag}
         data-merchant={post.merchant}
         data-id={post.id}
+        data-type={post.reviewType}
       >
         <div class="location-icon country-emoji" aria-hidden="true">
           {countryEmoji(post.country)}
         </div>
         <div class="article-main">
           <div class="article-meta">
+            <span class="review-type-label" translate="no">
+              {post.reviewTypeLabel}
+            </span>
             <span>{post.location}</span>
             <span class="meta-dot">·</span>
             <time datetime={post.date}>
@@ -68,7 +75,7 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
       <h3>{records.length ? '这个组合还没有测试记录' : '暂无测试记录'}</h3>
       {records.length > 0 && (
         <>
-          <p>换一个商家或国家，也可以清除筛选。</p>
+          <p>换一个类型、商家或国家，也可以清除筛选。</p>
           <button class="button secondary" data-reset-filters type="button">
             清除筛选
           </button>

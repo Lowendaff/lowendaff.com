@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { postsLoader } from './loaders/posts';
+import { reviewTypes } from './lib/review-types';
 import { compatibilitySchema, reviewImagesSchema } from './lib/readable-review';
 
 const httpUrl = z
@@ -120,7 +121,7 @@ const posts = defineCollection({
     .object({
       kind: z.enum(['review', 'archive-reference']).default('review'),
       format: z.enum(['mdx', 'review-markdown']).default('mdx'),
-      reviewType: z.enum(['vps', 'dedicated']).default('vps'),
+      reviewType: z.enum(reviewTypes).default('vps'),
       compatibility: compatibilitySchema.optional(),
       images: reviewImagesSchema.optional(),
       recordId: identifier.optional(),

@@ -313,3 +313,59 @@
     display: block !important;
   }
 }
+
+/* A shared, single-choice filter for the home and tag directories. */
+.review-type-filter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 360px);
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--subtle);
+}
+.review-type-filter button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  touch-action: manipulation;
+}
+.review-type-filter button:hover {
+  color: var(--text);
+}
+.review-type-filter button[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 650;
+  box-shadow: var(--shadow);
+}
+.review-type-label {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--subtle);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.home-revision .article-meta {
+  flex-wrap: wrap;
+}
+@media print {
+  .review-type-filter {
+    display: none !important;
+  }
+}

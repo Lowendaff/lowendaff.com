@@ -1,0 +1,27 @@
+---
+import { reviewTypes, reviewTypeLabels } from '../lib/review-types';
+const options = [
+  { value: '', label: '全部' },
+  ...reviewTypes.map((value) => ({ value, label: reviewTypeLabels[value] })),
+];
+---
+
+<div
+  class="review-type-filter"
+  role="group"
+  aria-label="测评类型"
+  data-type-filter
+  hidden
+>
+  {options.map(({ value, label }) => (
+    <button
+      type="button"
+      data-review-type={value}
+      aria-pressed={value === '' ? 'true' : 'false'}
+      aria-controls="reviews"
+      translate="no"
+    >
+      {label}
+    </button>
+  ))}
+</div>

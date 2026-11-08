@@ -63,6 +63,8 @@ source: 品牌授权或素材来源
 
 新文章从 [`VPS 模板`](../templates/reviews/vps.mdx) 或 [`独立服务器模板`](../templates/reviews/dedicated-server.mdx) 复制，详细用法见 [`模板说明`](../templates/reviews/README.md)。两者均使用 `format: review-markdown`，以 `reviewType: vps | dedicated` 区分。模板不在内容集合中，不会发布成文章。
 
+`reviewType` 同时控制首页「全部 / VPS / 独立服务器」筛选、列表与文章头部标签。标签云可将类型与商家、国家组合筛选，筛选状态保存在 URL（例如 `/?type=dedicated`）。切换类型重置页码，每页仍为 20 条；分类不依赖自由填写的 `categories` / `tags`。新文章必须按实际产品填写类型，未填写时兼容为 `vps`。
+
 文件名使用平铺 kebab-case，决定 `/reviews/<id>/`。最小原生 MDX 示例：
 
 ```mdx

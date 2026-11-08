@@ -1,5 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { postPath } from './posts';
+import { reviewTypeLabels } from './review-types';
 
 export const countryEmoji = (code: string) =>
   code === 'TW'
@@ -31,6 +32,8 @@ export function getRecords(posts: CollectionEntry<'posts'>[]) {
     .map(({ id, data }) => ({
       id: data.recordId || id,
       title: data.title,
+      reviewType: data.reviewType,
+      reviewTypeLabel: reviewTypeLabels[data.reviewType],
       location: data.location,
       country: data.country,
       date: data.publishedAt,

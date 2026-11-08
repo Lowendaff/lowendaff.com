@@ -19,7 +19,7 @@ cp templates/reviews/dedicated-server.mdx src/content/posts/vendor-location-dedi
 
 ## 元数据
 
-- `reviewType`：`vps` 或 `dedicated`，控制标题缺少测评后缀时的类型；不要根据商家名猜产品类型。
+- `reviewType`：`vps` 或 `dedicated`，驱动首页/标签云类型筛选、列表标签、文章头部类型和返回列表链接，也控制标题缺少测评后缀时的类型。新文章明确填写；省略时兼容为 `vps`，其他值会构建报错。不要根据商家名或标题猜产品类型。
 - `title`：建议写完整标题，如「商家 地区 独立服务器测试记录」。页面不会再重复追加 VPS 字样。
 - `country`：两位地区码，如 `US`、`SG`、`HK`、`TW`，未知用 `''`。`location` 写实际机房，GeoIP 误差在正文说明。
 - `publishedAt` 使用引号包裹的 `YYYY-MM-DD`；`testedAt` 可写日期、时段、时区；模板日期必须替换。
