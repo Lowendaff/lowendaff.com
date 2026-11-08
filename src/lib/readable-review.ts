@@ -37,6 +37,14 @@ type Block =
   | { type: 'heading'; level: number; text: string; line: number }
   | { type: 'paragraph' | 'quote'; html: string; line: number }
   | {
+      type: 'code';
+      id: string;
+      headings: string[];
+      text: string;
+      language: string;
+      line: number;
+    }
+  | {
       type: 'image';
       src: string;
       alt: string;
@@ -192,6 +200,18 @@ export function parseReadableReview(
         headings: [...headings],
         headers,
         rows,
+        line,
+      });
+    } else if (node.type === 'code') {
+      const path = [section.title, ...headings, 'code'].join(' / ');
+      const occurrence = (occurrences.get(path) ?? 0) + 1;
+      occurrences.set(path, occurrence);
+      section.blocks.push({
+        type: 'code',
+        id: stableId('code', `${path} / #${occurrence}`),
+        headings: [...headings],
+        text: node.value,
+        language: node.lang ?? 'text',
         line,
       });
     } else if (

@@ -42,8 +42,7 @@ export function reviewModel(review: Review) {
   const key = review.id;
   const section = (title: string): ReviewSection => {
     const match = review.sections.find((s) => s.title === title);
-    if (!match) throw new Error(`Missing source section: ${title}`);
-    return match;
+    return match ?? { id: `${key}-absent`, title, blocks: [] };
   };
   const hardware: ReviewPanel[] = [
     { id: 'system', label: '系统', sections: [section('系统信息')] },
@@ -58,7 +57,7 @@ export function reviewModel(review: Review) {
   const unlockSection = section('服务解锁测试');
   const unlock: ReviewPanel[] = [];
   for (const block of unlockSection.blocks) {
-    if (block.type !== 'table') continue;
+    if (block.type !== 'table' && block.type !== 'code') continue;
     const category = block.headings?.at(-1) || '其他';
     const ip = block.headings?.[0] || 'IPv4';
     let panel = unlock.find((p) => p.id === category);
@@ -111,5 +110,30 @@ export function reviewModel(review: Review) {
       route: 'outbound',
     },
   ];
-  return { review, section, hardware, unlock, speed, routing };
+  const present = (panels: ReviewPanel[]) =>
+    panels
+      .map((panel) => ({
+        ...panel,
+        sections: panel.sections.filter((s) =>
+          s.blocks.some((b) => b.type !== 'heading'),
+        ),
+      }))
+      .filter((panel) => panel.sections.length > 0);
+  const groups = [hardware, unlock, speed, routing].map(present);
+  const navigation = reviewNavigation.filter((item, index) => {
+    if (index === 0)
+      return ['买', '评'].some((title) => section(title).blocks.length > 0);
+    if (item.id === 'unlock')
+      return section('服务解锁测试').blocks.some((b) => b.type !== 'heading');
+    return groups[index - 1].length > 0;
+  });
+  return {
+    review,
+    section,
+    hardware: groups[0],
+    unlock: groups[1],
+    speed: groups[2],
+    routing: groups[3],
+    navigation,
+  };
 }

@@ -17,6 +17,8 @@ npm run verify:readable
 
 `verify:readable` 使用 Node 内置测试框架，验证 Markdown 表格、段落、稳定 ID 和错误输入。当前没有覆盖率百分比要求。
 
+修改两类文章模板或其解析/渲染规则时，执行 `npm run verify:templates`；验证 VPS/独服标题、可选章节、原始输出、本地图像标记与草稿隔离。它会创建临时文章并重建，须与其他构建、格式检查及内容编辑串行执行。
+
 修改内容集合、加载器或商业内容结构时，额外按顺序运行 `npm run verify:pipeline` 和 `npm run verify:markdown`。它们会暂改样本并在结束时恢复、重建默认预览；不能与其他构建或内容编辑并行运行。Markdown 检查结果默认写入 `test-results/markdown/`。
 
 ## 浏览器检查

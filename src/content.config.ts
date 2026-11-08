@@ -29,6 +29,14 @@ const block = z.discriminatedUnion('type', [
   z.object({ ...origin, type: z.literal('quote'), html: z.string() }),
   z.object({
     ...origin,
+    type: z.literal('code'),
+    id: identifier,
+    headings: z.array(z.string()),
+    text: z.string(),
+    language: z.string(),
+  }),
+  z.object({
+    ...origin,
     type: z.literal('heading'),
     level: z.number().int().min(1).max(6),
     text: z.string(),
@@ -36,7 +44,7 @@ const block = z.discriminatedUnion('type', [
   z.object({
     ...origin,
     type: z.literal('image'),
-    src: httpUrl,
+    src: z.union([httpUrl, z.string().startsWith('/archive-assets/')]),
     alt: z.string(),
     asset: z
       .object({
@@ -51,29 +59,34 @@ const block = z.discriminatedUnion('type', [
 const review = z
   .object({
     id: identifier,
-    source: httpUrl,
+    source: httpUrl.optional(),
     legacyAnchors: z.record(z.string(), z.string()),
-    sections: z.array(
-      z.object({
-        id: identifier,
-        title: z.string(),
-        level: z.number().int(),
-        line: z.number().int(),
-        blocks: z.array(block),
-      }),
-    ),
+    sections: z
+      .array(
+        z.object({
+          id: identifier,
+          title: z.string(),
+          level: z.number().int(),
+          line: z.number().int(),
+          blocks: z.array(block),
+        }),
+      )
+      .min(1),
   })
   .superRefine((value, ctx) => {
     const ids = value.sections.flatMap((section) => [
       section.id,
-      ...section.blocks.flatMap((b) => (b.type === 'table' ? [b.id] : [])),
+      ...section.blocks.flatMap((b) => ('id' in b ? [b.id] : [])),
     ]);
     if (new Set(ids).size !== ids.length)
       ctx.addIssue({
         code: 'custom',
         message: 'Section and table IDs must be unique',
       });
-    for (const title of [
+    const supported = [
+      // Retained only as source evidence in the two original reviews; never rendered.
+      'Bench Report',
+      'IPv4 质量分析',
       '买',
       '评',
       '系统信息',
@@ -87,11 +100,12 @@ const review = z
       'Apple CDN Speedtest',
       '路由追踪',
       '去程路由追踪',
-    ]) {
-      if (!value.sections.some((s) => s.title === title))
+    ];
+    for (const section of value.sections) {
+      if (!supported.includes(section.title))
         ctx.addIssue({
           code: 'custom',
-          message: `Missing structured review section: ${title}`,
+          message: `Unsupported review section: ${section.title}; use a supported section with level 3 subheadings`,
         });
     }
   });
@@ -106,6 +120,7 @@ const posts = defineCollection({
     .object({
       kind: z.enum(['review', 'archive-reference']).default('review'),
       format: z.enum(['mdx', 'review-markdown']).default('mdx'),
+      reviewType: z.enum(['vps', 'dedicated']).default('vps'),
       compatibility: compatibilitySchema.optional(),
       images: reviewImagesSchema.optional(),
       recordId: identifier.optional(),

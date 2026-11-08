@@ -87,3 +87,27 @@ test('unsafe links and competing data sources are rejected', () => {
     /cannot also define review/,
   );
 });
+
+test('raw output preserves indentation and markup without interpreting it as MDX', () => {
+  const output = 'Device: /dev/sda\n  RAW: {value} <script> & 100%';
+  const review = convert(
+    '## 磁盘性能测试\n\n### SMART\n\n```text\n' + output + '\n```',
+  );
+  const block = review.sections[0].blocks.at(-1);
+  assert.equal(block.type, 'code');
+  assert.equal(block.text, output);
+  assert.equal(block.language, 'text');
+  assert.deepEqual(block.headings, ['SMART']);
+});
+
+test('new reviews need no invented archive source and keep local image paths', () => {
+  const review = convert(
+    '## 系统信息\n\n![Hardware topology](/archive-assets/example/topology.png)',
+    { archiveSnapshot: undefined },
+  );
+  assert.equal(review.source, undefined);
+  assert.equal(
+    review.sections[0].blocks[0].src,
+    '/archive-assets/example/topology.png',
+  );
+});

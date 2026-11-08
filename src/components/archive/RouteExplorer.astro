@@ -1,6 +1,7 @@
 ---
 import RouteSelect from './RouteSelect.astro';
 import BenchmarkResultsTable from '../mdx/BenchmarkResultsTable.astro';
+import ArchiveBlock from './ArchiveBlock.astro';
 interface Block {
   type: string;
   id?: string;
@@ -9,6 +10,7 @@ interface Block {
   headers?: string[];
   rows?: string[][];
   html?: string;
+  text?: string;
 }
 interface Props {
   blocks: Block[];
@@ -16,9 +18,10 @@ interface Props {
   inbound?: boolean;
 }
 const { blocks, id, inbound = false } = Astro.props;
-const tables = blocks.filter((b) => b.type === 'table');
+const tables = blocks.filter((b) => b.type === 'table' || b.type === 'code');
 const sectionNotes = blocks.filter(
-  (b, i) => b.type === 'paragraph' && blocks[i + 1]?.type !== 'table',
+  (b, i) =>
+    b.type === 'paragraph' && !['table', 'code'].includes(blocks[i + 1]?.type),
 );
 const groupFor = (b: Block) => {
   const h = b.headings || [];
@@ -95,11 +98,15 @@ const groups = groupNames.map((name) => ({
           <div data-route-record={j} data-source-table={table.id}>
             <h4 class="route-record-title">{table.headings?.at(-1)}</h4>
             {note && <p class="route-origin" set:html={note} />}
-            <BenchmarkResultsTable
-              headers={table.headers || []}
-              rows={table.rows || []}
-              caption={table.headings?.at(-1) || '路由测试'}
-            />
+            {table.type === 'code' ? (
+              <ArchiveBlock block={table} sectionTitle="路由测试" />
+            ) : (
+              <BenchmarkResultsTable
+                headers={table.headers || []}
+                rows={table.rows || []}
+                caption={table.headings?.at(-1) || '路由测试'}
+              />
+            )}
           </div>
         );
       })}
@@ -119,6 +126,7 @@ const groups = groupNames.map((name) => ({
       const selectors = Array.from(
         root.querySelectorAll<HTMLElement>('[data-route-picker]'),
       );
+      if (!tabs.length) return;
       let selected = 0;
       const key = root.dataset.routeExplorer || 'routes';
       const restore = () => {

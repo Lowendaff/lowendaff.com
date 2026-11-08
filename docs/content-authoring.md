@@ -61,6 +61,8 @@ source: 品牌授权或素材来源
 
 ## 文章与历史目录
 
+新文章从 [`VPS 模板`](../templates/reviews/vps.mdx) 或 [`独立服务器模板`](../templates/reviews/dedicated-server.mdx) 复制，详细用法见 [`模板说明`](../templates/reviews/README.md)。两者均使用 `format: review-markdown`，以 `reviewType: vps | dedicated` 区分。模板不在内容集合中，不会发布成文章。
+
 文件名使用平铺 kebab-case，决定 `/reviews/<id>/`。最小原生 MDX 示例：
 
 ```mdx
@@ -92,7 +94,7 @@ import VpsSpecCard from '../../components/mdx/VpsSpecCard.astro';
 
 当前两种历史测评格式共存：100TB 已试用下方易读格式；PanstarCloud 仍在 Frontmatter 的 `review.sections[].blocks` 中保存结构化数据，并通过原有 MDX 组件调用渲染。不要把旧格式字段复制到易读格式中。两者均受同一内容 Schema 校验。
 
-### 易读测评格式（单篇试用）
+### 易读测评格式与新文章模板
 
 参考 `src/content/posts/100tb-cn2.mdx`，设置 `format: review-markdown`。正文直接写 Markdown，无需 import、JSX 或 `frontmatter.review`。集合加载器解析正文，再经过原有 Zod 校验；页面复用 FullReview 和原有页签、路由组件。
 
@@ -117,9 +119,9 @@ import VpsSpecCard from '../../components/mdx/VpsSpecCard.astro';
 
 - 一级或二级标题划分原有章节；三级标题表示分组，四级标题表示检测项。沿用样本章节名，不能跳级或重复顶层章节。路由分组沿用 `路由追踪 / 中国境内目标 / 北京电信…` 等现有语义，不靠模糊猜测。
 - 表头和每行列数必须一致；每条结果占一行。保留 N/A、busy、空值，不能把缺失数据当作零。单元格中的竖线写为 `\|`；字面量星号写为 `\*`。
-- 正文支持段落、加粗、行内代码、显式链接、单段引用，以及单独一段的图片。图片本地恢复信息可选填 `images`。本轮尚未扩展列表、多段引用、代码围栏、引用式链接和嵌入 JSX；不支持的块会报出文件与行号，不会默默丢弃。普通 MDX 模式不受此限制。
+- 正文支持段落、加粗、行内代码、显式链接、单段引用，以及单独一段的图片。图片本地恢复信息可选填 `images`。另支持代码围栏及 `/archive-assets/` 本地图片；尚未扩展列表、多段引用、引用式链接和嵌入 JSX；不支持的块会报出文件与行号，不会默默丢弃。普通 MDX 模式不受此限制。
 - 历史样本的 `compatibility` 只保存章节/表格旧 ID 和锚点映射，不含测评数值。它是迁移兼容信息，日常改数据无需动它；重命名已映射标题时要同步映射键以保留旧链接。新表格自动获得稳定 ID；同一路径多表按出现次序区分，优先给各测试设置不同标题。
-- `showcase` 是组件展示页的可选样本配置，不是写每篇文章的必填项。`compatibility` 也不是新内容的必填项。当前试用仍沿用完整历史测评的章节契约和来源要求，未将缺项自动补成虚构测试。
+- `showcase` 是组件展示页的可选样本配置，不是写每篇文章的必填项。`compatibility` 也不是新内容的必填项。新文章可删掉未测章节，无需历史来源 URL；目录和页签只显示实际内容。独服拓扑、SMART、dmidecode 等分别放系统和磁盘章节的子标题下。
 - 真实正文和跑分仍全部在这份 MDX 中；历史 JSON 只用于迁移对照，不参与应用加载。Markdown 正文改动会更新开发页面；静态部署仍需构建发布。
 
 运行 `npm run verify:readable` 检查解析规则；`npm run verify:markdown -- test-results/readable-mdx` 检查真实正文改动能否联动文章及组件展示页。后者会临时修改内容，结束后恢复，运行时暂停其他内容编辑。

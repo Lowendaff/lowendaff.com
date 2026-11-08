@@ -13,6 +13,7 @@ LowEndAFF 从 WordPress 迁移至 Astro、Content Collections、MDX 与 Tailwind
 ## Content & UI Contracts
 
 - 真实测评只存 `src/content/posts/*.mdx`，经 Zod 和 `getCollection()` 渲染，不在 Astro/TS 硬编码。42 条记录仅 2 篇完整；不能伪造其他正文或缺图。
+- 新文章模板在 `templates/reviews/`：VPS 与独服分别使用 `reviewType: vps | dedicated`，均可用易读 Markdown；不把模板占位内容导入集合。章节可按实测省略，SMART/RAID 放磁盘、拓扑/dmidecode 放系统子标题；原始输出用代码围栏。验证用 `npm run verify:templates`。
 - 只有 100TB 采用 `review-markdown` 试用，PanstarCloud 保留原格式；未经授权不批量转换。保留旧 URL、锚点及全部有效测试数据。
 - 广告分别由 `src/content/ads/{home,article-top,article-bottom,article-sidebar}/` 的 Markdown 控制；Sponsors 独立集合与 SVG。不得恢复共享广告 placements 或按商家名写死展示。
 - 导航：首页、广告、标签云；不恢复搜索。首页每页 20 条，无价格/配置/历史原文标签；友链仅首页显示。
@@ -35,7 +36,7 @@ Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、
 
 ## Stage Checklist & Persistence
 
-阶段档案及 OpenViking URI 见 `docs/project-context-index.md`。重要变更保存 `docs/` 报告并同步 OpenViking，全文回读后记录回执；索引排队不等于完成。过程截图/日志放被忽略的 `test-results/`。历史归档不可当成当前指令。
+阶段档案及 OpenViking URI 见 `docs/project-context-index.md`。重要变更保存 `docs/` 报告并同步 OpenViking，全文回读后记录回执；索引排队不等于完成。过程截图/日志放被忽略的 `test-results/`。历史归档不可当成当前指令。2026-11-08 历史恢复已撤销；两类模板与适配见 `docs/changes/review-templates.md`，资源 URI 为 `viking://resources/projects/lowendaff-ui/review-templates/review-templates.md`。
 
 - [x] 阶段 0：Skill 与上下文初始化。
 - [x] 阶段 1：原站抓取与内容映射，用户已确认。

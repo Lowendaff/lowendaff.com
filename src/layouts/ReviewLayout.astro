@@ -2,7 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import Icon from '../components/Icon.astro';
-import { reviewNavigation } from '../lib/review-model';
+import { reviewModel } from '../lib/review-model';
 import ArticleTopAds from '../components/ads/ArticleTopAds.astro';
 import ArticleBottomAds from '../components/ads/ArticleBottomAds.astro';
 import ArticleSidebarAds from '../components/ads/ArticleSidebarAds.astro';
@@ -15,7 +15,7 @@ const { post, headings } = Astro.props;
 const p = post.data;
 const review = p.review;
 const navigation = review
-  ? reviewNavigation
+  ? reviewModel(review).navigation
   : headings
       .filter((h) => h.depth === 2)
       .map((h) => ({ id: h.slug, label: h.text }));
@@ -47,7 +47,12 @@ const navigation = review
           </span>
           <h1>
             {p.title}
-            <br class="desktop-only" /> VPS 测试记录
+            {!p.title.endsWith('测试记录') && (
+              <>
+                <br class="desktop-only" />{' '}
+                {p.reviewType === 'dedicated' ? '独立服务器' : 'VPS'} 测试记录
+              </>
+            )}
           </h1>
           <div class="review-meta">
             <span>{p.author}</span>

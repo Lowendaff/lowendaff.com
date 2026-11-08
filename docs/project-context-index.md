@@ -9,6 +9,7 @@
 ## 当前文档
 
 - `content-authoring.md`：文章、广告及 Sponsors 维护。
+- `../templates/reviews/README.md`：VPS / 独服 Markdown 模板；`changes/review-templates.md` 记录历史依据、恢复撤销和兼容调整。
 - `verification.md`：类型、格式、构建、内容契约和浏览器检查。
 - `release-guide.md`：noindex、发布开关、重定向和部署边界。
 - `stage-3-component-map.md`、`stage-4-component-map.md`：Figma 节点与内容链路。
