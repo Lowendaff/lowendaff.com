@@ -20,6 +20,10 @@ def rows(table):
 
 report = {}
 for key, slug in [('100tb', '100tb-cn2'), ('panstarcloud', 'panstarcloud-singapore')]:
+    if not (ROOT / f'src/content/posts/{slug}.mdx').exists():
+        assert not (ROOT / f'dist/reviews/{slug}/index.html').exists(), f'{slug}: removed article still built'
+        report[key] = {'status': 'not-applicable', 'reason': 'Historical post removed', 'removedPageAbsent': True}
+        continue
     source = parse(ROOT / f'tests/fixtures/wordpress/{key}.html')
     article = next(n for n in source.walk() if 'main-article' in n.attrs.get('class', '').split())
     content = next(n for n in article.walk() if n.attrs.get('class') == 'text')

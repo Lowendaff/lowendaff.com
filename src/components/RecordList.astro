@@ -64,12 +64,16 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
         <Icon name={post.external ? 'external' : 'arrow'} size={19} />
       </a>
     ))}
-    <div class="empty-results" id="empty-results" hidden>
-      <h3>这个组合还没有测试记录</h3>
-      <p>换一个商家或国家，也可以清除筛选。</p>
-      <button class="button secondary" data-reset-filters type="button">
-        清除筛选
-      </button>
+    <div class="empty-results" id="empty-results" hidden={records.length > 0}>
+      <h3>{records.length ? '这个组合还没有测试记录' : '暂无测试记录'}</h3>
+      {records.length > 0 && (
+        <>
+          <p>换一个商家或国家，也可以清除筛选。</p>
+          <button class="button secondary" data-reset-filters type="button">
+            清除筛选
+          </button>
+        </>
+      )}
     </div>
   </div>
   <nav class="record-pagination" aria-label="测试记录分页" hidden>

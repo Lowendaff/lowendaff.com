@@ -6,6 +6,8 @@ import { parse, stringify } from 'yaml';
 const root = new URL('../', import.meta.url);
 const originals = new Map();
 const created = [];
+const postFixtures = [];
+const articlePath = 'src/content/posts/markdown-verification.mdx';
 const results = [];
 const file = (path) => new URL(path, root);
 const read = (path) => readFile(file(path), 'utf8');
@@ -51,6 +53,76 @@ async function scenario(name) {
   await cp(file('dist/index.html'), `${path}/index.html`);
 }
 try {
+  // Test content is synthetic and temporary; never edit published articles.
+  const metadata = {
+    kind: 'review',
+    format: 'review-markdown',
+    title: 'Markdown verification fixture',
+    description: 'Synthetic integration data',
+    vendor: 'Fixture',
+    country: 'US',
+    location: 'Fixture',
+    publishedAt: '2026-11-08',
+    route: 'Fixture',
+    specs: [{ label: 'Fixture CPU', value: '1 vCPU' }],
+    compatibility: {
+      tables: { '路由追踪 / 中国境内目标 / 北京电信 (IPv4)': 'fixture-route' },
+    },
+    showcase: {
+      specs: true,
+      route: { tableId: 'fixture-route', target: 'Fixture', protocol: 'IPv4' },
+    },
+  };
+  const body = `
+## 买
+
+Synthetic fixture; never published.
+
+## 系统信息
+
+| Name | Value |
+| --- | --- |
+| Fixture CPU | 1 vCPU |
+
+## CPU 性能测试
+
+| Test | Result |
+| --- | --- |
+| Fixture score | 888.77 |
+
+## 路由追踪
+
+### 中国境内目标
+
+#### 北京电信 (IPv4)
+
+| Hop | RTT |
+| --- | --- |
+| Fixture | 151.11 ms |
+`;
+  await writeFile(file(articlePath), pack({ data: metadata, body }), {
+    flag: 'wx',
+  });
+  postFixtures.push(file(articlePath));
+  const reference = file('src/content/posts/markdown-reference.mdx');
+  await writeFile(
+    reference,
+    pack({
+      data: {
+        kind: 'archive-reference',
+        title: 'Archive reference fixture',
+        description: 'Synthetic reference',
+        vendor: 'Fixture',
+        country: '',
+        location: 'Fixture',
+        publishedAt: '2026-11-08',
+        route: 'Fixture',
+        archiveSnapshot: 'https://example.com/archive-fixture',
+      },
+    }),
+    { flag: 'wx' },
+  );
+  postFixtures.push(reference);
   await reject(
     'src/content/ads/home/dmit.md',
     (data) => {
@@ -73,17 +145,36 @@ try {
     'Missing sponsor SVG',
   );
   await reject(
-    'src/content/posts/panstarcloud-singapore.mdx',
+    articlePath,
     (data) => {
-      data.review.sections
-        .flatMap((section) => section.blocks)
-        .find((block) => block.type === 'table')
-        .rows[0].pop();
+      data.format = 'mdx';
+      data.review = {
+        id: 'markdown-verification',
+        legacyAnchors: {},
+        sections: [
+          {
+            id: 'fixture-system',
+            title: '系统信息',
+            level: 2,
+            line: 1,
+            blocks: [
+              {
+                type: 'table',
+                id: 'fixture-route',
+                headings: [],
+                line: 2,
+                headers: ['Name', 'Result'],
+                rows: [['missing-cell']],
+              },
+            ],
+          },
+        ],
+      };
     },
     'header width',
   );
   await reject(
-    'src/content/posts/100tb-cn2.mdx',
+    articlePath,
     (data) => {
       data.showcase.route.tableId = 'missing-table';
     },
@@ -91,7 +182,7 @@ try {
   );
 
   await edit(
-    'src/content/posts/100tb-cn2.mdx',
+    articlePath,
     (data) => {
       data.title = 'MDX_PIPELINE_TITLE';
     },
@@ -167,7 +258,7 @@ try {
   created.push(newSponsor);
   build();
   const home = await read('dist/index.html'),
-    article = await read('dist/reviews/100tb-cn2/index.html'),
+    article = await read('dist/reviews/markdown-verification/index.html'),
     kit = await read('dist/components/index.html'),
     policy = await read('dist/ads/index.html');
   for (const html of [home, article])
@@ -207,8 +298,8 @@ try {
       !article.includes('YxVM 赞助商网站'),
   );
   assert(policy.includes('321') && policy.includes('@markdown-test'));
-  assert(!(await read('dist/rss.xml')).includes('xhost'));
-  await assert.rejects(read('dist/reviews/xhost/index.html'), {
+  assert(!(await read('dist/rss.xml')).includes('markdown-reference'));
+  await assert.rejects(read('dist/reviews/markdown-reference/index.html'), {
     code: 'ENOENT',
   });
   await scenario('custom');
@@ -248,7 +339,9 @@ try {
       });
   build();
   assert(!(await read('dist/index.html')).includes('class="sponsor-products"'));
-  const emptyArticle = await read('dist/reviews/100tb-cn2/index.html');
+  const emptyArticle = await read(
+    'dist/reviews/markdown-verification/index.html',
+  );
   assert(
     !emptyArticle.includes('data-ad-slot=') &&
       !emptyArticle.includes('class="sponsor-wall"'),
@@ -261,6 +354,7 @@ try {
 } finally {
   for (const path of created) await rm(path);
   await restore();
+  for (const path of postFixtures) await rm(path);
   build();
 }
 await cp(file('dist/_astro'), '/tmp/lowendaff-content-scenarios/_astro', {

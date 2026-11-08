@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-默认地址 `http://127.0.0.1:4321/`。页面包括 `/tags/`、`/ads/`、`/components/`、`/reviews/100tb-cn2/` 和 `/reviews/panstarcloud-singapore/`。
+默认地址 `http://127.0.0.1:4321/`。页面包括 `/tags/`、`/ads/` 和 `/components/`。当前不附带历史文章；添加真实 MDX 后才生成 `/reviews/<id>/`。
 
 ## 内容入口
 
@@ -28,7 +28,7 @@ npm run dev
 
 详见 [内容维护指南](docs/content-authoring.md)。开发模式监听文件变化；静态部署须重新构建并发布 `dist/` 才会更新。随机排序和轮播在浏览器执行，商家名单由 Markdown 决定。
 
-100TB 已试用普通 Markdown 正文写法（文件仍为 `.mdx`），PanstarCloud 保留原结构。维护说明见内容指南“易读测评格式”；`src/loaders/posts.ts` 在构建/开发时将正文转换为既有数据模型，页面组件继续复用。
+新文章从 [VPS / 独服模板](templates/reviews/README.md) 复制，以普通 Markdown 正文编写（扩展名仍为 `.mdx`）。维护说明见内容指南“易读测评格式”；`src/loaders/posts.ts` 在构建/开发时将正文转换为既有数据模型，页面组件继续复用。
 
 ## 检查与构建
 
@@ -41,6 +41,7 @@ npm run verify:release
 npm run verify:pipeline
 npm run verify:markdown
 npm run verify:readable
+npm run verify:templates
 ```
 
 `verify:pipeline` 和 `verify:markdown` 使用临时内容验证集合联动，结束后恢复原文件并重建预览版；不要与其他构建或内容编辑同时运行。`verify:markdown` 的临时浏览器场景输出在 `/tmp/lowendaff-content-scenarios/`，不进入 `dist/`。
@@ -65,4 +66,4 @@ npm run verify:readable
 
 [验证指南](docs/verification.md) · [组件映射](docs/stage-4-component-map.md) · [发布说明](docs/release-guide.md)
 
-42 条记录中，两篇有完整本地测评，另外 40 条指向历史快照。保留 211 张数据表；5 张历史正文图片未恢复，BGP IPv6 原文未提供。广告价格与测试结果均是历史数据；Sponsors SVG 是可着色文字标识。预览默认 noindex；发布开关、旧 URL 与主机侧重定向见发布说明。
+原有 42 篇 posts 已从当前版本移除，保留可独立构建的空文章库。旧内容可从 Git 历史找回；模板、广告和 Sponsors 继续独立维护。测试使用临时合成文章，不会重新发布旧测评。预览默认 noindex；发布开关与部署说明见发布指南。

@@ -4,7 +4,7 @@
 
 2026-11-08：Astro 本地工程已交付，已接续 GitHub `Lowendaff/lowendaff.com` 的初始历史，使用 `main` 分支；首次同步结果以 `test-results/git-sync/` 回执为准，尚未部署。源码和当前维护文档留在工作区；历史报告、截图、抓取日志、一次性脚本与旧素材已备份后移出，清理记录见 `changes/git-preparation.md`。
 
-42 条 MDX 中 2 篇完整测评、40 条快照引用。100TB 采用易读 Markdown 试用，PanstarCloud 仍为结构化 MDX。广告四个独立集合，Sponsors 单独维护。当前测试数据、广告和样式以源码为准；历史说明不覆盖 `AGENTS.md`。
+原有 42 篇 MDX 已按用户要求撤下，当前文章集合为空；新增内容使用 VPS / 独服模板。撤下记录见 `changes/remove-existing-posts.md`。广告四个独立集合，Sponsors 单独维护。当前测试数据、广告和样式以源码为准；历史说明不覆盖 `AGENTS.md`。
 
 ## 当前文档
 

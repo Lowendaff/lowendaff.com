@@ -92,11 +92,11 @@ import VpsSpecCard from '../../components/mdx/VpsSpecCard.astro';
 
 日期要加引号，避免 YAML 将其解析为日期对象。`draft: true` 从目录、文章路径、RSS、sitemap 和旧 URL 映射中排除。缺国家信息时 `country: ''`，标签显示未标注，不猜测地区。
 
-当前两种历史测评格式共存：100TB 已试用下方易读格式；PanstarCloud 仍在 Frontmatter 的 `review.sections[].blocks` 中保存结构化数据，并通过原有 MDX 组件调用渲染。不要把旧格式字段复制到易读格式中。两者均受同一内容 Schema 校验。
+当前不附带历史 posts。解析器仍兼容结构化 MDX 与易读 Markdown 两种格式，新文章优先使用模板；不要为展示效果重新导入旧文章。
 
 ### 易读测评格式与新文章模板
 
-参考 `src/content/posts/100tb-cn2.mdx`，设置 `format: review-markdown`。正文直接写 Markdown，无需 import、JSX 或 `frontmatter.review`。集合加载器解析正文，再经过原有 Zod 校验；页面复用 FullReview 和原有页签、路由组件。
+参考 `templates/reviews/vps.mdx` 或 `templates/reviews/dedicated-server.mdx`，设置 `format: review-markdown`。正文直接写 Markdown，无需 import、JSX 或 `frontmatter.review`。集合加载器解析正文，再经过原有 Zod 校验；页面复用 FullReview 和原有页签、路由组件。
 
 ```markdown
 ## CPU 性能测试

@@ -64,7 +64,21 @@ assert(!sitemap.includes('/components/'), 'UI kit excluded from sitemap');
 assert.equal(sitemap.includes('<loc>'), indexable, 'Sitemap publication mode');
 assert.equal(robots.includes('Allow: /'), indexable, 'Robots publication mode');
 assert(rules.includes('/feed/ /rss.xml 301'), 'Legacy RSS redirect');
-assert(redirects.length >= 3, 'Two original URLs plus feed fallback');
+assert(redirects.includes('feed/index.html'), 'RSS redirect fallback');
+const reviewPages = pages.filter((path) => path.startsWith('reviews/'));
+assert.equal(
+  (rss.match(/<item>/g) || []).length,
+  reviewPages.length,
+  'RSS must match actual articles',
+);
+for (const file of redirects) {
+  const html = await read(file);
+  const target = html.match(
+    /http-equiv="refresh" content="0;url=([^"\s]+)/,
+  )?.[1];
+  assert(target, `${file}: missing redirect target`);
+  await read(target.replace(/^\//, '').replace(/\/$/, '/index.html'));
+}
 console.log(
   JSON.stringify(
     {

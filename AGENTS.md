@@ -12,9 +12,9 @@ LowEndAFF 从 WordPress 迁移至 Astro、Content Collections、MDX 与 Tailwind
 
 ## Content & UI Contracts
 
-- 真实测评只存 `src/content/posts/*.mdx`，经 Zod 和 `getCollection()` 渲染，不在 Astro/TS 硬编码。42 条记录仅 2 篇完整；不能伪造其他正文或缺图。
+- 真实测评只存 `src/content/posts/*.mdx`，经 Zod 和 `getCollection()` 渲染，不在 Astro/TS 硬编码。当前文章集合为空，原有 42 篇已按用户要求撤下；不能自动恢复或发布模板占位内容。
 - 新文章模板在 `templates/reviews/`：VPS 与独服分别使用 `reviewType: vps | dedicated`，均可用易读 Markdown；不把模板占位内容导入集合。章节可按实测省略，SMART/RAID 放磁盘、拓扑/dmidecode 放系统子标题；原始输出用代码围栏。验证用 `npm run verify:templates`。
-- 只有 100TB 采用 `review-markdown` 试用，PanstarCloud 保留原格式；未经授权不批量转换。保留旧 URL、锚点及全部有效测试数据。
+- 历史 100TB / PanstarCloud 文章只存在于 Git 历史，不作为运行时或测试必需文件。新增文章从模板创建，验证使用临时合成夹具，结束后清理。
 - 广告分别由 `src/content/ads/{home,article-top,article-bottom,article-sidebar}/` 的 Markdown 控制；Sponsors 独立集合与 SVG。不得恢复共享广告 placements 或按商家名写死展示。
 - 导航：首页、广告、标签云；不恢复搜索。首页每页 20 条，无价格/配置/历史原文标签；友链仅首页显示。
 - 首页广告随机起序，单商家连续自动循环，左右箭头居中且不激活广告链接；尊重减少动效。文章广告纵排独立随机，Sponsors 仅文章侧栏。
@@ -44,6 +44,8 @@ Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、
 - [x] 阶段 3A：本地原型与用户确认。
 - [x] 阶段 3B：Figma 原生交付与用户确认。
 - [x] 阶段 4：本地工程与验证；未部署。
+
+撤下原有文章记录：`docs/changes/remove-existing-posts.md`；OpenViking：`viking://resources/projects/lowendaff-ui/remove-existing-posts.md`。
 
 ## Git & Agent Workflow
 
