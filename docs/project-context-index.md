@@ -10,6 +10,7 @@ VPS / 独服类型区分已完成：首页筛选、列表/文章类型标签及�
 
 ## 当前文档
 
+- `changes/content-ci.md`：GitHub push/PR 文章格式校验与构建反例测试；OpenViking：`viking://resources/projects/lowendaff-ui/content-ci.md`。
 - `content-authoring.md`：文章、广告及 Sponsors 维护。
 - `../templates/reviews/README.md`：VPS / 独服 Markdown 模板；`changes/review-templates.md` 记录历史依据、恢复撤销和兼容调整。
 - `verification.md`：类型、格式、构建、内容契约和浏览器检查。

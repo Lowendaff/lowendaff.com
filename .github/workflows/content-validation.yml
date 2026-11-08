@@ -1,0 +1,48 @@
+name: Content validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: content-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  articles:
+    name: Article format and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PUBLIC_SITE_INDEXABLE: 'false'
+      ASTRO_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check source and article formatting
+        run: npm run format:check
+      - name: Check types and content schema
+        run: npm run check
+      - name: Validate all articles through the production build
+        run: npm run build
+      - name: Check generated publication metadata
+        run: npm run verify:release
+      - name: Test Markdown parser rules
+        run: npm run verify:readable
+      # These fixtures intentionally fail builds, then are removed in finally.
+      # Keep this after formatting and the real article build, and run serially.
+      - name: Test both review templates and invalid article rejection
+        run: npm run verify:templates

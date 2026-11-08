@@ -18,6 +18,22 @@ async function add(name, body) {
   const path = file(`src/content/posts/template-check-${name}.mdx`);
   await writeFile(path, body, { flag: 'wx' });
   created.push(path);
+  return path;
+}
+async function rejectsArticle(name, body, expected) {
+  const path = await add(name, body);
+  try {
+    assert.throws(build, (error) => {
+      const output = String(error.stdout) + String(error.stderr);
+      assert.match(output, new RegExp(`template-check-${name}`));
+      assert.match(output, expected);
+      return true;
+    });
+    console.log(`PASS: rejected ${name} with a source diagnostic.`);
+  } finally {
+    await unlink(path);
+    created.splice(created.indexOf(path), 1);
+  }
 }
 try {
   for (const name of ['vps', 'dedicated-server']) {
@@ -100,15 +116,54 @@ try {
       ),
     );
   }
-  // A typo must fail instead of building an article whose content disappears.
-  await add('bad-section', `${header}\n## 意外的顶级章节\n\nThis must fail.\n`);
-  assert.throws(build, (error) =>
-    (String(error.stdout) + String(error.stderr)).includes(
-      'Unsupported review section',
-    ),
+  // Exercise the actual build gate, not a separate CI-only schema.
+  const validBody = '\n## 系统信息\n\nValidation fixture.\n';
+  await rejectsArticle(
+    'missing-title',
+    header.replace(/^title:.*\n/m, '') + validBody,
+    /title/,
   );
+  await rejectsArticle(
+    'bad-type',
+    header.replace('reviewType: dedicated', 'reviewType: physical') + validBody,
+    /reviewType/,
+  );
+  await rejectsArticle(
+    'bad-date',
+    header.replace(/^publishedAt:.*$/m, "publishedAt: '2026-13-40'") +
+      validBody,
+    /publishedAt/,
+  );
+  await rejectsArticle(
+    'bad-yaml',
+    header.replace(/^title:.*$/m, 'title: [unfinished') + validBody,
+    /YAML|flow collection/i,
+  );
+  await rejectsArticle(
+    'bad-section',
+    `${header}\n## 意外的顶级章节\n\nThis must fail.\n`,
+    /Unsupported review section/,
+  );
+  const raggedTable =
+    '\n## 系统信息\n\n| Item | Result |\n| --- | --- |\n| Missing result |\n';
+  for (const draft of [false, true]) {
+    await rejectsArticle(
+      `bad-table-${draft ? 'draft' : 'published'}`,
+      header.replace('draft: false', `draft: ${draft}`) + raggedTable,
+      /\.mdx:\d+:.*header width/,
+    );
+  }
+  for (const draft of [false, true]) {
+    await rejectsArticle(
+      `bad-mdx-${draft ? 'draft' : 'published'}`,
+      header
+        .replace('format: review-markdown', 'format: mdx')
+        .replace('draft: false', `draft: ${draft}`) + '\n<Unclosed\n',
+      /Unexpected|Expected|MDX/i,
+    );
+  }
   console.log(
-    'PASS: both templates, product titles, optional sections/TOC, raw output escaping, route/unlock output, local image markup, draft exclusion and unknown-section rejection.',
+    'PASS: both templates, product titles, optional sections/TOC, raw output escaping, route/unlock output, local image markup, draft exclusion, YAML/schema/Markdown/MDX rejection.',
   );
 } finally {
   for (const path of created) await unlink(path);

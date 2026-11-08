@@ -94,6 +94,8 @@ import VpsSpecCard from '../../components/mdx/VpsSpecCard.astro';
 
 日期要加引号，避免 YAML 将其解析为日期对象。`draft: true` 从目录、文章路径、RSS、sitemap 和旧 URL 映射中排除。缺国家信息时 `country: ''`，标签显示未标注，不猜测地区。
 
+提交后 GitHub 的 `Content validation` 工作流会检查文章排版、Frontmatter、Markdown/MDX 语法和构建结果，草稿同样必须格式合法。可先本地运行 `npm run format:check && npm run check && npm run build`；失败时按日志中的文章路径、字段或行号修正，完整规则见 [验证指南](verification.md)。
+
 当前不附带历史 posts。解析器仍兼容结构化 MDX 与易读 Markdown 两种格式，新文章优先使用模板；不要为展示效果重新导入旧文章。
 
 ### 易读测评格式与新文章模板
