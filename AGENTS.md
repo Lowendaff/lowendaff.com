@@ -34,6 +34,8 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 | `.agents/skills/apple-design-skill/SKILL.md` | 配色、层级、材质、动效与可访问性审查 |
 | `.agents/skills/web-design-guidelines/SKILL.md` | 排版、等宽数字、嵌套圆角与 Web 审查 |
 | `.agents/skills/figma-implement-design/SKILL.md` | Figma 与集合驱动页面的高保真映射 |
+| `.agents/skills/taste-skill-source/skills/taste-skill/SKILL.md` | 用户指定的视觉层级与交互细节审查；不以营销整屏规则覆盖既有阅读布局 |
+| `.agents/skills/impeccable-source/plugin/skills/impeccable/SKILL.md` | 既有界面的 polish / Read / Operate 审查；修复实际问题，检查器警告需结合产品判断 |
 
 Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、`figma-design-to-code`；不把截图称为原生设计或映射表称为 Code Connect。语义表面层级、65–75ch 正文、锚点留距、图标标签、同心圆角及 reduced-motion 要求继续有效。
 
@@ -53,6 +55,8 @@ Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、
 VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking：`viking://resources/projects/lowendaff-ui/review-types.md`，全文回读一致。Git 同步回执见 `test-results/review-types/git-push-receipt.json`；本次未同步 Figma。
 
 ## Git & Agent Workflow
+
+Taste / Impeccable 局部优化已完成：`docs/changes/design-polish.md`；OpenViking：`viking://resources/projects/lowendaff-ui/design-polish.md`，回执见 `test-results/design-polish/openviking-receipt.json`。空文章库隐藏无效筛选，有文章时保留原筛选；关注卡整块可点击且无尾部按钮；手机菜单有关闭状态和键盘反馈。GitHub 提交与 CI 状态以 `test-results/design-polish/git-ci-receipt.json` 为准；本轮未同步 Figma。
 
 CI 文章校验归档：`docs/changes/content-ci.md`；OpenViking：`viking://resources/projects/lowendaff-ui/content-ci.md`。GitHub 确切提交与运行回执见 `test-results/content-ci/git-ci-receipt.json`。
 

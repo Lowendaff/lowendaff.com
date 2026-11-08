@@ -26,113 +26,117 @@ const countries = recordTags(records, 'countryTag');
       </h1>
       <p>从商家出发，或看看下一个目的地。</p>
     </header>
-    <ReviewTypeFilter />
-    <section
-      class="tag-filters panel"
-      aria-label="按商家与国家筛选"
-      data-tag-filters
-      hidden
-    >
-      <div class="tag-tabs" role="tablist" aria-label="标签分类">
-        <button
-          type="button"
-          id="merchant-heading"
-          role="tab"
-          data-tag-tab="merchant"
-          aria-selected="true"
-          aria-controls="merchant-tags"
+    {records.length > 0 && (
+      <>
+        <ReviewTypeFilter />
+        <section
+          class="tag-filters panel"
+          aria-label="按商家与国家筛选"
+          data-tag-filters
+          hidden
         >
-          商家 <span>{merchants.length}</span>
-        </button>
-        <button
-          type="button"
-          id="country-heading"
-          role="tab"
-          data-tag-tab="country"
-          aria-selected="false"
-          aria-controls="country-tags"
-          tabindex="-1"
-        >
-          国家 <span>{countries.length}</span>
-        </button>
-      </div>
-      <div
-        class="tag-group"
-        id="merchant-tags"
-        role="tabpanel"
-        aria-labelledby="merchant-heading"
-        data-tag-panel="merchant"
-      >
-        <div class="tag-cloud">
-          <button
-            type="button"
-            data-tag-kind="merchant"
-            data-tag-value=""
-            aria-pressed="true"
-          >
-            全部 <span data-tag-count>{records.length}</span>
-          </button>
-          {merchants.map(({ value, count }) => (
+          <div class="tag-tabs" role="tablist" aria-label="标签分类">
             <button
               type="button"
-              data-tag-kind="merchant"
-              data-tag-value={value}
-              aria-pressed="false"
+              id="merchant-heading"
+              role="tab"
+              data-tag-tab="merchant"
+              aria-selected="true"
+              aria-controls="merchant-tags"
             >
-              <span class="tag-name" translate="no">
-                {value}
-              </span>
-              <span data-tag-count>{count}</span>
+              商家 <span>{merchants.length}</span>
             </button>
-          ))}
-        </div>
-      </div>
-      <div
-        class="tag-group"
-        id="country-tags"
-        role="tabpanel"
-        aria-labelledby="country-heading"
-        data-tag-panel="country"
-        hidden
-      >
-        <div class="tag-cloud">
-          <button
-            type="button"
-            data-tag-kind="country"
-            data-tag-value=""
-            aria-pressed="true"
-          >
-            全部 <span data-tag-count>{records.length}</span>
-          </button>
-          {countries.map(({ value, count }) => (
             <button
               type="button"
-              data-tag-kind="country"
-              data-tag-value={value}
-              data-tag-label={countryLabel(value)}
-              aria-pressed="false"
+              id="country-heading"
+              role="tab"
+              data-tag-tab="country"
+              aria-selected="false"
+              aria-controls="country-tags"
+              tabindex="-1"
             >
-              <span aria-hidden="true">{countryEmoji(value)}</span>
-              <span class="tag-name">{countryLabel(value)}</span>
-              <span data-tag-count>{count}</span>
+              国家 <span>{countries.length}</span>
             </button>
-          ))}
-        </div>
-      </div>
-      <div class="tag-selection">
-        <div>
-          <p data-selection-summary aria-live="polite">
-            全部记录
-          </p>
-          <a href="#reviews" class="text-action" data-tag-results>
-            查看 {records.length} 条记录 ↓
-          </a>
-        </div>
-        <button type="button" class="text-action" data-clear-tags disabled>
-          清除筛选
-        </button>
-      </div>
-    </section>
+          </div>
+          <div
+            class="tag-group"
+            id="merchant-tags"
+            role="tabpanel"
+            aria-labelledby="merchant-heading"
+            data-tag-panel="merchant"
+          >
+            <div class="tag-cloud">
+              <button
+                type="button"
+                data-tag-kind="merchant"
+                data-tag-value=""
+                aria-pressed="true"
+              >
+                全部 <span data-tag-count>{records.length}</span>
+              </button>
+              {merchants.map(({ value, count }) => (
+                <button
+                  type="button"
+                  data-tag-kind="merchant"
+                  data-tag-value={value}
+                  aria-pressed="false"
+                >
+                  <span class="tag-name" translate="no">
+                    {value}
+                  </span>
+                  <span data-tag-count>{count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div
+            class="tag-group"
+            id="country-tags"
+            role="tabpanel"
+            aria-labelledby="country-heading"
+            data-tag-panel="country"
+            hidden
+          >
+            <div class="tag-cloud">
+              <button
+                type="button"
+                data-tag-kind="country"
+                data-tag-value=""
+                aria-pressed="true"
+              >
+                全部 <span data-tag-count>{records.length}</span>
+              </button>
+              {countries.map(({ value, count }) => (
+                <button
+                  type="button"
+                  data-tag-kind="country"
+                  data-tag-value={value}
+                  data-tag-label={countryLabel(value)}
+                  aria-pressed="false"
+                >
+                  <span aria-hidden="true">{countryEmoji(value)}</span>
+                  <span class="tag-name">{countryLabel(value)}</span>
+                  <span data-tag-count>{count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div class="tag-selection">
+            <div>
+              <p data-selection-summary aria-live="polite">
+                全部记录
+              </p>
+              <a href="#reviews" class="text-action" data-tag-results>
+                查看 {records.length} 条记录 ↓
+              </a>
+            </div>
+            <button type="button" class="text-action" data-clear-tags disabled>
+              清除筛选
+            </button>
+          </div>
+        </section>
+      </>
+    )}
     <RecordList filters showTypeFilter={false} records={records} />
   </div>
 </BaseLayout>

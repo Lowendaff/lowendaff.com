@@ -165,7 +165,12 @@ const structuredData = article
           </a>
           <details class="mobile-nav">
             <summary aria-label="打开导航">
-              <Icon name="menu" />
+              <span class="mobile-nav-open-icon">
+                <Icon name="menu" />
+              </span>
+              <span class="mobile-nav-close-icon">
+                <Icon name="close" />
+              </span>
             </summary>
             <nav aria-label="移动导航">
               <a href="/" aria-current={active === 'home' ? 'page' : undefined}>
@@ -221,10 +226,25 @@ const structuredData = article
     <script>
       const mobileNav =
         document.querySelector<HTMLDetailsElement>('.mobile-nav');
+      mobileNav?.addEventListener('toggle', () => {
+        mobileNav
+          .querySelector('summary')
+          ?.setAttribute(
+            'aria-label',
+            mobileNav.open ? '关闭导航' : '打开导航',
+          );
+      });
+      mobileNav?.addEventListener('focusout', (event) => {
+        if (
+          event.relatedTarget instanceof Node &&
+          !mobileNav.contains(event.relatedTarget)
+        )
+          mobileNav.open = false;
+      });
       document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && mobileNav?.open) {
           mobileNav.open = false;
-          mobileNav.querySelector('summary')?.focus();
+          mobileNav.querySelector('summary')?.focus({ preventScroll: true });
         }
       });
       document.addEventListener('click', (event) => {

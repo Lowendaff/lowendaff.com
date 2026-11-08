@@ -14,9 +14,6 @@ const records = getRecords(await getCollection('posts'));
   <div class="shell home-revision home-page">
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">
-          <span class="tiny-line"></span> INDEPENDENT HOSTING JOURNAL
-        </p>
         <h1>
           我们评测全世界，<span>让每一次选择都有依据。</span>
         </h1>
@@ -43,15 +40,21 @@ const records = getRecords(await getCollection('posts'));
       <div class="home-editorial">
         <HomeAds />
         <RecordList records={records} />
-        <section class="follow-banner panel">
+        <a
+          class="follow-banner panel"
+          href="https://t.me/lowendaff_blog"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="关注 LowEndAFF Telegram 更新（在新标签页打开）"
+        >
           <div class="follow-icon">
-            <Icon name="rss" size={28} />
+            <Icon name="send" size={28} />
           </div>
           <div>
             <h2>下一台值得关注的服务器，别错过。</h2>
             <p>新测评、新节点，保持好奇，也保持判断。</p>
           </div>
-        </section>
+        </a>
       </div>
     </div>
     <FriendLinks />

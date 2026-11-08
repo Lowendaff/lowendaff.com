@@ -258,6 +258,7 @@ table,
 }
 .brand {
   display: inline-flex;
+  min-height: 44px;
   align-items: center;
   gap: 10px;
   font-size: 24px;
@@ -328,6 +329,7 @@ table,
   align-items: center;
   font-size: 12px;
   font-weight: 600;
+  min-height: 44px;
 }
 .mobile-nav {
   display: none;
@@ -907,7 +909,7 @@ table,
   font-size: 22px;
 }
 .site-footer p {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 10px;
 }
@@ -919,12 +921,13 @@ table,
   align-items: center;
   justify-content: flex-end;
   gap: 24px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .footer-right a {
   display: flex;
   align-items: center;
   gap: 6px;
+  min-height: 44px;
 }
 /* Reading and MDX surfaces */
 .breadcrumb {
@@ -1514,6 +1517,21 @@ table,
   .mobile-nav summary::-webkit-details-marker {
     display: none;
   }
+  .mobile-nav summary:hover,
+  .mobile-nav[open] summary {
+    color: var(--accent);
+    background: var(--subtle);
+  }
+  .mobile-nav summary > span {
+    display: flex;
+  }
+  .mobile-nav summary .mobile-nav-close-icon,
+  .mobile-nav[open] summary .mobile-nav-open-icon {
+    display: none;
+  }
+  .mobile-nav[open] summary .mobile-nav-close-icon {
+    display: flex;
+  }
   .mobile-nav nav {
     position: absolute;
     right: 0;
@@ -1529,6 +1547,12 @@ table,
   .mobile-nav nav a {
     padding: 10px 14px;
     font-size: 13px;
+    border-radius: 6px;
+  }
+  .mobile-nav nav a:hover,
+  .mobile-nav nav a[aria-current='page'] {
+    background: var(--accent-soft);
+    color: var(--accent);
   }
   .hero {
     grid-template-columns: 1fr;

@@ -29,11 +29,16 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
         测试记录
       </h2>
     </div>
-    <p class="result-count" aria-live="polite" id="result-count">
+    <p
+      class="result-count"
+      aria-live="polite"
+      id="result-count"
+      hidden={records.length === 0}
+    >
       {records.length} 条记录 · 每页 20 条
     </p>
   </div>
-  {showTypeFilter && <ReviewTypeFilter />}
+  {showTypeFilter && records.length > 0 && <ReviewTypeFilter />}
   <div class="article-list panel">
     {records.map((post) => (
       <a
@@ -96,9 +101,11 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
       下一页
     </button>
   </nav>
-  <noscript>
-    <p class="archive-note">已显示全部测试记录。</p>
-  </noscript>
+  {records.length > 0 && (
+    <noscript>
+      <p class="archive-note">已显示全部测试记录。</p>
+    </noscript>
+  )}
 </section>
 <script>
   import '../scripts/records';

@@ -10,6 +10,7 @@ VPS / 独服类型区分已完成：首页筛选、列表/文章类型标签及�
 
 ## 当前文档
 
+- `changes/design-polish.md`：Taste / Impeccable 驱动的空状态、手机导航、点击区域与冗余文字优化；GitHub 提交与 CI 回执见 `test-results/design-polish/git-ci-receipt.json`，未同步 Figma。OpenViking：`viking://resources/projects/lowendaff-ui/design-polish.md`，全文回读回执见 `test-results/design-polish/openviking-receipt.json`。
 - `changes/content-ci.md`：GitHub push/PR 文章格式校验与构建反例测试；OpenViking：`viking://resources/projects/lowendaff-ui/content-ci.md`。
 - `content-authoring.md`：文章、广告及 Sponsors 维护。
 - `../templates/reviews/README.md`：VPS / 独服 Markdown 模板；`changes/review-templates.md` 记录历史依据、恢复撤销和兼容调整。
@@ -40,6 +41,8 @@ Figma file key：`vZ3h8djsL9yAt0WIlhyCSm`。三个最终 Frame：UI Kit `40:1521
 `.agents/skills/` 本机副本保留，但不纳入 Git；跨机器使用前从以下来源挂载所需 Skill，阅读 `SKILL.md` 和核心 references。构建与测试不依赖这些文件。
 
 - `apple-design-skill`：https://github.com/dickwu/apple-design-skill
+- `taste-skill`：https://github.com/leonxlnx/taste-skill；入口 `.agents/skills/taste-skill-source/skills/taste-skill/SKILL.md`，固定提交 `f6b76575f949707b4e3c37cd86cb44b0b98643e8`。
+- `impeccable`：https://github.com/pbakaus/impeccable；入口 `.agents/skills/impeccable-source/plugin/skills/impeccable/SKILL.md`，固定提交 `924bbd194d02e5e15a227e75b5901fb0d7a4ecad`。按既有阅读站点范围使用，规则取舍见本轮归档。
 - `web-design-guidelines`：https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines
 - Vercel 规则源：https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
 - `figma-implement-design`：https://github.com/openai/skills/tree/main/skills/.curated/figma-implement-design
