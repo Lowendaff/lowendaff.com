@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 
 const root = new URL('../dist/', import.meta.url);
-const indexable = process.argv.includes('--indexable');
+const indexable =
+  process.argv.includes('--indexable') ||
+  process.env.PUBLIC_SITE_INDEXABLE === 'true';
 const read = (name) => readFile(new URL(name, root), 'utf8');
 const pages = [];
 async function walk(directory = '') {
@@ -15,6 +17,12 @@ async function walk(directory = '') {
   }
 }
 await walk();
+const sitemap = await read('sitemap.xml');
+const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+  (match) => match[1],
+);
+assert.equal(new Set(urls).size, urls.length, 'Unique sitemap URLs');
+const expectedUrls = new Set();
 const redirects = [];
 for (const file of pages) {
   const html = await read(file);
@@ -31,19 +39,58 @@ for (const file of pages) {
   assert.match(html, /property="og:title"/, file);
   assert.match(html, /href="\/rss.xml"/, file);
   const policy =
-    indexable && file !== 'components/index.html'
+    indexable &&
+    file !== 'components/index.html' &&
+    !(
+      file === 'tags/index.html' &&
+      !pages.some((path) => path.startsWith('reviews/'))
+    )
       ? 'index,follow'
       : 'noindex,nofollow';
   assert(
     html.includes(`name="robots" content="${policy}"`),
     `${file}: robots policy`,
   );
+  const json = html.match(
+    /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
+  )?.[1];
+  assert(json, `${file}: schema missing`);
+  const schema = JSON.parse(json);
+  assert.equal(schema['@context'], 'https://schema.org');
+  const graph = schema['@graph'];
+  for (const type of ['Organization', 'WebSite', 'WebPage'])
+    assert.equal(
+      graph.filter((node) => node['@type'] === type).length,
+      1,
+      `${file}: ${type}`,
+    );
+  const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+  assert(
+    canonical && !new URL(canonical).search && !new URL(canonical).hash,
+    `${file}: clean canonical`,
+  );
+  assert.equal(
+    graph.find((node) => node['@type'] === 'WebPage').url,
+    canonical,
+  );
+  if (policy === 'index,follow') expectedUrls.add(canonical);
+  for (const marker of [
+    'name="description"',
+    'property="og:description"',
+    'name="twitter:description"',
+    'property="og:locale"',
+  ])
+    assert(html.includes(marker), `${file}: ${marker}`);
   if (file.startsWith('reviews/')) {
-    const json = html.match(
-      /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
-    )?.[1];
-    assert(json, `${file}: article schema missing`);
-    assert.equal(JSON.parse(json)['@type'], 'BlogPosting');
+    const article = graph.find((node) => node['@type'] === 'BlogPosting');
+    assert(article, `${file}: article schema missing`);
+    assert.equal(article.url, canonical);
+    assert(
+      article.dateModified >= article.datePublished,
+      `${file}: article date order`,
+    );
+    assert(article.author.name && article.publisher['@id']);
+    assert(graph.some((node) => node['@type'] === 'BreadcrumbList'));
     assert(
       !html.includes('Generated at '),
       `${file}: removed timestamp returned`,
@@ -52,8 +99,8 @@ for (const file of pages) {
   }
 }
 const rss = await read('rss.xml');
-const sitemap = await read('sitemap.xml');
 const robots = await read('robots.txt');
+const llms = await read('llms.txt');
 const rules = await read('_redirects');
 assert.match(rss, /<rss version="2.0">/);
 assert(
@@ -63,6 +110,17 @@ assert(
 assert(!sitemap.includes('/components/'), 'UI kit excluded from sitemap');
 assert.equal(sitemap.includes('<loc>'), indexable, 'Sitemap publication mode');
 assert.equal(robots.includes('Allow: /'), indexable, 'Robots publication mode');
+assert.deepEqual(
+  new Set(urls),
+  expectedUrls,
+  'Sitemap matches indexable canonical pages',
+);
+assert.equal(
+  robots.includes('Sitemap: https://lowendaff.com/sitemap.xml'),
+  indexable,
+);
+assert(!/priority|changefreq/.test(sitemap), 'No invented sitemap hints');
+assert(!llms.includes('/components/'), 'UI kit excluded from AI directory');
 assert(rules.includes('/feed/ /rss.xml 301'), 'Legacy RSS redirect');
 assert(redirects.includes('feed/index.html'), 'RSS redirect fallback');
 const reviewPages = pages.filter((path) => path.startsWith('reviews/'));
@@ -78,6 +136,31 @@ for (const file of redirects) {
   )?.[1];
   assert(target, `${file}: missing redirect target`);
   await read(target.replace(/^\//, '').replace(/\/$/, '/index.html'));
+}
+for (const file of reviewPages) {
+  const path = `/${file.replace(/index\.html$/, '')}`;
+  assert.equal(
+    llms.includes(`https://lowendaff.com${path}`),
+    indexable,
+    `${file}: AI directory policy`,
+  );
+  if (indexable) {
+    const html = await read(file);
+    const schema = JSON.parse(
+      html.match(
+        /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
+      )[1],
+    );
+    const article = schema['@graph'].find(
+      (node) => node['@type'] === 'BlogPosting',
+    );
+    assert(
+      sitemap.includes(
+        `<loc>https://lowendaff.com${path}</loc><lastmod>${article.dateModified}</lastmod>`,
+      ),
+      `${file}: lastmod uses authored dates`,
+    );
+  }
 }
 console.log(
   JSON.stringify(

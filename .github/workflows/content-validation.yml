@@ -18,7 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      PUBLIC_SITE_INDEXABLE: 'false'
+      # PRs/previews stay non-indexable; main opt-in also requires server policy.
+      PUBLIC_SITE_INDEXABLE: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.SITE_INDEXABLE == 'true' && 'true' || 'false' }}
       ASTRO_TELEMETRY_DISABLED: '1'
     steps:
       - name: Check out repository
@@ -42,12 +43,21 @@ jobs:
         run: npm run verify:release
       - name: Test Markdown parser rules
         run: npm run verify:readable
+      - name: Test structured metadata and safe serialization
+        run: npm run verify:seo
+      - name: Test draft exclusion and both indexing modes
+        run: npm run verify:pipeline
       # These fixtures intentionally fail builds, then are removed in finally.
       # Keep this after formatting and the real article build, and run serially.
       - name: Test both review templates and invalid article rejection
         run: npm run verify:templates
       - name: Test artifact deployment rules
         run: python3 -m unittest discover -s tests/deployment -v
+      # Fixture checks build in preview mode. Never upload their final dist directory.
+      - name: Rebuild clean content with the intended publication policy
+        run: |
+          npm run build
+          npm run verify:release
       - name: Identify the deployable build
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: node scripts/create-deploy-manifest.mjs

@@ -108,6 +108,7 @@ try {
     'tags/index.html',
     'rss.xml',
     'sitemap.xml',
+    'llms.txt',
   ]) {
     assert(!(await read(`dist/${path}`)).includes('template-check-vps-draft'));
     assert(
@@ -133,6 +134,19 @@ try {
     header.replace(/^publishedAt:.*$/m, "publishedAt: '2026-13-40'") +
       validBody,
     /publishedAt/,
+  );
+  await rejectsArticle(
+    'bad-updated-date',
+    header.replace(
+      /^publishedAt:.*$/m,
+      "publishedAt: '2026-11-08'\nupdatedAt: '2026-11-07'",
+    ) + validBody,
+    /updatedAt/,
+  );
+  await rejectsArticle(
+    'empty-description',
+    header.replace(/^description:.*$/m, "description: ' '") + validBody,
+    /description/,
   );
   await rejectsArticle(
     'bad-yaml',

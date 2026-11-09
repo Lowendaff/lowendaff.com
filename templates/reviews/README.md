@@ -23,6 +23,9 @@ cp templates/reviews/dedicated-server.mdx src/content/posts/vendor-location-dedi
 - `title`：建议写完整标题，如「商家 地区 独立服务器测试记录」。页面不会再重复追加 VPS 字样。
 - `country`：两位地区码，如 `US`、`SG`、`HK`、`TW`，未知用 `''`。`location` 写实际机房，GeoIP 误差在正文说明。
 - `publishedAt` 使用引号包裹的 `YYYY-MM-DD`；`testedAt` 可写日期、时段、时区；模板日期必须替换。
+- `updatedAt` 可选，同样使用 `YYYY-MM-DD`，只在正文或测试结论实质更新时填写，不得早于 `publishedAt`。页面更新日期、文章结构化数据和 sitemap 的 `lastmod` 共用此字段；不填写时沿用发布日期，不用构建时间冒充更新。
+- `description` 必填，以一两句话交代产品、测试范围、主要发现或限制，避免泛泛口号；用于搜索摘要、分享卡片和 `llms.txt` 索引。不能填写正文没有支持的结论。
+- `author` 填实际作者；可选 `authorUrl` 指向真实作者介绍页，不虚构资历。可选 `coverImage` 使用站点内 PNG/JPEG/WebP/AVIF 路径或 HTTP(S) 图片地址，`coverAlt` 描述配图内容；只用于分享及文章元数据，不增加正文头图。无实测相关配图时省略，分享卡使用站点头像。
 - `categories`、`tags` 自由填写；商家和国家筛选仍分别读取 `vendor`、`country`。
 - 新文章不用填 `originalUrl`、`archiveSnapshot`、`evidence`、`compatibility`、`showcase`。这些是历史迁移或展示页选样信息。
 - 有 Affiliate 时设 `affiliate: true`、填写真实 `purchaseUrl`，正文明确披露返佣关系；正文购买链接与 `purchaseUrl` 保持一致。优惠和价格以具体测试/活动日期为准。
@@ -117,6 +120,8 @@ cp templates/reviews/dedicated-server.mdx src/content/posts/vendor-location-dedi
 ```
 
 ## 写作边界
+
+为搜索与 AI 引用保留证据：在「评」章节先给简短结论，再写测试条件、适用场景与局限；VPS 的可观察资源与独服的物理硬件分开描述。数值保留单位、工具版本、时间、IPv4/IPv6 与节点地区。官方规格、Looking Glass 或报告链接放在相关段落附近，商家承诺不能写成实测事实。不重复关键词，不为了 SEO 增设空章节或未经测试的 FAQ。
 
 正文支持段落、加粗、行内代码、显式链接、单段引用、表格、独立图片和代码围栏。不支持列表、多段引用、引用式链接或 JSX；复杂原始输出放代码块。表格单元格用纯文本，链接单独放段落，避免链接目标在表格转换中丢失。
 

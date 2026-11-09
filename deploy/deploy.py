@@ -3,6 +3,7 @@
 
 import fcntl
 import hashlib
+from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -17,6 +18,7 @@ import urllib.parse
 import urllib.request
 import uuid
 import zipfile
+import xml.etree.ElementTree as ET
 
 ROOT = Path('/opt/1panel/www/sites/lowendaff.com/.deploy')
 REPOSITORY = 'Lowendaff/lowendaff.com'
@@ -131,19 +133,64 @@ def extract(archive, destination):
             Path(directory).chmod(0o755)
 
 
+class PagePolicy(HTMLParser):
+    def __init__(self, html):
+        super().__init__()
+        self.robots = []
+        self.redirect = False
+        self.feed(html)
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'meta':
+            if attrs.get('name', '').lower() == 'robots':
+                self.robots.append(attrs.get('content', ''))
+            if attrs.get('http-equiv', '').lower() == 'refresh':
+                self.redirect = True
+
+
 def verify_site(directory, payload):
     manifest = json.loads((directory / 'deployment.json').read_text())
     for key in ('schema', 'repository', 'commit', 'runId', 'runNumber', 'runAttempt'):
         if manifest.get(key) != payload[key]:
             raise DeployError('manifest does not match notification')
-    # Rehearsals stay non-indexable. Changing this is an explicit release decision.
-    if manifest.get('indexable') is not False:
-        raise DeployError('expected rehearsal indexing policy')
-    for name in ('index.html', 'tags/index.html', 'ads/index.html', 'robots.txt', 'rss.xml'):
+    # Fail closed unless CI and the server explicitly agree on publication policy.
+    configured = os.environ.get('LOWENDAFF_SITE_INDEXABLE', 'false')
+    if configured not in ('true', 'false'):
+        raise DeployError('invalid server indexing policy')
+    indexable = configured == 'true'
+    if type(manifest.get('indexable')) is not bool or manifest['indexable'] != indexable:
+        raise DeployError('indexing policy does not match server configuration')
+    for name in ('index.html', 'tags/index.html', 'ads/index.html', 'robots.txt', 'rss.xml', 'sitemap.xml', 'llms.txt'):
         if not (directory / name).is_file():
             raise DeployError('incomplete static site')
-    if 'noindex,nofollow' not in (directory / 'index.html').read_text():
-        raise DeployError('missing rehearsal noindex')
+    expected_urls = set()
+    for page in directory.rglob('*.html'):
+        relative = page.relative_to(directory).as_posix()
+        policy = PagePolicy(page.read_text())
+        if policy.redirect:
+            continue
+        expected = 'index,follow' if indexable else 'noindex,nofollow'
+        if relative == 'components/index.html':
+            expected = 'noindex,nofollow'
+        if relative == 'tags/index.html' and policy.robots == ['noindex,nofollow']:
+            expected = 'noindex,nofollow'  # Empty collections are not search landing pages.
+        if policy.robots != [expected]:
+            raise DeployError('page indexing policy mismatch')
+        if expected == 'index,follow':
+            path = '/' + relative.removesuffix('index.html')
+            expected_urls.add('https://lowendaff.com' + path)
+    sitemap = ET.fromstring((directory / 'sitemap.xml').read_text())
+    namespace = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
+    if sitemap.tag != namespace + 'urlset':
+        raise DeployError('invalid sitemap root')
+    urls = [node.text for node in sitemap.findall(f'{namespace}url/{namespace}loc')]
+    if len(urls) != len(set(urls)) or set(urls) != expected_urls:
+        raise DeployError('sitemap does not match indexable pages')
+    robots = (directory / 'robots.txt').read_text().splitlines()
+    expected_robots = ['User-agent: *', 'Allow: /', 'Sitemap: https://lowendaff.com/sitemap.xml'] if indexable else ['User-agent: *', 'Disallow: /']
+    if [line.strip() for line in robots if line.strip()] != expected_robots:
+        raise DeployError('robots policy mismatch')
     if not (directory / '_astro').is_dir():
         raise DeployError('missing static assets')
     return manifest
@@ -160,7 +207,8 @@ def health(manifest):
     actual = json.loads(get('/deployment.json'))
     if actual != manifest:
         raise DeployError('served manifest mismatch')
-    if b'noindex,nofollow' not in get('/'):
+    expected = 'index,follow' if manifest['indexable'] else 'noindex,nofollow'
+    if PagePolicy(get('/').decode()).robots != [expected]:
         raise DeployError('served page mismatch')
 
 

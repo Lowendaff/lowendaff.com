@@ -11,6 +11,7 @@ npm run build
 npm run verify:content
 npm run verify:release
 npm run verify:readable
+npm run verify:seo
 ```
 
 `verify:content` 保留历史原文对照能力；当前两篇旧测评已撤下，报告明确显示 `not-applicable`，并验证构建目录中不存在其旧文章页。若将来主动恢复原文，可继续与 `tests/fixtures/wordpress/` 的 HTML 比较；不得将缺少文章时的检查称为全文保真通过。`scripts/archive_html.py` 只解析 HTML，不执行脚本或网络请求。
@@ -29,10 +30,11 @@ npm run verify:readable
 2. `format:check` 检查源码及 `src/content/posts/*.mdx` 排版；`check` 校验类型和集合 Schema。
 3. `build` 使用正式加载器验证全部文章，包括草稿的 Frontmatter 和语法，并实际渲染非草稿 MDX；`verify:release` 核对生成结果。
 4. `verify:readable` 测试 Markdown 解析规则，`verify:templates` 实际构建 VPS / 独服模板，并验证错误 YAML、缺少标题、错误类型/日期、未知章节、表格列数不符及 MDX 语法错误会让构建失败。草稿也不能绕过格式校验。
+5. `verify:seo` 检查结构化实体关联、日期与 JSON-LD 安全转义；`verify:pipeline` 真实构建公开/预览两种模式，验证 sitemap、AI 阅读目录和草稿隔离。`verify:templates` 另验证空摘要与倒序更新日期拒绝发布。测试完成后按 CI 的收录模式重建，再上传无夹具的产物。
 
 检查复用 `src/content.config.ts` 与正文解析器，不维护第二套文章规则。`format: review-markdown` 服从模板章节和表格约定；原生 `format: mdx` 使用 MDX 语法，不强制套用易读模板的章节限制。空文章集合允许通过，不会自动恢复历史文章。错误日志提供来源文件及相关字段，正文解析错误含行号；格式问题可本地运行 `npm run format` 后复查，字段/语法问题需修改文章。
 
-工作流只有读取仓库权限，不需要服务器密码，也不部署。测试夹具串行创建和清理，不提交、不上传为站点产物。如需强制 PR 合并门禁，应在 GitHub 分支规则中将 `Article format and build` 设为必需检查；工作流失败本身不会撤销直接 push。
+校验工作流只有读取仓库权限，不需要服务器密码；main 成功后的静态产物由独立 `Deploy static site` 工作流通知 Webhook 发布。测试夹具串行创建和清理，不提交、不上传为站点产物。如需强制 PR 合并门禁，应在 GitHub 分支规则中将 `Article format and build` 设为必需检查；工作流失败本身不会撤销直接 push。
 
 ## 浏览器检查
 

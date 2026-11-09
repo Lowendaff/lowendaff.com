@@ -1,6 +1,6 @@
 # LowEndAFF Astro 主题
 
-基于已确认的修订 13 设计，使用 Astro、Content Collections、MDX 和 Tailwind CSS。测评、广告和 Sponsors 均由内容集合驱动；本地工程与 Figma 已交付，尚未部署生产站。
+基于已确认的修订 13 设计，使用 Astro、Content Collections、MDX 和 Tailwind CSS。测评、广告和 Sponsors 均由内容集合驱动；通过 GitHub CI 构建静态产物，交由 Webhook 自动部署到 OpenResty。
 
 ## 本地开发
 
@@ -38,6 +38,7 @@ npm run check
 npm run build
 npm run verify:content
 npm run verify:release
+npm run verify:seo
 npm run verify:pipeline
 npm run verify:markdown
 npm run verify:readable

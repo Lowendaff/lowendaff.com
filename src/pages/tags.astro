@@ -17,6 +17,7 @@ const countries = recordTags(records, 'countryTag');
 <BaseLayout
   title="标签云"
   active="tags"
+  noindex={records.every((record) => record.external)}
   description="按类型、商家与国家浏览 LowEndAFF 的 VPS 与独立服务器测试记录。"
 >
   <div class="shell directory-page home-revision">

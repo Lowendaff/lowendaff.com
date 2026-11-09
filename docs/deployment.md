@@ -50,7 +50,11 @@ runuser -u lowendaff-deploy -- /usr/local/lib/lowendaff-deploy/deploy.py \
 
 ## 演练与正式发布边界
 
-当前强制 `PUBLIC_SITE_INDEXABLE=false`，部署程序也拒绝缺少 noindex 的产物。此次为公开可访问的演练，不等于开启搜索引擎收录。正式发布需同时调整 CI 索引配置、发布验证参数和部署程序的索引策略，并重新测试。
+默认保持 noindex。CI 仅在非 PR 的 main 构建且 GitHub 仓库变量 `SITE_INDEXABLE=true` 时设置 `PUBLIC_SITE_INDEXABLE=true`。发布验证从同一环境读取模式；临时夹具测试结束后，CI 必须重新构建并校验真实内容，再创建部署清单，避免上传测试留下的预览产物。
+
+正式收录同时需要服务器部署程序支持。安装本次 `deploy/deploy.py` 前备份旧文件；在 `lowendaff-webhook.service` 的 systemd drop-in `[Service]` 中设置 `Environment=LOWENDAFF_SITE_INDEXABLE=true`，随后 daemon-reload 和重启接收服务。该值默认 false，CI 清单模式与服务器不一致会拒绝发布。安装器还验证 HTML robots、robots.txt 和 sitemap 的实际内容，不能只改清单冒充开放。修改安装器需要另行同步，不会随静态产物更新。
+
+发布后核验 `/deployment.json` 的 `indexable`、首页 robots meta、`/robots.txt`、`/sitemap.xml` 及 `/llms.txt`。回退健康检查依据回退版本清单，允许恢复到之前的 noindex 版本；后续新部署仍按当前服务配置验证。搜索收录需用户确认，配置能力的加入本身不代表已开启。
 
 当前文章集合为空，不恢复旧文章，不为本次部署新增旧网址迁移规则。静态部署不提供服务端 CMS 或动态文章编辑。
 

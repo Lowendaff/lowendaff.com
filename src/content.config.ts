@@ -126,7 +126,7 @@ const posts = defineCollection({
       images: reviewImagesSchema.optional(),
       recordId: identifier.optional(),
       title: z.string().min(1),
-      description: z.string(),
+      description: z.string().trim().min(1),
       vendor: z.string().min(1),
       originalUrl: httpUrl
         .refine((value) => {
@@ -145,10 +145,19 @@ const posts = defineCollection({
       tags: z.array(z.string()).default([]),
       recommendation: z.number().min(0).max(5).optional(),
       author: z.string().default('jam'),
+      authorUrl: httpUrl.optional(),
+      coverImage: z
+        .union([
+          httpUrl,
+          z.string().regex(/^\/(?!\/)[^\s?#]+\.(?:png|jpe?g|webp|avif)$/i),
+        ])
+        .optional(),
+      coverAlt: z.string().trim().min(1).optional(),
       draft: z.boolean().default(false),
       country: z.string().regex(/^([A-Z]{2})?$/),
       location: z.string(),
       publishedAt: z.iso.date(),
+      updatedAt: z.iso.date().optional(),
       testedAt: z.string().optional(),
       route: z.string(),
       price: z.string().optional(),
@@ -184,6 +193,12 @@ const posts = defineCollection({
         .optional(),
     })
     .superRefine((data, ctx) => {
+      if (data.updatedAt && data.updatedAt < data.publishedAt)
+        ctx.addIssue({
+          code: 'custom',
+          path: ['updatedAt'],
+          message: 'updatedAt must not be earlier than publishedAt',
+        });
       if (
         data.kind === 'archive-reference' &&
         (!data.archiveSnapshot || data.review)

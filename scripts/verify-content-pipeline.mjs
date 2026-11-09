@@ -17,6 +17,7 @@ vendor: 'Fixture'
 country: 'US'
 location: 'Fixture'
 publishedAt: '2026-11-01'
+updatedAt: '2026-11-09'
 testedAt: '2026-11-01'
 route: 'Fixture'
 draft: ${draft}
@@ -53,6 +54,7 @@ try {
     'tags/index.html',
     'rss.xml',
     'sitemap.xml',
+    'llms.txt',
   ]) {
     const html = await readFile(new URL(`dist/${file}`, root), 'utf8');
     assert(
@@ -74,6 +76,17 @@ try {
     execFileSync('node', ['scripts/verify-release.mjs', '--indexable'], {
       cwd: root,
       encoding: 'utf8',
+    }),
+  );
+  const sitemap = await readFile(new URL('dist/sitemap.xml', root), 'utf8');
+  assert(sitemap.includes('<lastmod>2026-11-09</lastmod>'));
+  assert(article.includes('2026-11-09 更新'));
+  build(false);
+  console.log(
+    execFileSync('node', ['scripts/verify-release.mjs'], {
+      cwd: root,
+      encoding: 'utf8',
+      env: { ...process.env, PUBLIC_SITE_INDEXABLE: 'false' },
     }),
   );
   console.log(

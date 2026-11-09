@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import stat
@@ -28,22 +29,36 @@ def payload(number=10):
 
 class DeploymentTests(unittest.TestCase):
     def setUp(self):
+        self.policy = patch.dict(os.environ, {'LOWENDAFF_SITE_INDEXABLE': 'false'})
+        self.policy.start()
+        self.addCleanup(self.policy.stop)
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name) / 'state'
         (self.root / 'releases/bootstrap').mkdir(parents=True)
         (self.root / 'current').symlink_to('releases/bootstrap')
 
-    def fixture(self, data):
+    def fixture(self, data, indexable=False, overrides=None):
         archive = Path(self.temporary.name) / f"{data['runId']}.zip"
         manifest = {k: data[k] for k in (
             'schema', 'repository', 'commit', 'runId', 'runNumber', 'runAttempt')}
-        manifest['indexable'] = False
+        manifest['indexable'] = indexable
+        policy = 'index,follow' if indexable else 'noindex,nofollow'
+        html = f'<meta name="robots" content="{policy}">'
+        urls = ['https://lowendaff.com/', 'https://lowendaff.com/ads/'] if indexable else []
+        files = {
+            'index.html': html, 'ads/index.html': html,
+            'tags/index.html': '<meta name="robots" content="noindex,nofollow">',
+            'components/index.html': '<meta name="robots" content="noindex,nofollow">',
+            'robots.txt': 'User-agent: *\nAllow: /\nSitemap: https://lowendaff.com/sitemap.xml\n' if indexable else 'User-agent: *\nDisallow: /\n',
+            'sitemap.xml': '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{url}</loc></url>' for url in urls) + '</urlset>',
+            'rss.xml': 'fixture', 'llms.txt': 'fixture', '_astro/site.css': 'fixture',
+        }
+        files.update(overrides or {})
         with zipfile.ZipFile(archive, 'w') as output:
             output.writestr('deployment.json', json.dumps(manifest))
-            output.writestr('index.html', '<meta name="robots" content="noindex,nofollow">')
-            for name in ('tags/index.html', 'ads/index.html', 'robots.txt', 'rss.xml', '_astro/site.css'):
-                output.writestr(name, 'fixture')
+            for name, content in files.items():
+                output.writestr(name, content)
         data['digest'] = 'sha256:' + hashlib.sha256(archive.read_bytes()).hexdigest()
         return lambda _, target: shutil.copyfile(archive, target)
 
@@ -119,6 +134,42 @@ class DeploymentTests(unittest.TestCase):
         with self.assertRaises(deploy.DeployError):
             deploy.deploy(data, self.root, fetch, lambda _: None)
         self.assertEqual((self.root / 'current').readlink().as_posix(), 'releases/bootstrap')
+
+    def test_publication_requires_explicit_matching_server_policy(self):
+        data = payload()
+        fetch = self.fixture(data, indexable=True)
+        with self.assertRaisesRegex(deploy.DeployError, 'indexing policy'):
+            deploy.deploy(data, self.root, fetch, lambda _: None)
+        with patch.dict(os.environ, {'LOWENDAFF_SITE_INDEXABLE': 'true'}):
+            self.assertEqual(deploy.deploy(data, self.root, fetch, lambda _: None), 'deployed')
+
+    def test_publication_rejects_mismatched_html_robots_and_sitemap(self):
+        for override in [
+            {'index.html': '<meta name="robots" content="noindex,nofollow">'},
+            {'robots.txt': 'User-agent: *\nDisallow: /\n'},
+            {'sitemap.xml': '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>'},
+            {'components/index.html': '<meta name="robots" content="index,follow">'},
+        ]:
+            with self.subTest(override=override), patch.dict(os.environ, {'LOWENDAFF_SITE_INDEXABLE': 'true'}):
+                data = payload()
+                with self.assertRaises(deploy.DeployError):
+                    deploy.deploy(data, self.root, self.fixture(data, True, override), lambda _: None)
+                self.assertEqual((self.root / 'current').readlink().as_posix(), 'releases/bootstrap')
+
+    def test_public_server_rejects_preview_artifact(self):
+        data = payload()
+        with patch.dict(os.environ, {'LOWENDAFF_SITE_INDEXABLE': 'true'}):
+            with self.assertRaisesRegex(deploy.DeployError, 'indexing policy'):
+                deploy.deploy(data, self.root, self.fixture(data), lambda _: None)
+
+    def test_health_matches_manifest_when_rolling_back_across_indexing_modes(self):
+        import types
+        for indexable in (True, False):
+            manifest = {'indexable': indexable}
+            policy = 'index,follow' if indexable else 'noindex,nofollow'
+            with self.subTest(indexable=indexable), patch.object(deploy.subprocess, 'run') as run:
+                run.side_effect = [types.SimpleNamespace(stdout=json.dumps(manifest).encode()), types.SimpleNamespace(stdout=f'<meta name="robots" content="{policy}">'.encode())]
+                deploy.health(manifest)
 
     def test_checksum_mismatch_is_rejected(self):
         import io

@@ -4,6 +4,7 @@ import BaseLayout from './BaseLayout.astro';
 import Icon from '../components/Icon.astro';
 import { reviewModel } from '../lib/review-model';
 import { reviewTypeLabels } from '../lib/review-types';
+import { postPath } from '../lib/posts';
 import ArticleTopAds from '../components/ads/ArticleTopAds.astro';
 import ArticleBottomAds from '../components/ads/ArticleBottomAds.astro';
 import ArticleSidebarAds from '../components/ads/ArticleSidebarAds.astro';
@@ -26,10 +27,23 @@ const navigation = review
   title={p.title}
   description={p.description}
   active="review"
+  coverImage={p.coverImage}
+  coverAlt={p.coverAlt}
+  breadcrumbs={[
+    { name: '首页', path: '/' },
+    {
+      name: `${reviewTypeLabels[p.reviewType]} 测评`,
+      path: `/?type=${p.reviewType}#reviews`,
+    },
+    { name: p.vendor, path: postPath(post.id) },
+  ]}
   article={{
     publishedAt: p.publishedAt,
+    updatedAt: p.updatedAt,
     author: p.author,
-    source: p.originalUrl,
+    authorUrl: p.authorUrl,
+    tags: p.tags,
+    section: `${reviewTypeLabels[p.reviewType]} 测评`,
   }}
 >
   <div class="shell review-shell review-revision">
@@ -65,8 +79,17 @@ const navigation = review
             >
               {reviewTypeLabels[p.reviewType]}
             </span>
-            <span>{p.author}</span>
+            {p.authorUrl ? (
+              <a href={p.authorUrl} rel="author">
+                {p.author}
+              </a>
+            ) : (
+              <span>{p.author}</span>
+            )}
             <time datetime={p.publishedAt}>{p.publishedAt} 发布</time>
+            {p.updatedAt && p.updatedAt !== p.publishedAt && (
+              <time datetime={p.updatedAt}>{p.updatedAt} 更新</time>
+            )}
           </div>
         </header>
         <ArticleTopAds />

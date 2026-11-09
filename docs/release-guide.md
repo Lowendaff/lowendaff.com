@@ -12,11 +12,13 @@
 
 1. 确认 `astro.config.mjs` 的 `site` 是实际域名；目前为 `https://lowendaff.com`。
 2. 核验历史商业信息、Affiliate 披露与图片版权/缺失项，补齐需要发布的内容。
-3. 正式收录需同时修改 CI 的 `PUBLIC_SITE_INDEXABLE`、`verify:release -- --indexable` 调用及部署程序的索引策略。单独执行 `PUBLIC_SITE_INDEXABLE=true npm run build` 不会部署，且当前演练接收程序会拒绝此产物。
+3. 正式收录使用 GitHub 仓库变量 `SITE_INDEXABLE=true`，并先安装兼容部署程序、将服务器服务环境 `LOWENDAFF_SITE_INDEXABLE=true`。步骤见 `deployment.md`；CI 自动读取模式并校验，不再手改工作流中的验证参数。本地 `PUBLIC_SITE_INDEXABLE=true npm run build` 只生成文件，不会部署。
 4. 通过 main 的成功 CI 产物发布。Markdown 修改后重新构建；无运行时 CMS、数据库或远程广告请求。
 5. 核验实际 HTTP 状态、TLS、缓存和 `deployment.json` 中的提交。演练验证记录见 `changes/deploy-rehearsal.md`。
 
 ## 路由范围
+
+`/sitemap.xml` 自动列出首页、广告页和已发布本地测评；有本地测评才列出标签页。文章日期来自 `updatedAt` / `publishedAt`；静态页面不编造更新时间。草稿、组件展示、重定向、筛选参数与站外历史引用不进入 sitemap。`/llms.txt` 是可选的 AI 阅读目录，不是收录承诺，正文 HTML 才是完整内容来源。正式模式的 robots 允许抓取页面，让爬虫能够读取被排除页面的 noindex。
 
 按用户决定，新站从零开始，不实施旧文章网址迁移，也不添加旧站 HTTP 301 规则。当前构建保留已有 `/feed/` 到 `/rss.xml` 的静态回退；`dist/_redirects` 不会被 OpenResty 自动解释为配置。文章撤下后不存在历史文章页面。
 
