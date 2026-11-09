@@ -1,5 +1,7 @@
 # 项目上下文索引
 
+友情链接实时核验与清理：`changes/friend-links-audit.md`；11 项调整为 8 项，补全虎窝地址。OpenViking `viking://resources/projects/lowendaff-ui/friend-links-audit.md`；发布回执 `test-results/friend-links/deployment-receipt.json`。
+
 ## 当前状态
 
 2026-11-09 URL 规则：`/reviews/{规范化中文标题}-{测试日期YYYYMMDD}/`，保留末尾斜杠；显式 permalink、自动补全、唯一性与基线冻结检查纳入 CI。用户明确要求全新站点，撤销旧地址兼容、301、静态跳转页和 `_redirects` 生成；旧地址返回 404。见 `changes/review-urls.md`、`changes/remove-legacy-redirects.md`，最新发布回执 `test-results/remove-legacy-redirects/deployment-receipt.json`；OpenViking `viking://resources/projects/lowendaff-ui/review-urls.md`。

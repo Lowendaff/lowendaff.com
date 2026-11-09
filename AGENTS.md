@@ -61,6 +61,8 @@ VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking�
 
 ## Git & Agent Workflow
 
+2026-11-09：友情链接按实时可访问性和本站互链核验，数据在 `src/data/friends.json`；本机与服务器复查后删除米莉亚の小破站、霧雨魔法店、HostEvaluate，虎窝补为 `https://blog.ahu.moe/`，保留 8 项。独立友链页及站内跳转链接均应检查，不能只看首页或按单次请求失败删除。报告 `docs/changes/friend-links-audit.md`；OpenViking `viking://resources/projects/lowendaff-ui/friend-links-audit.md`，发布回执 `test-results/friend-links/deployment-receipt.json`。
+
 2026-11-09：URL 规则、补全与 CI 校验完成。用户明确要求全新站点，不保留旧地址 301；已删除文章别名、WordPress 路由、旧 `/feed/` 跳转与 `_redirects` 生成逻辑，RSS 使用 `/rss.xml`。服务器 OpenResty include 同步移除文章 301。规则见 `docs/changes/review-urls.md`，撤销兼容记录见 `docs/changes/remove-legacy-redirects.md`，最终发布证据以 `test-results/remove-legacy-redirects/deployment-receipt.json` 为准。OpenViking：`viking://resources/projects/lowendaff-ui/review-urls.md`。
 
 2026-11-09：用户授权三项阅读界面精修，已本地完成；用户随后授权提交 GitHub 并核验自动部署，结果以 `test-results/ui-reading-polish/deployment-receipt.json` 为准。目录位于标题元信息之后、顶部广告之前；手机默认收起、点击展开，桌面采用贴合页头的横向 sticky 章节栏，避免侧栏目录遮挡广告。路由表使用主题滚动条与动态四向边缘提示，桌面数量字号 12px。归档 `docs/changes/ui-reading-polish.md`；OpenViking `viking://resources/projects/lowendaff-ui/ui-reading-polish.md`，回执见 `test-results/ui-reading-polish/`。不要恢复已否决的侧栏顶部 sticky 目录布局。
