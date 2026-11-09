@@ -13,6 +13,7 @@
     "verify:content": "python3 scripts/verify-content.py",
     "verify:release": "node scripts/verify-release.mjs",
     "verify:seo": "node --experimental-strip-types --test scripts/verify-seo.mjs",
+    "verify:analytics": "node --experimental-strip-types --test scripts/verify-analytics.mjs",
     "verify:pipeline": "node scripts/verify-content-pipeline.mjs",
     "verify:markdown": "node scripts/verify-markdown-content.mjs",
     "verify:readable": "node --experimental-strip-types --test scripts/verify-readable-review.mjs",

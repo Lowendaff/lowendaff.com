@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-11-09 后续：已修复 OpenResty 静态文本缺 charset 导致的中文乱码；统计使用 `src/config/analytics.json`，支持 GA4 与外部脚本型平台，生产域名门禁和预览排除。指南 `analytics.md`，归档 `changes/analytics-charset.md`；OpenViking `viking://resources/projects/lowendaff-ui/analytics-charset.md`，最终上线证据 `test-results/analytics/deployment-receipt.json`。
+
 2026-11-09 后续：用户明确授权线上开放收录。本轮 sitemap / SEO / GEO 说明 `changes/seo-geo.md`，采用 GitHub `SITE_INDEXABLE` 与服务器 `LOWENDAFF_SITE_INDEXABLE` 双端一致配置；本地/PR 默认预览。最终发布证据 `test-results/seo/deployment-receipt.json`，OpenViking `viking://resources/projects/lowendaff-ui/seo-geo.md`。此决定取代下文早期演练的 noindex 限制。
 
 2026-11-09：Astro 工程已通过 GitHub `Lowendaff/lowendaff.com` 的 main 分支 CI 产物完成 HTTPS 部署演练，保持 noindex，未开启正式收录。首次 Git 同步结果以 `test-results/git-sync/` 回执为准；当前发布证据见 `test-results/deploy-rehearsal/`。源码和当前维护文档留在工作区；历史报告、截图、抓取日志、一次性脚本与旧素材已备份后移出，清理记录见 `changes/git-preparation.md`。

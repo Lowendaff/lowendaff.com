@@ -45,6 +45,8 @@ jobs:
         run: npm run verify:readable
       - name: Test structured metadata and safe serialization
         run: npm run verify:seo
+      - name: Test analytics configuration and production gates
+        run: npm run verify:analytics
       - name: Test draft exclusion and both indexing modes
         run: npm run verify:pipeline
       # These fixtures intentionally fail builds, then are removed in finally.

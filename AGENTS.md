@@ -56,6 +56,8 @@ VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking�
 
 ## Git & Agent Workflow
 
+2026-11-09：统计统一由 `src/config/analytics.json` 管理，不把 ID 写进组件或环境变量。只在正式构建与配置允许的 hostname 加载，组件页默认排除；GA4 与通用 HTTPS script/data-* 适配器不执行任意配置代码。提交前增加 `npm run verify:analytics`。llms.txt 中文字符集由 OpenResty server 级 `charset utf-8` 声明，不能只修改 Astro Response。指南 `docs/analytics.md`，归档 `docs/changes/analytics-charset.md`；OpenViking `viking://resources/projects/lowendaff-ui/analytics-charset.md`；发布证据 `test-results/analytics/deployment-receipt.json`。
+
 2026-11-09 用户已授权开启线上收录并发布 sitemap / SEO / GEO。正式 main 使用 GitHub 变量 `SITE_INDEXABLE=true`，服务器服务环境 `LOWENDAFF_SITE_INDEXABLE=true`；本地和 PR 默认仍为 noindex。CI 夹具测试后必须按发布模式重建再上传，禁止发布临时文章。sitemap、llms.txt 只列正式本地文章，空标签页与组件页 noindex；更新时间只读 Frontmatter `updatedAt ?? publishedAt`，不可用构建时间。说明 `docs/changes/seo-geo.md`；OpenViking `viking://resources/projects/lowendaff-ui/seo-geo.md`；最终线上证据 `test-results/seo/deployment-receipt.json`。不要恢复演练时期的强制 noindex 配置。
 
 2026-11-09 已确认的首页动效：地图固定法兰克福、新加坡、东京、洛杉矶、弗吉尼亚、圣保罗、悉尼、约翰内斯堡八个城市，由 11 条海缆/陆缆组合通道互联。数据在 `src/data/global-network.json`，海缆实线、陆缆虚线；弗吉尼亚—洛杉矶骨干线加强显示。每 2.4 秒随机选择起终点，沿连通路径传播 1.7 秒；离屏与隐藏标签页停止，手机仍隐藏地图。按用户明确要求，仅地图不再读取 reduced-motion 停播；其他组件规则不变。归档 `docs/changes/motion-preview.md`；OpenViking：`viking://resources/projects/lowendaff-ui/motion-preview.md`，全文回读一致，当前回执在 `test-results/global-network/openviking-receipt.json`。用户已授权提交并通过现有 CI/Webhook 发布；最终提交、构建、服务器与公网核验以 `test-results/motion-deploy/final-receipt.json` 为准。未同步 Figma。

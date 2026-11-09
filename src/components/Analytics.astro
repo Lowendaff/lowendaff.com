@@ -1,0 +1,21 @@
+---
+import rawConfig from '../config/analytics.json';
+import { analyticsSchema, analyticsForPage } from '../lib/analytics';
+import { serializeJsonLd } from '../lib/seo';
+import { siteIndexable } from '../lib/site';
+
+const config = analyticsSchema.parse(rawConfig);
+const providers = analyticsForPage(config, siteIndexable, Astro.url.pathname);
+---
+
+{providers.length > 0 && (
+  <script
+    id="site-analytics-config"
+    type="application/json"
+    set:html={serializeJsonLd({ allowedHosts: config.allowedHosts, providers })}
+  />
+)}
+<script>
+  import { initializeAnalytics } from '../scripts/analytics';
+  initializeAnalytics();
+</script>

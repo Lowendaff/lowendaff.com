@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "allowedHosts": ["lowendaff.com"],
+  "excludePaths": ["/components/"],
+  "providers": [
+    {
+      "name": "google-analytics",
+      "type": "ga4",
+      "enabled": true,
+      "measurementId": "G-QJ1LPFHGL9"
+    }
+  ]
+}

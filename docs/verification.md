@@ -12,6 +12,7 @@ npm run verify:content
 npm run verify:release
 npm run verify:readable
 npm run verify:seo
+npm run verify:analytics
 ```
 
 `verify:content` 保留历史原文对照能力；当前两篇旧测评已撤下，报告明确显示 `not-applicable`，并验证构建目录中不存在其旧文章页。若将来主动恢复原文，可继续与 `tests/fixtures/wordpress/` 的 HTML 比较；不得将缺少文章时的检查称为全文保真通过。`scripts/archive_html.py` 只解析 HTML，不执行脚本或网络请求。

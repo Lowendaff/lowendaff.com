@@ -28,6 +28,8 @@
 
 1Panel 已将宿主机 `/opt/1panel/www` 挂载到 OpenResty 的 `/www`，所以版本、根目录和相对链接均放在此挂载内。不要将 index 改为指向容器不可见的宿主机路径。通过 1Panel 编辑配置后，核查代理 include 和 index 软链接仍存在。
 
+`deploy/openresty-location.conf` 同时设置 server 级 `charset utf-8`。静态 `.txt` 的字符集由 OpenResty 决定，不能依靠 Astro 源码里的 Response header；更新 include 后先执行 OpenResty `-t`，成功再 reload。核验 `/llms.txt` 响应为 `text/plain; charset=utf-8`，浏览器直接打开中文正常。自动 CI 产物发布不修改该服务器配置。
+
 ## 检查与回退
 
 ```sh

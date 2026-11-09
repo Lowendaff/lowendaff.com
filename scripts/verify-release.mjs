@@ -6,6 +6,12 @@ const indexable =
   process.argv.includes('--indexable') ||
   process.env.PUBLIC_SITE_INDEXABLE === 'true';
 const read = (name) => readFile(new URL(name, root), 'utf8');
+const analytics = JSON.parse(
+  await readFile(
+    new URL('../src/config/analytics.json', import.meta.url),
+    'utf8',
+  ),
+);
 const pages = [];
 async function walk(directory = '') {
   for (const entry of await readdir(new URL(directory, root), {
@@ -31,6 +37,27 @@ for (const file of pages) {
     redirects.push(file);
     continue;
   }
+  const pagePath = `/${file.replace(/index\.html$/, '')}`;
+  const analyticsJson = html.match(
+    /<script id="site-analytics-config" type="application\/json">([\s\S]*?)<\/script>/,
+  )?.[1];
+  const providers = analytics.providers.filter((provider) => provider.enabled);
+  const shouldTrack =
+    indexable &&
+    analytics.enabled &&
+    !analytics.excludePaths.includes(pagePath) &&
+    providers.length > 0;
+  assert.equal(
+    Boolean(analyticsJson),
+    shouldTrack,
+    `${file}: analytics publication policy`,
+  );
+  if (analyticsJson)
+    assert.deepEqual(
+      JSON.parse(analyticsJson),
+      { allowedHosts: analytics.allowedHosts, providers },
+      `${file}: JSON-driven analytics`,
+    );
   assert.match(
     html,
     /<link rel="canonical" href="https:\/\/lowendaff.com\//,

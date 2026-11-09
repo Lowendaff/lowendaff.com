@@ -13,6 +13,7 @@ import '../styles/advertising.css';
 import '../styles/motion.css';
 import Icon from '../components/Icon.astro';
 import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import Analytics from '../components/Analytics.astro';
 import { siteIndexable } from '../lib/site';
 import {
   siteIdentity,
@@ -126,6 +127,7 @@ const schema = structuredData({
     )}
     <script type="application/ld+json" set:html={serializeJsonLd(schema)} />
     <title>{pageTitle}</title>
+    <Analytics />
     <script is:inline>
       // Apply explicit preferences before paint; no preference uses CSS media queries.
       let appearance = 'system';

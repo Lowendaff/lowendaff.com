@@ -28,6 +28,8 @@ npm run dev
 
 详见 [内容维护指南](docs/content-authoring.md)。开发模式监听文件变化；静态部署须重新构建并发布 `dist/` 才会更新。随机排序和轮播在浏览器执行，商家名单由 Markdown 决定。
 
+统计平台统一由 `src/config/analytics.json` 配置，支持 GA4 和外部脚本型平台；配置示例、启停与扩展方式见 [统计配置](docs/analytics.md)。
+
 新文章从 [VPS / 独服模板](templates/reviews/README.md) 复制，以普通 Markdown 正文编写（扩展名仍为 `.mdx`）。维护说明见内容指南“易读测评格式”；`src/loaders/posts.ts` 在构建/开发时将正文转换为既有数据模型，页面组件继续复用。
 
 ## 检查与构建
