@@ -1,6 +1,6 @@
 # 项目上下文索引
 
-友情链接实时核验与清理：`changes/friend-links-audit.md`；11 项调整为 8 项，补全虎窝地址。OpenViking `viking://resources/projects/lowendaff-ui/friend-links-audit.md`；发布回执 `test-results/friend-links/deployment-receipt.json`。
+友情链接实时核验与清理：`changes/friend-links-audit.md`；初次清理后按用户确认恢复 HostEvaluate，当前 9 项；虎窝地址已补全。OpenViking `viking://resources/projects/lowendaff-ui/friend-links-audit.md`；最新发布回执 `test-results/restore-hostevaluate/deployment-receipt.json`。
 
 ## 当前状态
 
