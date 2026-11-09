@@ -58,6 +58,7 @@ try {
     kind: 'review',
     format: 'review-markdown',
     title: 'Markdown verification fixture',
+    permalink: '/reviews/markdown-verification-20261108/',
     description: 'Synthetic integration data',
     vendor: 'Fixture',
     country: 'US',
@@ -258,7 +259,9 @@ Synthetic fixture; never published.
   created.push(newSponsor);
   build();
   const home = await read('dist/index.html'),
-    article = await read('dist/reviews/markdown-verification/index.html'),
+    article = await read(
+      'dist/reviews/markdown-verification-20261108/index.html',
+    ),
     kit = await read('dist/components/index.html'),
     policy = await read('dist/ads/index.html');
   for (const html of [home, article])
@@ -340,7 +343,7 @@ Synthetic fixture; never published.
   build();
   assert(!(await read('dist/index.html')).includes('class="sponsor-products"'));
   const emptyArticle = await read(
-    'dist/reviews/markdown-verification/index.html',
+    'dist/reviews/markdown-verification-20261108/index.html',
   );
   assert(
     !emptyArticle.includes('data-ad-slot=') &&

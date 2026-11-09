@@ -3,6 +3,7 @@ from pathlib import Path
 import archive_html as m
 import json
 import argparse
+import subprocess
 
 arguments = argparse.ArgumentParser()
 arguments.add_argument("--output", type=Path)
@@ -28,7 +29,13 @@ for key, slug in [('100tb', '100tb-cn2'), ('panstarcloud', 'panstarcloud-singapo
     article = next(n for n in source.walk() if 'main-article' in n.attrs.get('class', '').split())
     content = next(n for n in article.walk() if n.attrs.get('class') == 'text')
     source_tables = [n for n in content.walk() if n.tag == 'table']
-    built = parse(ROOT / f'dist/reviews/{slug}/index.html')
+    # Read authored metadata with the same YAML parser used by authoring tools.
+    permalink = subprocess.check_output([
+        'node', '--input-type=module', '-e',
+        "import {readPosts} from './scripts/review-url-files.mjs'; const p=(await readPosts()).find(p=>p.file===process.argv[1]); console.log(p.data.permalink)",
+        f'src/content/posts/{slug}.mdx'
+    ], cwd=ROOT, text=True).strip()
+    built = parse(ROOT / 'dist' / permalink.lstrip('/') / 'index.html')
     rendered = next(n for n in built.walk() if n.attrs.get('class') == 'full-review')
     table_map = {n.attrs['data-source-table']: next(t for t in n.walk() if t.tag == 'table') for n in rendered.walk() if 'data-source-table' in n.attrs}
     excluded_id = f'{key}-table-' + ('4' if key == '100tb' else '3')

@@ -40,7 +40,7 @@ export function getRecords(posts: CollectionEntry<'posts'>[]) {
       href:
         data.kind === 'archive-reference'
           ? data.archiveSnapshot!
-          : postPath(id),
+          : postPath({ data }),
       external: data.kind === 'archive-reference',
       merchant: data.vendor,
       countryTag: data.country || 'unspecified',

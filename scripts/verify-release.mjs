@@ -191,7 +191,9 @@ assert(!/priority|changefreq/.test(sitemap), 'No invented sitemap hints');
 assert(!llms.includes('/components/'), 'UI kit excluded from AI directory');
 assert(rules.includes('/feed/ /rss.xml 301'), 'Legacy RSS redirect');
 assert(redirects.includes('feed/index.html'), 'RSS redirect fallback');
-const reviewPages = pages.filter((path) => path.startsWith('reviews/'));
+const reviewPages = pages.filter(
+  (path) => path.startsWith('reviews/') && !redirects.includes(path),
+);
 assert.equal(
   (rss.match(/<item>/g) || []).length,
   reviewPages.length,
@@ -208,7 +210,7 @@ for (const file of redirects) {
 for (const file of reviewPages) {
   const path = `/${file.replace(/index\.html$/, '')}`;
   assert.equal(
-    llms.includes(`https://lowendaff.com${path}`),
+    llms.includes(new URL(path, 'https://lowendaff.com').href),
     indexable,
     `${file}: AI directory policy`,
   );
@@ -224,7 +226,7 @@ for (const file of reviewPages) {
     );
     assert(
       sitemap.includes(
-        `<loc>https://lowendaff.com${path}</loc><lastmod>${article.dateModified}</lastmod>`,
+        `<loc>${new URL(path, 'https://lowendaff.com').href}</loc><lastmod>${article.dateModified}</lastmod>`,
       ),
       `${file}: lastmod uses authored dates`,
     );

@@ -14,14 +14,19 @@ const build = () =>
     stdio: 'pipe',
     maxBuffer: 8 * 1024 * 1024,
   });
-async function add(name, body) {
+async function add(name, body, includeUrl = true) {
   const path = file(`src/content/posts/template-check-${name}.mdx`);
+  if (includeUrl && !/^permalink:/m.test(body))
+    body = body.replace(
+      /^---\n/,
+      `---\npermalink: '/reviews/template-check-${name}-20261108/'\n`,
+    );
   await writeFile(path, body, { flag: 'wx' });
   created.push(path);
   return path;
 }
-async function rejectsArticle(name, body, expected) {
-  const path = await add(name, body);
+async function rejectsArticle(name, body, expected, includeUrl = true) {
+  const path = await add(name, body, includeUrl);
   try {
     assert.throws(build, (error) => {
       const output = String(error.stdout) + String(error.stderr);
@@ -65,7 +70,9 @@ try {
   );
   build();
   for (const name of ['vps', 'dedicated-server']) {
-    const html = await read(`dist/reviews/template-check-${name}/index.html`);
+    const html = await read(
+      `dist/reviews/template-check-${name}-20261108/index.html`,
+    );
     assert(html.includes('class="full-review"'));
     assert(html.includes('data-route-explorer="return-route"'));
     assert(html.includes('data-review-panels="unlock"'));
@@ -78,11 +85,13 @@ try {
       assert(html.includes('data-component="BenchmarkTerminal"'));
     }
     await assert.rejects(
-      read(`dist/reviews/template-check-${name}-draft/index.html`),
+      read(`dist/reviews/template-check-${name}-draft-20261108/index.html`),
       { code: 'ENOENT' },
     );
   }
-  const minimal = await read('dist/reviews/template-check-minimal/index.html');
+  const minimal = await read(
+    'dist/reviews/template-check-minimal-20261108/index.html',
+  );
   for (const id of ['purchase', 'unlock', 'speed', 'routing']) {
     assert(!minimal.includes(`href="#${id}"`), `Empty TOC target ${id}`);
     assert(!minimal.includes(`id="${id}"`), `Empty chapter ${id}`);
@@ -96,11 +105,15 @@ try {
   assert(!terminal.includes('<script>'));
   assert(terminal.includes('{unexecuted}'));
   assert(minimal.includes('独立服务器 测试记录'));
-  const raw = await read('dist/reviews/template-check-raw-network/index.html');
+  const raw = await read(
+    'dist/reviews/template-check-raw-network-20261108/index.html',
+  );
   assert(
     raw.includes('RAW_UNLOCK_SENTINEL') && raw.includes('RAW_ROUTE_SENTINEL'),
   );
-  const images = await read('dist/reviews/template-check-images/index.html');
+  const images = await read(
+    'dist/reviews/template-check-images-20261108/index.html',
+  );
   assert(images.includes('src="/archive-assets/template-check-topology.png"'));
   assert(images.includes('src="/archive-assets/template-check-bgp.png"'));
   for (const path of [
@@ -119,6 +132,36 @@ try {
   }
   // Exercise the actual build gate, not a separate CI-only schema.
   const validBody = '\n## 系统信息\n\nValidation fixture.\n';
+  for (const draft of [false, true]) {
+    await rejectsArticle(
+      `missing-url-${draft ? 'draft' : 'published'}`,
+      header.replace('draft: false', `draft: ${draft}`) + validBody,
+      /Missing permalink/,
+      false,
+    );
+  }
+  await rejectsArticle(
+    'bad-url-date',
+    header.replace(/^---\n/, "---\npermalink: '/reviews/test-20260229/'\n") +
+      validBody,
+    /normalized-title/,
+  );
+  await rejectsArticle(
+    'duplicate-url',
+    header.replace(
+      /^---\n/,
+      "---\npermalink: '/reviews/template-check-vps-20261108/'\n",
+    ) + validBody,
+    /Duplicate review URL/,
+  );
+  await rejectsArticle(
+    'alias-collision',
+    header.replace(
+      /^---\n/,
+      "---\nredirectFrom: ['/reviews/template-check-vps-20261108/']\n",
+    ) + validBody,
+    /Duplicate review URL/,
+  );
   await rejectsArticle(
     'missing-title',
     header.replace(/^title:.*\n/m, '') + validBody,

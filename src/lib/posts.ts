@@ -1,8 +1,12 @@
 import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import { assertUniqueReviewUrls } from './review-url';
 
 /** One publication filter for routes, directories and feeds. Drafts never ship. */
 export async function getPublishedEntries() {
-  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  const entries = await getCollection('posts');
+  assertUniqueReviewUrls(entries);
+  const posts = entries.filter(({ data }) => !data.draft);
   const sources = new Set<string>();
   for (const post of posts) {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.id))
@@ -24,4 +28,5 @@ export async function getPublishedPosts() {
   );
 }
 
-export const postPath = (id: string) => `/reviews/${id}/`;
+export const postPath = ({ data }: Pick<CollectionEntry<'posts'>, 'data'>) =>
+  encodeURI(data.permalink!);

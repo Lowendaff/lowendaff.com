@@ -32,8 +32,8 @@ export const GET: APIRoute = async ({ site }) => {
           '',
           ...(posts.length
             ? posts.map(
-                ({ id, data }) =>
-                  `- [${markdownText(data.title)}](${url(postPath(id))}): ${reviewTypeLabels[data.reviewType]}；${markdownText(data.description)} 发布 ${data.publishedAt}${data.updatedAt ? `，更新 ${data.updatedAt}` : ''}。`,
+                ({ data }) =>
+                  `- [${markdownText(data.title)}](${url(postPath({ data }))}): ${reviewTypeLabels[data.reviewType]}；${markdownText(data.description)} 发布 ${data.publishedAt}${data.updatedAt ? `，更新 ${data.updatedAt}` : ''}。`,
               )
             : ['暂无已发布的测试记录。']),
         ]

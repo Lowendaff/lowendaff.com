@@ -11,6 +11,7 @@ const build = (indexable) =>
     stdio: 'pipe',
   });
 const content = (draft) => `---
+permalink: '/reviews/pipeline-verification-${draft ? 'draft' : 'published'}-20261101/'
 title: 'Pipeline verification ${draft ? 'draft' : 'published'}'
 description: 'Temporary build fixture, removed after verification.'
 vendor: 'Fixture'
@@ -41,7 +42,10 @@ try {
   }
   build(true);
   const article = await readFile(
-    new URL('dist/reviews/pipeline-verification-published/index.html', root),
+    new URL(
+      'dist/reviews/pipeline-verification-published-20261101/index.html',
+      root,
+    ),
     'utf8',
   );
   assert(
@@ -68,7 +72,10 @@ try {
   }
   await assert.rejects(
     readFile(
-      new URL('dist/reviews/pipeline-verification-draft/index.html', root),
+      new URL(
+        'dist/reviews/pipeline-verification-draft-20261101/index.html',
+        root,
+      ),
     ),
     { code: 'ENOENT' },
   );

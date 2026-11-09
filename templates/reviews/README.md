@@ -15,7 +15,21 @@ cp templates/reviews/vps.mdx src/content/posts/vendor-location-vps.mdx
 cp templates/reviews/dedicated-server.mdx src/content/posts/vendor-location-dedicated.mdx
 ```
 
-模板放在内容集合之外，不会生成文章。复制后默认 `draft: true`，草稿不会生成可访问的文章页面。替换全部「待填写」、示例链接和日期，删除不适用的段落/测试，再改为 `draft: false` 本地预览；发布前运行 `npm run check && npm run build`。不要将占位模板当成真实测评发布。
+模板放在内容集合之外，不会生成文章。复制后默认 `draft: true`，草稿不会生成可访问的文章页面。替换全部「待填写」、示例链接和日期，删除不适用的段落/测试，运行 `npm run urls:fill -- src/content/posts/你的文件.mdx` 写入地址，再改为 `draft: false` 本地预览；发布前运行 `npm run urls:check && npm run check && npm run build`。不要将占位模板当成真实测评发布。
+
+## 自动生成 URL
+
+URL 规则为 `/reviews/{规范化标题}-{YYYYMMDD}/`，保留中文与末尾 `/`；国旗/Emoji 和标点不进入地址，英文小写、空格变连字符。日期取 `testedAt` 开头的真实测试日期，不能用发布日期或构建时间代替。`testedAt` 例如 `'2026-11-10 23:43 CST'`，也允许只有 `'2026-11-10'`。
+
+```sh
+npm run urls:fill -- --dry-run  # 预览所有缺失地址
+npm run urls:fill              # 补全所有缺失地址，写回 Frontmatter
+npm run urls:check             # 只检查，不改文件
+```
+
+生成的 `permalink` 是唯一地址来源，文件名仍可使用简短英文名称。重复执行不会改写已有地址。尚未发布的草稿修改标题/日期后，可以删除其 `permalink` 再补全；已发布文章改标题或纠正日期必须保留地址。同日同标题撞名时命令报错、不写文件、不自动添加序号；请用有意义的标题区分两份独立测试。
+
+CI 对新文章检查标题/测试日期与地址一致，对基线中非草稿文章检查地址不可变；草稿也必须有合法、唯一的地址。`redirectFrom` 用于一次性迁移已上线的新站旧地址，不能填 WordPress 快照或外站 URL，也不能抢占其他文章的地址。
 
 ## 元数据
 

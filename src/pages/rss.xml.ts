@@ -5,8 +5,8 @@ import { escapeXml as xml } from '../lib/site';
 export const GET: APIRoute = async ({ site }) => {
   const posts = await getPublishedPosts();
   const items = posts
-    .map(({ id, data }) => {
-      const url = xml(new URL(postPath(id), site).href);
+    .map(({ data }) => {
+      const url = xml(new URL(postPath({ data }), site).href);
       return `<item><title>${xml(data.title)}</title><link>${url}</link><guid isPermaLink="true">${url}</guid><description>${xml(data.description)}</description><pubDate>${new Date(`${data.publishedAt}T00:00:00+08:00`).toUTCString()}</pubDate></item>`;
     })
     .join('');

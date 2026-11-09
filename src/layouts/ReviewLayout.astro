@@ -35,7 +35,7 @@ const navigation = review
       name: `${reviewTypeLabels[p.reviewType]} 测评`,
       path: `/?type=${p.reviewType}#reviews`,
     },
-    { name: p.vendor, path: postPath(post.id) },
+    { name: p.vendor, path: postPath(post) },
   ]}
   article={{
     publishedAt: p.publishedAt,

@@ -95,7 +95,7 @@ async function verifyReviewTypes(page) {
     assert(await p.locator('[data-clear-tags]').isDisabled(), 'Clear disabled');
 
     for (const type of ['vps', 'dedicated']) {
-      await p.goto(`${base}/reviews/type-verification-${type}-1/`);
+      await p.goto(`${base}/reviews/type-verification-${type}-1-20261108/`);
       assert(
         await p.locator(`[data-review-kind="${type}"]`).isVisible(),
         'Header label',
@@ -112,7 +112,7 @@ async function verifyReviewTypes(page) {
         for (const path of [
           '/',
           '/tags/',
-          '/reviews/type-verification-dedicated-1/',
+          '/reviews/type-verification-dedicated-1-20261108/',
         ]) {
           await p.goto(base + path);
           await p.evaluate(() => document.fonts.ready);

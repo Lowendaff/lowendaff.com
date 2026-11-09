@@ -33,6 +33,8 @@
 
 ## 检查与回退
 
+中文测评 URL 发布前需安装本仓库更新后的 `deploy/deploy.py`：Sitemap 中的百分号编码应与磁盘中文路径的 UTF-8 编码一致。先备份服务器程序，再同步并验证，不能仅 push 网页产物。文章 `redirectFrom` 会生成静态跳转页及 `_redirects`；OpenResty 不读取该文件，HTTP 301 规则需单独配置/核验，不能以 meta refresh 代替服务器跳转验收。详见 `docs/changes/review-urls.md`。
+
 ```sh
 systemctl status lowendaff-webhook
 readlink /opt/1panel/www/sites/lowendaff.com/.deploy/current
@@ -59,6 +61,6 @@ runuser -u lowendaff-deploy -- /usr/local/lib/lowendaff-deploy/deploy.py \
 
 发布后核验 `/deployment.json` 的 `indexable`、首页 robots meta、`/robots.txt`、`/sitemap.xml` 及 `/llms.txt`。回退健康检查依据回退版本清单，允许恢复到之前的 noindex 版本；后续新部署仍按当前服务配置验证。搜索收录需用户确认，配置能力的加入本身不代表已开启。
 
-当前文章集合为空，不恢复旧文章，不为本次部署新增旧网址迁移规则。静态部署不提供服务端 CMS 或动态文章编辑。
+当前仅包含用户授权恢复的 100TB 测评，不自动恢复其余旧文章。该文章已发布的 `/reviews/100tb-cn2/` 迁移至中文语义地址，规则在 `deploy/openresty-location.conf`；新静态页面发布成功后再安装 include，执行 `openresty -t` 并 reload。增加别名时需同步此配置；回退到旧版文章路径时应恢复对应 include。静态部署不提供服务端 CMS 或动态文章编辑。
 
 测试：`python3 -m unittest discover -s tests/deployment -v`；现有 Astro 检查按 `AGENTS.md` 执行。通知流程必须用真实 CI 产物验证，单元测试不能代替公网发布证据。演练备份和运行回执记录于 `docs/changes/deploy-rehearsal.md` 及被忽略的 `test-results/deploy-rehearsal/`。

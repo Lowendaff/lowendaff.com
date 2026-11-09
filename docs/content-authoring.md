@@ -6,6 +6,10 @@
 
 Astro 在开发时监听内容，在构建时生成静态页面。Markdown 改动不是线上实时更新；部署后需重新运行构建并发布。无需修改 `.astro` 商家名单、数量或分组。
 
+## 文章地址
+
+文章地址由 Frontmatter `permalink` 管理，采用 `/reviews/{规范化标题}-{测试日期YYYYMMDD}/`。填写标题和 `testedAt` 后运行 `npm run urls:fill`；已有地址不被覆盖。运行 `npm run urls:check` 可在提交前检查缺失、格式、重复及已发布地址变更。完整流程见 `templates/reviews/README.md` 与 `docs/changes/review-urls.md`。
+
 ## 广告
 
 四个位置分别维护，目录决定投放位置：

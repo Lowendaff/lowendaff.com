@@ -6,6 +6,8 @@
 
 ```sh
 npm run format:check
+npm run urls:check
+npm run verify:urls
 npm run check
 npm run build
 npm run verify:content

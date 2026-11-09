@@ -16,6 +16,7 @@ const build = () =>
 async function add(id, type, vendor, country, draft = false) {
   const path = file(`src/content/posts/type-verification-${id}.mdx`);
   const body = `---
+permalink: '/reviews/type-verification-${id}-20261108/'
 title: '类型验证 ${id}'
 description: '自动验证夹具，不是真实测评。'
 ${type ? `reviewType: ${type}` : ''}
@@ -61,12 +62,14 @@ try {
   }
   for (const type of ['vps', 'dedicated']) {
     const html = await read(
-      `dist/reviews/type-verification-${type}-1/index.html`,
+      `dist/reviews/type-verification-${type}-1-20261108/index.html`,
     );
     assert(html.includes(`data-review-kind="${type}"`));
     assert(html.includes(`href="/?type=${type}#reviews"`));
   }
-  await assert.rejects(read('dist/reviews/type-verification-draft/index.html'));
+  await assert.rejects(
+    read('dist/reviews/type-verification-draft-20261108/index.html'),
+  );
   const output = file('test-results/review-types/site/');
   await mkdir(output, { recursive: true });
   await cp(file('dist/'), output, { recursive: true });

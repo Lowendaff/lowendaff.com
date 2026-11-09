@@ -5,14 +5,14 @@ import { getPublishedPosts, postPath } from '../lib/posts';
 export async function getStaticPaths() {
   return (await getPublishedPosts())
     .filter(({ data }) => data.originalUrl)
-    .map(({ id, data }) => ({
+    .map(({ data }) => ({
       params: {
         legacy: decodeURIComponent(new URL(data.originalUrl!).pathname).replace(
           /^\/|\/$/g,
           '',
         ),
       },
-      props: { destination: postPath(id) },
+      props: { destination: postPath({ data }) },
     }));
 }
 return Astro.redirect(Astro.props.destination, 301);

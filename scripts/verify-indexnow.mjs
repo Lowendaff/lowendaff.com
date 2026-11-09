@@ -33,6 +33,36 @@ const digest = hash('content');
 const html = (body) =>
   `<html><head><title>真实测评</title><meta name="description" content="实测数据"></head><body><nav>导航</nav><main>${body}</main></body></html>`;
 
+test('Chinese review URL migration retains old deletions and rejects ambiguous encodings', () => {
+  const next = encodeURI(
+    config.site + '/reviews/100tb-美国洛杉矶-cn2-vps-测试记录-20261007/',
+  );
+  const index = {
+    schema: 1,
+    site: config.site,
+    indexable: true,
+    entries: { [next]: digest },
+  };
+  validateIndex(index, config.site);
+  const previous = {
+    ...planState(null, { [article]: digest }, commit),
+    pending: {},
+  };
+  const migration = planState(previous, index.entries, commit);
+  assert.equal(migration.pending[article], null);
+  assert.equal(migration.pending[next], digest);
+  for (const url of [
+    decodeURI(next),
+    next.replace('%E7', '%e7'),
+    config.site + '/reviews/foo%2Fbar/',
+    config.site + '/reviews/%252E%252E/',
+    config.site + '/reviews/foo%3Fbar/',
+  ])
+    assert.throws(() =>
+      validateIndex({ ...index, entries: { [url]: digest } }, config.site),
+    );
+});
+
 test('strict configuration and canonical URL boundaries', () => {
   assert.deepEqual(validateConfig(config), config);
   for (const indexNow of [

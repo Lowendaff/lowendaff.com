@@ -3,6 +3,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { postsLoader } from './loaders/posts';
 import { reviewTypes } from './lib/review-types';
+import { isReviewPermalink, isReviewAlias } from './lib/review-url';
 import { compatibilitySchema, reviewImagesSchema } from './lib/readable-review';
 
 const httpUrl = z
@@ -126,6 +127,18 @@ const posts = defineCollection({
       images: reviewImagesSchema.optional(),
       recordId: identifier.optional(),
       title: z.string().min(1),
+      permalink: z
+        .string()
+        .refine(
+          isReviewPermalink,
+          'Use /reviews/{normalized-title}-{YYYYMMDD}/',
+        )
+        .optional(),
+      redirectFrom: z
+        .array(
+          z.string().refine(isReviewAlias, 'Use a former /reviews/.../ path'),
+        )
+        .default([]),
       description: z.string().trim().min(1),
       vendor: z.string().min(1),
       originalUrl: httpUrl
@@ -193,6 +206,12 @@ const posts = defineCollection({
         .optional(),
     })
     .superRefine((data, ctx) => {
+      if (data.kind === 'review' && !data.permalink)
+        ctx.addIssue({
+          code: 'custom',
+          path: ['permalink'],
+          message: 'Missing permalink; run npm run urls:fill',
+        });
       if (data.updatedAt && data.updatedAt < data.publishedAt)
         ctx.addIssue({
           code: 'custom',

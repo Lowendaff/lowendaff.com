@@ -162,6 +162,24 @@ class DeploymentTests(unittest.TestCase):
             with self.assertRaisesRegex(deploy.DeployError, 'indexing policy'):
                 deploy.deploy(data, self.root, self.fixture(data), lambda _: None)
 
+    def test_chinese_article_directory_matches_percent_encoded_sitemap(self):
+        path = '/reviews/100tb-美国洛杉矶-cn2-vps-测试记录-20261007/'
+        url = 'https://lowendaff.com' + deploy.urllib.parse.quote(path, safe='/')
+        sitemap = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(
+            f'<url><loc>{value}</loc></url>' for value in ['https://lowendaff.com/', 'https://lowendaff.com/ads/', url]
+        ) + '</urlset>'
+        data = payload()
+        override = {path.lstrip('/') + 'index.html': '<meta name="robots" content="index,follow">', 'sitemap.xml': sitemap}
+        with patch.dict(os.environ, {'LOWENDAFF_SITE_INDEXABLE': 'true'}):
+            self.assertEqual(deploy.deploy(data, self.root, self.fixture(data, True, override), lambda _: None), 'deployed')
+        # A raw Unicode or unrelated path must not bypass the exact sitemap contract.
+        for replacement in ['https://lowendaff.com' + path, url.replace('20261007', '20261008')]:
+            directory = self.root / 'current'
+            (directory / 'sitemap.xml').write_text(sitemap.replace(url, replacement))
+            with patch.dict(os.environ, {'LOWENDAFF_SITE_INDEXABLE': 'true'}):
+                with self.assertRaisesRegex(deploy.DeployError, 'sitemap'):
+                    deploy.verify_site(directory, data)
+
     def test_health_matches_manifest_when_rolling_back_across_indexing_modes(self):
         import types
         for indexable in (True, False):

@@ -179,7 +179,7 @@ def verify_site(directory, payload):
             raise DeployError('page indexing policy mismatch')
         if expected == 'index,follow':
             path = '/' + relative.removesuffix('index.html')
-            expected_urls.add('https://lowendaff.com' + path)
+            expected_urls.add('https://lowendaff.com' + urllib.parse.quote(path, safe='/'))
     sitemap = ET.fromstring((directory / 'sitemap.xml').read_text())
     namespace = '{http://www.sitemaps.org/schemas/sitemap/0.9}'
     if sitemap.tag != namespace + 'urlset':

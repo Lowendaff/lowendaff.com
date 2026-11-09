@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-11-09 URL 规则已本地实现：`/reviews/{规范化中文标题}-{测试日期YYYYMMDD}/`，保留末尾斜杠；显式 permalink、自动补全、唯一性与基线冻结检查已加入 CI。见 `changes/review-urls.md`；OpenViking `viking://resources/projects/lowendaff-ui/review-urls.md`。用户已授权推送部署；服务器安装器已备份更新，新页面上线后安装旧地址 HTTP 301。最终提交、CI、Webhook 与公网核验见 `test-results/review-urls/deployment-receipt.json`。
+
 2026-11-09 最新：Google / Bing 已完成 100TB 实时抓取检查与索引申请，尚未确认正式收录，见 `changes/article-indexing-check.md`，OpenViking `viking://resources/projects/lowendaff-ui/article-indexing-check.md`。用户随后指定 unslop 和新版 Impeccable，并要求优先处理 Skill、URL 留待下一步；挂载及规则取舍见 `changes/design-skill-refresh.md`，OpenViking `viking://resources/projects/lowendaff-ui/design-skill-refresh.md`。安装阶段未修改界面或 URL；后续阅读精修见 `changes/ui-reading-polish.md`，用户已授权提交并核验自动部署。
 
 2026-11-09 后续：用户跳过百度；SEO/GEO 抓取检查及 GA4 实时数据核验完成，授权恢复一篇 100TB 测评验证正式发布。归档 `changes/seo-acceptance-100tb.md`；OpenViking `viking://resources/projects/lowendaff-ui/seo-acceptance-100tb.md`；上线证据 `test-results/seo-acceptance/deployment-receipt.json`。

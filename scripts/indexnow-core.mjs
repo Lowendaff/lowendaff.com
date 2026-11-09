@@ -33,9 +33,11 @@ export function validPage(url, site) {
       !parsed.search &&
       !parsed.hash &&
       parsed.href === url &&
-      /^\/(?:ads\/|tags\/|reviews\/[a-z0-9]+(?:-[a-z0-9]+)*\/)?$/.test(
-        parsed.pathname,
-      )
+      // Keep former ASCII article URLs valid for deletion notifications after migration.
+      /^\/(?:ads\/|tags\/|reviews\/[a-z0-9\p{Script=Han}]+(?:-[a-z0-9\p{Script=Han}]+)*\/)?$/u.test(
+        decodeURIComponent(parsed.pathname),
+      ) &&
+      encodeURI(decodeURIComponent(parsed.pathname)) === parsed.pathname
     );
   } catch {
     return false;
