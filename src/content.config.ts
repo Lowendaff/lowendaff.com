@@ -3,7 +3,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { postsLoader } from './loaders/posts';
 import { reviewTypes } from './lib/review-types';
-import { isReviewPermalink, isReviewAlias } from './lib/review-url';
+import { isReviewPermalink } from './lib/review-url';
 import { compatibilitySchema, reviewImagesSchema } from './lib/readable-review';
 
 const httpUrl = z
@@ -134,24 +134,11 @@ const posts = defineCollection({
           'Use /reviews/{normalized-title}-{YYYYMMDD}/',
         )
         .optional(),
-      redirectFrom: z
-        .array(
-          z.string().refine(isReviewAlias, 'Use a former /reviews/.../ path'),
-        )
-        .default([]),
+      // A new site has one canonical URL per article, without legacy aliases.
+      redirectFrom: z.never().optional(),
       description: z.string().trim().min(1),
       vendor: z.string().min(1),
-      originalUrl: httpUrl
-        .refine((value) => {
-          const url = new URL(value);
-          return (
-            url.origin === 'https://lowendaff.com' &&
-            /^\/\d{4}\/\d{2}\/\d{2}\/[^/]+\/$/.test(url.pathname) &&
-            !url.search &&
-            !url.hash
-          );
-        }, 'Use the original LowEndAFF dated permalink')
-        .optional(),
+      originalUrl: z.never().optional(),
       archiveSnapshot: httpUrl.optional(),
       evidence: z.string().optional(),
       categories: z.array(z.string()).default([]),

@@ -61,4 +61,4 @@ npm run verify:analytics
 
 ## 发布边界
 
-默认构建 noindex，Figma 捕获脚本不可进入生产输出。`verify:release` 检查 SEO 元数据、RSS、sitemap 和旧 URL 回退；不代表实际主机已部署 HTTP 301。公开发布另按 `release-guide.md` 执行。
+默认构建 noindex，Figma 捕获脚本不可进入生产输出。`verify:release` 检查 SEO 元数据、RSS、sitemap，并拒绝静态跳转页、`_redirects` 与旧 `/feed/` 路由。公开发布另按 `release-guide.md` 执行。

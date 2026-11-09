@@ -70,14 +70,13 @@ else
   );
 assert.equal(new Set(urls).size, urls.length, 'Unique sitemap URLs');
 const expectedUrls = new Set();
-const redirects = [];
 for (const file of pages) {
   const html = await read(file);
   assert(!html.includes('mcp.figma.com'), `${file}: capture script leaked`);
-  if (html.includes('http-equiv="refresh"')) {
-    redirects.push(file);
-    continue;
-  }
+  assert(
+    !/http-equiv=["']refresh["']/i.test(html),
+    `${file}: redirect page is not allowed`,
+  );
   const pagePath = `/${file.replace(/index\.html$/, '')}`;
   const analyticsJson = html.match(
     /<script id="site-analytics-config" type="application\/json">([\s\S]*?)<\/script>/,
@@ -169,7 +168,16 @@ for (const file of pages) {
 const rss = await read('rss.xml');
 const robots = await read('robots.txt');
 const llms = await read('llms.txt');
-const rules = await read('_redirects');
+await assert.rejects(
+  read('_redirects'),
+  { code: 'ENOENT' },
+  'No legacy hosting rules',
+);
+await assert.rejects(
+  read('feed/index.html'),
+  { code: 'ENOENT' },
+  'RSS is served only at /rss.xml',
+);
 assert.match(rss, /<rss version="2.0">/);
 assert(
   !rss.includes('web.archive.org'),
@@ -189,24 +197,12 @@ assert.equal(
 );
 assert(!/priority|changefreq/.test(sitemap), 'No invented sitemap hints');
 assert(!llms.includes('/components/'), 'UI kit excluded from AI directory');
-assert(rules.includes('/feed/ /rss.xml 301'), 'Legacy RSS redirect');
-assert(redirects.includes('feed/index.html'), 'RSS redirect fallback');
-const reviewPages = pages.filter(
-  (path) => path.startsWith('reviews/') && !redirects.includes(path),
-);
+const reviewPages = pages.filter((path) => path.startsWith('reviews/'));
 assert.equal(
   (rss.match(/<item>/g) || []).length,
   reviewPages.length,
   'RSS must match actual articles',
 );
-for (const file of redirects) {
-  const html = await read(file);
-  const target = html.match(
-    /http-equiv="refresh" content="0;url=([^"\s]+)/,
-  )?.[1];
-  assert(target, `${file}: missing redirect target`);
-  await read(target.replace(/^\//, '').replace(/\/$/, '/index.html'));
-}
 for (const file of reviewPages) {
   const path = `/${file.replace(/index\.html$/, '')}`;
   assert.equal(
@@ -237,7 +233,7 @@ console.log(
     {
       indexable,
       htmlPages: pages.length,
-      redirectPages: redirects.length,
+      redirectPages: 0,
       rssItems: (rss.match(/<item>/g) || []).length,
       sitemapUrls: (sitemap.match(/<loc>/g) || []).length,
       captureScriptAbsent: true,

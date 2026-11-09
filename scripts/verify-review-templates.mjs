@@ -155,12 +155,20 @@ try {
     /Duplicate review URL/,
   );
   await rejectsArticle(
-    'alias-collision',
+    'unsupported-redirect',
     header.replace(
       /^---\n/,
       "---\nredirectFrom: ['/reviews/template-check-vps-20261108/']\n",
     ) + validBody,
-    /Duplicate review URL/,
+    /redirectFrom/,
+  );
+  await rejectsArticle(
+    'unsupported-original-url',
+    header.replace(
+      /^---\n/,
+      "---\noriginalUrl: 'https://lowendaff.com/2026/11/08/sample/'\n",
+    ) + validBody,
+    /originalUrl/,
   );
   await rejectsArticle(
     'missing-title',

@@ -38,7 +38,7 @@ for (const post of posts) {
     next: insertPermalink(post.source, post.data.permalink),
   });
 }
-// Check all reserved addresses before writing any file, including drafts and aliases.
+// Check all reserved addresses before writing any file, including drafts.
 assertUniqueReviewUrls(
   posts.filter((post) => post.data.permalink !== undefined),
 );

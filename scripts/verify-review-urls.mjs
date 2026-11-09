@@ -111,7 +111,7 @@ test('test date is explicit, calendar-valid and never inferred from publication 
     assert.equal(isReviewPermalink(value), false, value);
 });
 
-test('canonical and redirect addresses share one namespace, including drafts', () => {
+test('canonical addresses are unique including drafts and legacy URL fields are rejected', () => {
   const entry = { id: 'a', data: { permalink: address } };
   assert.throws(
     () =>
@@ -121,37 +121,18 @@ test('canonical and redirect addresses share one namespace, including drafts', (
       ]),
     /Duplicate/,
   );
-  assert.throws(
-    () =>
-      assertUniqueReviewUrls([
-        entry,
-        {
-          id: 'b',
-          data: {
-            permalink: '/reviews/other-20261110/',
-            redirectFrom: [address],
-          },
-        },
-      ]),
-    /Duplicate/,
-  );
-  assert.throws(
-    () =>
-      assertUniqueReviewUrls([
-        { id: 'a', data: { permalink: address, redirectFrom: [address] } },
-      ]),
-    /Duplicate/,
-  );
-  assert.throws(
-    () =>
-      assertUniqueReviewUrls([
-        {
-          id: 'a',
-          data: { permalink: address, redirectFrom: ['/reviews/%2e%2e/'] },
-        },
-      ]),
-    /invalid redirect/,
-  );
+  for (const extra of [
+    { redirectFrom: ['/reviews/sample/'] },
+    { originalUrl: 'https://lowendaff.com/2026/11/10/sample/' },
+  ]) {
+    assert.throws(
+      () =>
+        assertUniqueReviewUrls([
+          { id: 'a', data: { permalink: address, ...extra } },
+        ]),
+      /legacy URL fields are not supported/,
+    );
+  }
 });
 
 test('fill supports dry-run, targeted files, preserves all existing bytes and is idempotent', async (t) => {
@@ -233,25 +214,23 @@ test('published URLs survive title/date changes and file renames, while URL rewr
   run('check-review-urls.mjs', f.directory);
 });
 
-test('first migration reserves the former URL and later changes cannot remove it', async (t) => {
+test('existing content can receive a canonical URL without preserving a filename alias', async (t) => {
   const f = await fixture(t);
   await f.write(source());
   commit(f.directory);
   run('fill-review-urls.mjs', f.directory);
-  fails(
-    () => run('check-review-urls.mjs', f.directory),
-    /first migration must preserve/,
-  );
-  await f.write(
-    insertPermalink(source("redirectFrom: ['/reviews/sample/']\n"), address),
-  );
   run('check-review-urls.mjs', f.directory);
-  commit(f.directory);
-  await f.write(insertPermalink(source(), address));
-  fails(
-    () => run('check-review-urls.mjs', f.directory),
-    /cannot remove published redirect/,
-  );
+  assert.equal(parsePost(await f.read(), f.file).data.permalink, address);
+  for (const extra of [
+    "redirectFrom: ['/reviews/sample/']\n",
+    "originalUrl: 'https://lowendaff.com/2026/11/10/sample/'\n",
+  ]) {
+    await f.write(insertPermalink(source(extra), address));
+    fails(
+      () => run('check-review-urls.mjs', f.directory),
+      /legacy URL fields are not supported/,
+    );
+  }
 });
 
 test('invalid YAML and duplicate keys are rejected instead of rewritten', async (t) => {

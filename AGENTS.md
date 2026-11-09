@@ -14,11 +14,11 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 
 ## Content & UI Contracts
 
-- 测评地址使用 `/reviews/{规范化中文标题}-{测试日期YYYYMMDD}/`，保留末尾 `/`，Frontmatter `permalink` 与文件名/后续标题解耦。`npm run urls:fill` 仅补缺；`urls:check` + `verify:urls` 纳入 CI。已提交非草稿地址冻结，草稿也检查唯一性；初次迁移保留 `redirectFrom`，不可与任何正式地址冲突。指南 `templates/reviews/README.md`，归档 `docs/changes/review-urls.md`。
+- 测评地址使用 `/reviews/{规范化中文标题}-{测试日期YYYYMMDD}/`，保留末尾 `/`，Frontmatter `permalink` 与文件名/后续标题解耦。`npm run urls:fill` 仅补缺；`urls:check` + `verify:urls` 纳入 CI。已提交非草稿地址冻结，草稿也检查唯一性；全新站点不兼容旧地址，不使用 `redirectFrom` / `originalUrl` 生成跳转；旧地址返回 404，CI 拒绝这些字段与静态跳转页。指南 `templates/reviews/README.md`，归档 `docs/changes/review-urls.md`。
 
 - 真实测评只存 `src/content/posts/*.mdx`，经 Zod 和 `getCollection()` 渲染，不在 Astro/TS 硬编码。2026-11-09 用户授权恢复 `100tb-cn2.mdx`，当前只有这一篇正式测评；其余已撤下文章不能自动恢复，模板占位内容不能发布。
 - 新文章模板在 `templates/reviews/`：VPS 与独服分别使用 `reviewType: vps | dedicated`，均可用易读 Markdown；不把模板占位内容导入集合。章节可按实测省略，SMART/RAID 放磁盘、拓扑/dmidecode 放系统子标题；原始输出用代码围栏。验证用 `npm run verify:templates`。
-- 100TB 从 Git 历史恢复，保留 2026-10-08 发布日期及 2026-10-07 测试时间；PanstarCloud 仍撤下。历史快照仅用于来源核对，不设置 `originalUrl` 触发旧地址跳转。新增文章从模板创建，验证使用临时合成夹具，结束后清理。
+- 100TB 从 Git 历史恢复，保留 2026-10-08 发布日期及 2026-10-07 测试时间；PanstarCloud 仍撤下。历史快照仅用于内容来源核对，不承担旧网址兼容。新增文章从模板创建，验证使用临时合成夹具，结束后清理。
 - 广告分别由 `src/content/ads/{home,article-top,article-bottom,article-sidebar}/` 的 Markdown 控制；Sponsors 独立集合与 SVG。不得恢复共享广告 placements 或按商家名写死展示。
 - 导航：首页、广告、标签云；不恢复搜索。首页每页 20 条，无价格/配置/历史原文标签；友链仅首页显示。
 - 测评类型只读 Frontmatter `reviewType: vps | dedicated`（缺省 VPS）。首页与标签云提供「全部 / VPS / 独立服务器」，列表和文章头部显示文字标签；类型与商家/国家组合筛选，URL 保留状态，切换类型重置页码。此项不包含置顶排序。回归：`verify:types` 及 `scripts/verify-review-type-browser.js`。
@@ -61,7 +61,7 @@ VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking�
 
 ## Git & Agent Workflow
 
-2026-11-09：URL 规则、补全与 CI 校验完成，用户已授权推送及部署。服务器安装器已备份并更新中文路径校验；旧地址 HTTP 301 配置保存在 `deploy/openresty-location.conf`，须在新页面上线后安装、检查并 reload。静态产物不会自动更新安装器，OpenResty 不会读取 `_redirects`；以后增加别名也需同步服务器规则。100TB 新路径及流程见 `docs/changes/review-urls.md`，最终提交、CI、Webhook 和公网验证以 `test-results/review-urls/deployment-receipt.json` 为准。OpenViking：`viking://resources/projects/lowendaff-ui/review-urls.md`。
+2026-11-09：URL 规则、补全与 CI 校验完成。用户明确要求全新站点，不保留旧地址 301；已删除文章别名、WordPress 路由、旧 `/feed/` 跳转与 `_redirects` 生成逻辑，RSS 使用 `/rss.xml`。服务器 OpenResty include 同步移除文章 301。规则见 `docs/changes/review-urls.md`，撤销兼容记录见 `docs/changes/remove-legacy-redirects.md`，最终发布证据以 `test-results/remove-legacy-redirects/deployment-receipt.json` 为准。OpenViking：`viking://resources/projects/lowendaff-ui/review-urls.md`。
 
 2026-11-09：用户授权三项阅读界面精修，已本地完成；用户随后授权提交 GitHub 并核验自动部署，结果以 `test-results/ui-reading-polish/deployment-receipt.json` 为准。目录位于标题元信息之后、顶部广告之前；手机默认收起、点击展开，桌面采用贴合页头的横向 sticky 章节栏，避免侧栏目录遮挡广告。路由表使用主题滚动条与动态四向边缘提示，桌面数量字号 12px。归档 `docs/changes/ui-reading-polish.md`；OpenViking `viking://resources/projects/lowendaff-ui/ui-reading-polish.md`，回执见 `test-results/ui-reading-polish/`。不要恢复已否决的侧栏顶部 sticky 目录布局。
 

@@ -55,21 +55,9 @@ export function isReviewPermalink(value: unknown): value is string {
   );
 }
 
-/** Only former review paths can be reserved as aliases; no arbitrary redirects. */
-export function isReviewAlias(value: unknown): value is string {
-  return (
-    typeof value === 'string' &&
-    /^\/reviews\/[a-z0-9\p{Script=Han}]+(?:-[a-z0-9\p{Script=Han}]+)*\/$/u.test(
-      value,
-    ) &&
-    value.normalize('NFKC') === value
-  );
-}
-
 export type ReviewAddress = {
   kind?: string;
   permalink?: string;
-  redirectFrom?: string[];
 };
 
 export function assertUniqueReviewUrls(
@@ -77,18 +65,21 @@ export function assertUniqueReviewUrls(
 ): void {
   const owners = new Map<string, string>();
   for (const { id, data } of entries) {
+    if (
+      Object.hasOwn(data, 'redirectFrom') ||
+      Object.hasOwn(data, 'originalUrl')
+    )
+      throw new Error(`${id}: legacy URL fields are not supported`);
     if (data.kind === 'archive-reference') continue;
     if (!isReviewPermalink(data.permalink))
       throw new Error(
         `${id}: missing or invalid permalink; run npm run urls:fill`,
       );
-    for (const url of [data.permalink, ...(data.redirectFrom ?? [])]) {
-      if (!isReviewAlias(url))
-        throw new Error(`${id}: invalid redirectFrom URL: ${url}`);
-      const previous = owners.get(url);
-      if (previous)
-        throw new Error(`Duplicate review URL ${url}: ${previous} and ${id}`);
-      owners.set(url, id);
-    }
+    const previous = owners.get(data.permalink);
+    if (previous)
+      throw new Error(
+        `Duplicate review URL ${data.permalink}: ${previous} and ${id}`,
+      );
+    owners.set(data.permalink, id);
   }
 }

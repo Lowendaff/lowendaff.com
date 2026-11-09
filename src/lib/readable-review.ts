@@ -28,7 +28,6 @@ const optionsSchema = z.object({
   format: z.literal('review-markdown'),
   recordId: identifier.optional(),
   archiveSnapshot: z.url().optional(),
-  originalUrl: z.url().optional(),
   purchaseUrl: z.url().optional(),
   compatibility: compatibilitySchema.optional(),
   images: reviewImagesSchema.optional(),
@@ -250,7 +249,7 @@ export function parseReadableReview(
   }
   return {
     id: key,
-    source: options.archiveSnapshot ?? options.originalUrl,
+    source: options.archiveSnapshot,
     legacyAnchors: options.compatibility?.anchors ?? {},
     sections,
   };

@@ -73,12 +73,6 @@ for (const post of current) {
       throw new Error(
         `${post.file}: published permalink is immutable; restore ${previous.data.permalink}`,
       );
-    for (const alias of previous.data.redirectFrom ?? []) {
-      if (!post.data.redirectFrom?.includes(alias))
-        throw new Error(
-          `${post.file}: cannot remove published redirect ${alias}`,
-        );
-    }
   } else {
     const expected = generateReviewPermalink(
       post.data.title,
@@ -86,16 +80,6 @@ for (const post of current) {
     );
     if (post.data.permalink !== expected)
       throw new Error(`${post.file}: initial permalink must be ${expected}`);
-    if (published) {
-      const oldUrl = `/reviews/${previous.file
-        .split('/')
-        .at(-1)
-        .replace(/\.mdx$/, '')}/`;
-      if (!post.data.redirectFrom?.includes(oldUrl))
-        throw new Error(
-          `${post.file}: first migration must preserve ${oldUrl} in redirectFrom`,
-        );
-    }
   }
 }
 console.log(

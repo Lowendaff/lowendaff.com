@@ -1,23 +1,18 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
-import { getPublishedPosts, postPath } from '../../lib/posts';
+import { getPublishedPosts } from '../../lib/posts';
 import ReviewLayout from '../../layouts/ReviewLayout.astro';
 import FullReview from '../../components/archive/FullReview.astro';
 export async function getStaticPaths() {
-  return (await getPublishedPosts()).flatMap((post) => [
-    { params: { id: post.data.permalink!.split('/')[2] }, props: { post } },
-    ...post.data.redirectFrom.map((alias) => ({
-      params: { id: alias.split('/')[2] },
-      props: { post, redirect: postPath(post) },
-    })),
-  ]);
+  return (await getPublishedPosts()).map((post) => ({
+    params: { id: post.data.permalink!.split('/')[2] },
+    props: { post },
+  }));
 }
 interface Props {
   post: CollectionEntry<'posts'>;
-  redirect?: string;
 }
 const { post } = Astro.props;
-if (Astro.props.redirect) return Astro.redirect(Astro.props.redirect, 301);
 const readable = post.data.format === 'review-markdown';
 const rendered = readable ? undefined : await render(post);
 const Content = rendered?.Content;

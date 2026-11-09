@@ -29,7 +29,7 @@ npm run urls:check             # 只检查，不改文件
 
 生成的 `permalink` 是唯一地址来源，文件名仍可使用简短英文名称。重复执行不会改写已有地址。尚未发布的草稿修改标题/日期后，可以删除其 `permalink` 再补全；已发布文章改标题或纠正日期必须保留地址。同日同标题撞名时命令报错、不写文件、不自动添加序号；请用有意义的标题区分两份独立测试。
 
-CI 对新文章检查标题/测试日期与地址一致，对基线中非草稿文章检查地址不可变；草稿也必须有合法、唯一的地址。`redirectFrom` 用于一次性迁移已上线的新站旧地址，不能填 WordPress 快照或外站 URL，也不能抢占其他文章的地址。
+CI 对新文章检查标题/测试日期与地址一致，对基线中非草稿文章检查地址不可变；草稿也必须有合法、唯一的地址。站点不兼容旧地址，不提供别名或 301；`redirectFrom`、`originalUrl` 会被 CI 和构建拒绝。
 
 ## 元数据
 
@@ -41,7 +41,7 @@ CI 对新文章检查标题/测试日期与地址一致，对基线中非草稿�
 - `description` 必填，以一两句话交代产品、测试范围、主要发现或限制，避免泛泛口号；用于搜索摘要、分享卡片和 `llms.txt` 索引。不能填写正文没有支持的结论。
 - `author` 填实际作者；可选 `authorUrl` 指向真实作者介绍页，不虚构资历。可选 `coverImage` 使用站点内 PNG/JPEG/WebP/AVIF 路径或 HTTP(S) 图片地址，`coverAlt` 描述配图内容；只用于分享及文章元数据，不增加正文头图。无实测相关配图时省略，分享卡使用站点头像。
 - `categories`、`tags` 自由填写；商家和国家筛选仍分别读取 `vendor`、`country`。
-- 新文章不用填 `originalUrl`、`archiveSnapshot`、`evidence`、`compatibility`、`showcase`。这些是历史迁移或展示页选样信息。
+- 新文章不用填 `archiveSnapshot`、`evidence`、`compatibility`、`showcase`。这些是历史迁移或展示页选样信息。
 - 有 Affiliate 时设 `affiliate: true`、填写真实 `purchaseUrl`，正文明确披露返佣关系；正文购买链接与 `purchaseUrl` 保持一致。优惠和价格以具体测试/活动日期为准。
 - 广告和 Sponsors 继续在各自 Markdown 集合维护，不塞进文章模板。
 

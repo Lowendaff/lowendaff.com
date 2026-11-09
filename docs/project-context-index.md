@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-2026-11-09 URL 规则已本地实现：`/reviews/{规范化中文标题}-{测试日期YYYYMMDD}/`，保留末尾斜杠；显式 permalink、自动补全、唯一性与基线冻结检查已加入 CI。见 `changes/review-urls.md`；OpenViking `viking://resources/projects/lowendaff-ui/review-urls.md`。用户已授权推送部署；服务器安装器已备份更新，新页面上线后安装旧地址 HTTP 301。最终提交、CI、Webhook 与公网核验见 `test-results/review-urls/deployment-receipt.json`。
+2026-11-09 URL 规则：`/reviews/{规范化中文标题}-{测试日期YYYYMMDD}/`，保留末尾斜杠；显式 permalink、自动补全、唯一性与基线冻结检查纳入 CI。用户明确要求全新站点，撤销旧地址兼容、301、静态跳转页和 `_redirects` 生成；旧地址返回 404。见 `changes/review-urls.md`、`changes/remove-legacy-redirects.md`，最新发布回执 `test-results/remove-legacy-redirects/deployment-receipt.json`；OpenViking `viking://resources/projects/lowendaff-ui/review-urls.md`。
 
 2026-11-09 最新：Google / Bing 已完成 100TB 实时抓取检查与索引申请，尚未确认正式收录，见 `changes/article-indexing-check.md`，OpenViking `viking://resources/projects/lowendaff-ui/article-indexing-check.md`。用户随后指定 unslop 和新版 Impeccable，并要求优先处理 Skill、URL 留待下一步；挂载及规则取舍见 `changes/design-skill-refresh.md`，OpenViking `viking://resources/projects/lowendaff-ui/design-skill-refresh.md`。安装阶段未修改界面或 URL；后续阅读精修见 `changes/ui-reading-polish.md`，用户已授权提交并核验自动部署。
 
