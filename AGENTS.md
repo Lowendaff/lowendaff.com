@@ -14,9 +14,9 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 
 ## Content & UI Contracts
 
-- 真实测评只存 `src/content/posts/*.mdx`，经 Zod 和 `getCollection()` 渲染，不在 Astro/TS 硬编码。当前文章集合为空，原有 42 篇已按用户要求撤下；不能自动恢复或发布模板占位内容。
+- 真实测评只存 `src/content/posts/*.mdx`，经 Zod 和 `getCollection()` 渲染，不在 Astro/TS 硬编码。2026-11-09 用户授权恢复 `100tb-cn2.mdx`，当前只有这一篇正式测评；其余已撤下文章不能自动恢复，模板占位内容不能发布。
 - 新文章模板在 `templates/reviews/`：VPS 与独服分别使用 `reviewType: vps | dedicated`，均可用易读 Markdown；不把模板占位内容导入集合。章节可按实测省略，SMART/RAID 放磁盘、拓扑/dmidecode 放系统子标题；原始输出用代码围栏。验证用 `npm run verify:templates`。
-- 历史 100TB / PanstarCloud 文章只存在于 Git 历史，不作为运行时或测试必需文件。新增文章从模板创建，验证使用临时合成夹具，结束后清理。
+- 100TB 从 Git 历史恢复，保留 2026-10-08 发布日期及 2026-10-07 测试时间；PanstarCloud 仍撤下。历史快照仅用于来源核对，不设置 `originalUrl` 触发旧地址跳转。新增文章从模板创建，验证使用临时合成夹具，结束后清理。
 - 广告分别由 `src/content/ads/{home,article-top,article-bottom,article-sidebar}/` 的 Markdown 控制；Sponsors 独立集合与 SVG。不得恢复共享广告 placements 或按商家名写死展示。
 - 导航：首页、广告、标签云；不恢复搜索。首页每页 20 条，无价格/配置/历史原文标签；友链仅首页显示。
 - 测评类型只读 Frontmatter `reviewType: vps | dedicated`（缺省 VPS）。首页与标签云提供「全部 / VPS / 独立服务器」，列表和文章头部显示文字标签；类型与商家/国家组合筛选，URL 保留状态，切换类型重置页码。此项不包含置顶排序。回归：`verify:types` 及 `scripts/verify-review-type-browser.js`。
@@ -56,9 +56,11 @@ VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking�
 
 ## Git & Agent Workflow
 
+2026-11-09：用户取消百度接入；已完成现有站点抓取/元信息检查及 GA4 实时数据核验，并授权以 100TB 文章验证正式发布。正文按原始快照逐项比对，105 张保留表格、9,132 个单元格一致；两张历史配图仍不可恢复，不用实时图替代历史证据。归档 `docs/changes/seo-acceptance-100tb.md`；OpenViking `viking://resources/projects/lowendaff-ui/seo-acceptance-100tb.md`；实际 CI、部署和通知结果以 `test-results/seo-acceptance/deployment-receipt.json` 为准。
+
 2026-11-09：IndexNow 由 `src/config/search-engines.json` 管理；构建生成内容索引与验证文件，CI 在 Webhook 发布后核验公网 commit/runId/runAttempt 和内容索引摘要再通知。纯样式变化不触发，草稿/组件/空标签页不提交；失败队列保存在 `indexnow-state` 产物 90 天，不回滚站点。手动运行 Deploy static site 只重试通知。新增检查 `npm run verify:indexnow`；维护说明 `docs/search-engines.md`，归档 `docs/changes/indexnow.md`；OpenViking `viking://resources/projects/lowendaff-ui/indexnow.md`，实际发布结果见 `test-results/indexnow/deployment-receipt.json`。
 
-2026-11-09：Google 网域验证已完成，Bing 复用已有站点权限；两家平台的 `sitemap.xml` 均成功抓取并发现 2 个页面。按用户授权清理三条旧 WordPress Sitemap 提交记录，各只保留当前 Sitemap；没有删除站点资源或申请全站搜索结果移除。详情 `docs/changes/search-console-onboarding.md`；OpenViking `viking://resources/projects/lowendaff-ui/search-console-onboarding.md`。百度与 IndexNow 尚未接入。
+2026-11-09：Google 网域验证已完成，Bing 复用已有站点权限；两家平台接入时的 `sitemap.xml` 均成功抓取并发现 2 个页面。按用户授权清理三条旧 WordPress Sitemap 提交记录，各只保留当前 Sitemap；没有删除站点资源或申请全站搜索结果移除。详情 `docs/changes/search-console-onboarding.md`；OpenViking `viking://resources/projects/lowendaff-ui/search-console-onboarding.md`。IndexNow 已接入，百度按用户决定跳过。
 
 2026-11-09：统计统一由 `src/config/analytics.json` 管理，不把 ID 写进组件或环境变量。只在正式构建与配置允许的 hostname 加载，组件页默认排除；GA4 与通用 HTTPS script/data-* 适配器不执行任意配置代码。提交前增加 `npm run verify:analytics`。llms.txt 中文字符集由 OpenResty server 级 `charset utf-8` 声明，不能只修改 Astro Response。指南 `docs/analytics.md`，归档 `docs/changes/analytics-charset.md`；OpenViking `viking://resources/projects/lowendaff-ui/analytics-charset.md`；发布证据 `test-results/analytics/deployment-receipt.json`。
 

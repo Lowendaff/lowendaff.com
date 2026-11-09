@@ -2,9 +2,11 @@
 
 ## 当前状态
 
+2026-11-09 后续：用户跳过百度；SEO/GEO 抓取检查及 GA4 实时数据核验完成，授权恢复一篇 100TB 测评验证正式发布。归档 `changes/seo-acceptance-100tb.md`；OpenViking `viking://resources/projects/lowendaff-ui/seo-acceptance-100tb.md`；上线证据 `test-results/seo-acceptance/deployment-receipt.json`。
+
 2026-11-09 后续：IndexNow 自动通知实现与维护见 `search-engines.md`、`changes/indexnow.md`，JSON 配置、内容差异、发布后公网核验及失败队列独立于浏览器统计；OpenViking `viking://resources/projects/lowendaff-ui/indexnow.md`。实际发布与 HTTP 回执以 `test-results/indexnow/deployment-receipt.json` 为准。
 
-2026-11-09 后续：Google / Bing 站长平台接入完成；当前 Sitemap 均已成功抓取并发现 2 个页面，旧 WordPress 的三条 Sitemap 提交记录已按用户授权清理。归档 `changes/search-console-onboarding.md`，OpenViking `viking://resources/projects/lowendaff-ui/search-console-onboarding.md`；本轮无代码发布，百度与 IndexNow 待后续执行。
+2026-11-09 后续：Google / Bing 站长平台接入完成；当前 Sitemap 均已成功抓取并发现 2 个页面，旧 WordPress 的三条 Sitemap 提交记录已按用户授权清理。归档 `changes/search-console-onboarding.md`，OpenViking `viking://resources/projects/lowendaff-ui/search-console-onboarding.md`；该阶段无代码发布；后续 IndexNow 已完成，百度已按用户要求跳过。
 
 2026-11-09 后续：已修复 OpenResty 静态文本缺 charset 导致的中文乱码；统计使用 `src/config/analytics.json`，支持 GA4 与外部脚本型平台，生产域名门禁和预览排除。指南 `analytics.md`，归档 `changes/analytics-charset.md`；OpenViking `viking://resources/projects/lowendaff-ui/analytics-charset.md`，最终上线证据 `test-results/analytics/deployment-receipt.json`。
 
@@ -12,7 +14,7 @@
 
 2026-11-09：Astro 工程已通过 GitHub `Lowendaff/lowendaff.com` 的 main 分支 CI 产物完成 HTTPS 部署演练，保持 noindex，未开启正式收录。首次 Git 同步结果以 `test-results/git-sync/` 回执为准；当前发布证据见 `test-results/deploy-rehearsal/`。源码和当前维护文档留在工作区；历史报告、截图、抓取日志、一次性脚本与旧素材已备份后移出，清理记录见 `changes/git-preparation.md`。
 
-原有 42 篇 MDX 已按用户要求撤下，当前文章集合为空；新增内容使用 VPS / 独服模板。撤下记录见 `changes/remove-existing-posts.md`。广告四个独立集合，Sponsors 单独维护。当前测试数据、广告和样式以源码为准；历史说明不覆盖 `AGENTS.md`。
+原有 42 篇 MDX 曾按用户要求撤下；2026-11-09 用户授权恢复 100TB 一篇，其余保持撤下。新增内容使用 VPS / 独服模板。撤下记录见 `changes/remove-existing-posts.md`。广告四个独立集合，Sponsors 单独维护。当前测试数据、广告和样式以源码为准；历史说明不覆盖 `AGENTS.md`。
 
 VPS / 独服类型区分已完成：首页筛选、列表/文章类型标签及标签云组合筛选，详见 `changes/review-types.md`。未实现置顶。OpenViking：`viking://resources/projects/lowendaff-ui/review-types.md`（全文回读一致，回执在 `test-results/review-types/openviking-receipt.json`）；Git 同步回执见 `test-results/review-types/git-push-receipt.json`。未部署或同步本次 Figma 画布。
 

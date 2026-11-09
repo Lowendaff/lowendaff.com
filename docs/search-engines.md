@@ -41,4 +41,4 @@ PUBLIC_SITE_INDEXABLE=true npm run verify:release
 
 CI 同时运行上述通知规则测试和发布模式验证。部署后检查公网 `deployment.json`、`search-index.json` 及验证文件，再查看 Actions 摘要中的实际 HTTP 状态；不能以单元测试或 Sitemap 成功代替 IndexNow 提交回执。
 
-官方协议：https://www.indexnow.org/documentation 。下一批可接入百度搜索资源平台，独立管理其账号验证与提交凭据。
+官方协议：https://www.indexnow.org/documentation 。百度搜索资源平台已于 2026-11-09 按用户决定跳过，不接入验证或提交凭据。
