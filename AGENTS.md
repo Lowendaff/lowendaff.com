@@ -35,9 +35,12 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 | `.agents/skills/web-design-guidelines/SKILL.md` | 排版、等宽数字、嵌套圆角与 Web 审查 |
 | `.agents/skills/figma-implement-design/SKILL.md` | Figma 与集合驱动页面的高保真映射 |
 | `.agents/skills/taste-skill-source/skills/taste-skill/SKILL.md` | 用户指定的视觉层级与交互细节审查；不以营销整屏规则覆盖既有阅读布局 |
-| `.agents/skills/impeccable-source/plugin/skills/impeccable/SKILL.md` | 既有界面的 polish / Read / Operate 审查；修复实际问题，检查器警告需结合产品判断 |
+| `.agents/skills/impeccable/SKILL.md` | 新版 Codex 入口；既有界面的 polish / Read / Operate 审查，修复实际问题，检查器警告需结合产品判断 |
+| `.agents/skills/unslop/SKILL.md` | 先审查实际画面、判断精修范围，再逐层处理间距、色彩、排版与交互；不得为变化而变化 |
 
 Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、`figma-design-to-code`；不把截图称为原生设计或映射表称为 Code Connect。语义表面层级、65–75ch 正文、锚点留距、图标标签、同心圆角及 reduced-motion 要求继续有效。
+
+2026-11-09 新 Skill 已挂载，来源及版本见 `docs/changes/design-skill-refresh.md`，OpenViking 全文回读一致，语义索引完成状态未确认。用户确认的 Tokyo 主题、国旗 Emoji、表格左对齐和地图循环规则优先于 Skill 通用建议；不自动套用营销 Hero、假数据或全站重做。安装阶段仅核对规则；后续界面精修见下方记录，URL 设计仍留待下一步讨论。
 
 ## Stage Checklist & Persistence
 
@@ -55,6 +58,10 @@ Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、
 VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking：`viking://resources/projects/lowendaff-ui/review-types.md`，全文回读一致。Git 同步回执见 `test-results/review-types/git-push-receipt.json`；本次未同步 Figma。
 
 ## Git & Agent Workflow
+
+2026-11-09：用户授权三项阅读界面精修，已本地完成；用户随后授权提交 GitHub 并核验自动部署，结果以 `test-results/ui-reading-polish/deployment-receipt.json` 为准。目录位于标题元信息之后、顶部广告之前；手机默认收起、点击展开，桌面采用贴合页头的横向 sticky 章节栏，避免侧栏目录遮挡广告。路由表使用主题滚动条与动态四向边缘提示，桌面数量字号 12px。归档 `docs/changes/ui-reading-polish.md`；OpenViking `viking://resources/projects/lowendaff-ui/ui-reading-polish.md`，回执见 `test-results/ui-reading-polish/`。不要恢复已否决的侧栏顶部 sticky 目录布局。
+
+2026-11-09：100TB 的 Google / Bing 实时检查均 HTTP 200、允许索引，两家索引申请均获确认；这不代表已实际收录。Google 唯一失败资源为统计上报请求，Bing 显示无 SEO/GEO 问题。归档 `docs/changes/article-indexing-check.md`；OpenViking `viking://resources/projects/lowendaff-ui/article-indexing-check.md`。新 Skill 归档 URI：`viking://resources/projects/lowendaff-ui/design-skill-refresh.md`；回执分别在 `test-results/article-indexing/` 与 `test-results/skill-refresh/`。
 
 2026-11-09：用户取消百度接入；已完成现有站点抓取/元信息检查及 GA4 实时数据核验，并授权以 100TB 文章验证正式发布。正文按原始快照逐项比对，105 张保留表格、9,132 个单元格一致；两张历史配图仍不可恢复，不用实时图替代历史证据。归档 `docs/changes/seo-acceptance-100tb.md`；OpenViking `viking://resources/projects/lowendaff-ui/seo-acceptance-100tb.md`；实际 CI、部署和通知结果以 `test-results/seo-acceptance/deployment-receipt.json` 为准。
 

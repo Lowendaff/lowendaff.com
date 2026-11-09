@@ -276,28 +276,6 @@
 .full-sidebar .advertising {
   margin-top: 28px;
 }
-.sticky-toc {
-  position: sticky;
-  top: 104px;
-  max-height: calc(100vh - 130px);
-  overflow-y: auto;
-  margin-top: 32px;
-  padding-left: 18px;
-}
-.sticky-toc a {
-  font-size: 13px;
-  padding: 6px 0;
-}
-.sticky-toc a:first-of-type {
-  color: inherit;
-}
-.sticky-toc a:hover {
-  color: var(--accent);
-}
-.sticky-toc h2 {
-  font-size: 14px;
-  color: var(--text);
-}
 .review-introduction {
   font-size: 14px;
   color: var(--muted);
@@ -499,7 +477,10 @@
   font-weight: 650;
 }
 .route-tabs button > span {
-  font: 10px 'JetBrains Mono Variable';
+  font:
+    12px 'JetBrains Mono Variable',
+    monospace;
+  font-variant-numeric: tabular-nums;
   color: var(--muted);
   background: var(--subtle);
   border-radius: 4px;
@@ -687,9 +668,6 @@
   .full-sidebar .advertising {
     margin-top: 0;
   }
-  .full-sidebar .sticky-toc {
-    display: none;
-  }
   .home-layout .bento-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -703,7 +681,8 @@
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    min-height: 32px;
+    min-height: 44px;
+    align-content: center;
   }
   .mobile-toc summary > span {
     font-size: 12px;
@@ -720,6 +699,9 @@
   .mobile-toc a {
     font-size: 14px;
     padding: 8px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
   .complete-review-grid .review-heading h1 {
     font-size: 36px;

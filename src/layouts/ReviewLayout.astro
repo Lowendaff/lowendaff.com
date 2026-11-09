@@ -92,7 +92,11 @@ const navigation = review
             )}
           </div>
         </header>
-        <ArticleTopAds />
+        <nav class="article-toc" aria-label="文章目录">
+          {navigation.map((s) => (
+            <a href={`#${s.id}`}>{s.label}</a>
+          ))}
+        </nav>
         <details class="mobile-toc">
           <summary>
             本文目录 <span>{navigation.length} 个阅读章节</span>
@@ -103,6 +107,7 @@ const navigation = review
             ))}
           </nav>
         </details>
+        <ArticleTopAds />
         {p.testedAt && (
           <p class="review-introduction">
             测试时间：<strong>{p.testedAt}</strong>
@@ -120,12 +125,6 @@ const navigation = review
       <aside class="review-sidebar full-sidebar">
         <Sponsors />
         <ArticleSidebarAds />
-        <nav class="toc sticky-toc" aria-label="文章目录">
-          <h2>本文目录</h2>
-          {navigation.map((s) => (
-            <a href={`#${s.id}`}>{s.label}</a>
-          ))}
-        </nav>
       </aside>
     </div>
   </div>

@@ -101,11 +101,23 @@ const groups = groupNames.map((name) => ({
             {table.type === 'code' ? (
               <ArchiveBlock block={table} sectionTitle="路由测试" />
             ) : (
-              <BenchmarkResultsTable
-                headers={table.headers || []}
-                rows={table.rows || []}
-                caption={table.headings?.at(-1) || '路由测试'}
-              />
+              <div class="route-table-frame" data-route-table>
+                <BenchmarkResultsTable
+                  headers={table.headers || []}
+                  rows={table.rows || []}
+                  caption={table.headings?.at(-1) || '路由测试'}
+                />
+                <span class="scroll-edge scroll-edge-left" aria-hidden="true" />
+                <span
+                  class="scroll-edge scroll-edge-right"
+                  aria-hidden="true"
+                />
+                <span class="scroll-edge scroll-edge-top" aria-hidden="true" />
+                <span
+                  class="scroll-edge scroll-edge-bottom"
+                  aria-hidden="true"
+                />
+              </div>
             )}
           </div>
         );
@@ -203,5 +215,64 @@ const groups = groupNames.map((name) => ({
       root.classList.add('enhanced');
       restore();
       render(false);
+
+      // Hidden route records are measured again when their panel becomes visible.
+      const scrollFrames = new Map<HTMLElement, HTMLElement>();
+      const pending = new Set<HTMLElement>();
+      let frameRequest = 0;
+      const measure = () => {
+        frameRequest = 0;
+        pending.forEach((viewport) => {
+          const frame = scrollFrames.get(viewport)!;
+          const visible = viewport.clientWidth > 0 && viewport.clientHeight > 0;
+          frame.dataset.scrollLeft = String(visible && viewport.scrollLeft > 1);
+          frame.dataset.scrollRight = String(
+            visible &&
+              viewport.scrollWidth -
+                viewport.clientWidth -
+                viewport.scrollLeft >
+                1,
+          );
+          frame.dataset.scrollUp = String(visible && viewport.scrollTop > 1);
+          frame.dataset.scrollDown = String(
+            visible &&
+              viewport.scrollHeight -
+                viewport.clientHeight -
+                viewport.scrollTop >
+                1,
+          );
+          if (visible) {
+            frame.style.setProperty(
+              '--route-header-height',
+              `${viewport.querySelector('thead')?.getBoundingClientRect().height ?? 0}px`,
+            );
+          }
+        });
+        pending.clear();
+      };
+      const schedule = (viewport: HTMLElement) => {
+        pending.add(viewport);
+        if (!frameRequest) frameRequest = requestAnimationFrame(measure);
+      };
+      const resizeObserver = new ResizeObserver((entries) => {
+        entries.forEach(({ target }) => {
+          const viewport = target.matches('.data-table')
+            ? (target as HTMLElement)
+            : target.closest<HTMLElement>('.data-table');
+          if (viewport) schedule(viewport);
+        });
+      });
+      root
+        .querySelectorAll<HTMLElement>('[data-route-table]')
+        .forEach((frame) => {
+          const viewport = frame.querySelector<HTMLElement>('.data-table')!;
+          scrollFrames.set(viewport, frame);
+          viewport.addEventListener('scroll', () => schedule(viewport), {
+            passive: true,
+          });
+          resizeObserver.observe(viewport);
+          resizeObserver.observe(viewport.querySelector('table')!);
+          schedule(viewport);
+        });
     });
 </script>
