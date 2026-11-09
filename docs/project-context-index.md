@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-2026-11-08：Astro 本地工程已交付，已接续 GitHub `Lowendaff/lowendaff.com` 的初始历史，使用 `main` 分支；首次同步结果以 `test-results/git-sync/` 回执为准，尚未部署。源码和当前维护文档留在工作区；历史报告、截图、抓取日志、一次性脚本与旧素材已备份后移出，清理记录见 `changes/git-preparation.md`。
+2026-11-09：Astro 工程已通过 GitHub `Lowendaff/lowendaff.com` 的 main 分支 CI 产物完成 HTTPS 部署演练，保持 noindex，未开启正式收录。首次 Git 同步结果以 `test-results/git-sync/` 回执为准；当前发布证据见 `test-results/deploy-rehearsal/`。源码和当前维护文档留在工作区；历史报告、截图、抓取日志、一次性脚本与旧素材已备份后移出，清理记录见 `changes/git-preparation.md`。
 
 原有 42 篇 MDX 已按用户要求撤下，当前文章集合为空；新增内容使用 VPS / 独服模板。撤下记录见 `changes/remove-existing-posts.md`。广告四个独立集合，Sponsors 单独维护。当前测试数据、广告和样式以源码为准；历史说明不覆盖 `AGENTS.md`。
 
@@ -11,6 +11,7 @@ VPS / 独服类型区分已完成：首页筛选、列表/文章类型标签及�
 ## 当前文档
 
 - `deployment.md`：GitHub Actions 产物、adnanh/webhook、systemd、OpenResty 和版本回退操作；服务器不构建源码，演练保持 noindex。
+- `changes/deploy-rehearsal.md`：2026-11-09 真实 CI 发布与回退演练。OpenViking：`viking://resources/projects/lowendaff-ui/deploy-rehearsal.md`，全文回读与运行回执在 `test-results/deploy-rehearsal/`。
 - `changes/design-polish.md`：Taste / Impeccable 驱动的空状态、手机导航、点击区域与冗余文字优化；GitHub 提交与 CI 回执见 `test-results/design-polish/git-ci-receipt.json`，未同步 Figma。OpenViking：`viking://resources/projects/lowendaff-ui/design-polish.md`，全文回读回执见 `test-results/design-polish/openviking-receipt.json`。
 - `changes/content-ci.md`：GitHub push/PR 文章格式校验与构建反例测试；OpenViking：`viking://resources/projects/lowendaff-ui/content-ci.md`。
 - `content-authoring.md`：文章、广告及 Sponsors 维护。

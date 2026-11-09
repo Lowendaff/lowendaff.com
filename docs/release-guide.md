@@ -2,7 +2,9 @@
 
 ## 默认预览
 
-`npm ci && npm run check && npm run build` 生成 `dist/`。默认 `PUBLIC_SITE_INDEXABLE=false`：页面 noindex、robots 禁止抓取、sitemap 为空。RSS 仍供本地验证，包含两篇完整测评；40 条快照引用不冒充全文。
+`npm ci && npm run check && npm run build` 生成 `dist/`。默认 `PUBLIC_SITE_INDEXABLE=false`：页面 noindex、robots 禁止抓取、sitemap 为空。当前文章集合为空，RSS 没有文章；不能自动恢复历史文章或导入模板占位内容。
+
+当前服务器通过 GitHub Actions 构建产物与 adnanh/webhook 部署，已完成 HTTPS 演练，操作见 `deployment.md`。服务器不安装 Node/npm。main 的成功构建会自动发布，PR 不发布。
 
 `npm run preview -- --port 4323` 查看构建结果。Astro 当前使用后台服务；查看/停止可用 `npx astro preview status`、`npx astro preview stop`，开发服务对应 `astro dev status/stop`。
 
@@ -10,15 +12,13 @@
 
 1. 确认 `astro.config.mjs` 的 `site` 是实际域名；目前为 `https://lowendaff.com`。
 2. 核验历史商业信息、Affiliate 披露与图片版权/缺失项，补齐需要发布的内容。
-3. 使用 `PUBLIC_SITE_INDEXABLE=true npm run build`，随后 `npm run verify:release -- --indexable`。此开关只改变索引策略，不执行部署。
-4. 发布 `dist/` 到选定静态主机。Markdown 修改后重新构建；无运行时 CMS、数据库或远程广告请求。
-5. 核验实际 HTTP 状态、TLS、缓存和旧 URL。当前仅验证本地静态页面，未验证生产主机配置。
+3. 正式收录需同时修改 CI 的 `PUBLIC_SITE_INDEXABLE`、`verify:release -- --indexable` 调用及部署程序的索引策略。单独执行 `PUBLIC_SITE_INDEXABLE=true npm run build` 不会部署，且当前演练接收程序会拒绝此产物。
+4. 通过 main 的成功 CI 产物发布。Markdown 修改后重新构建；无运行时 CMS、数据库或远程广告请求。
+5. 核验实际 HTTP 状态、TLS、缓存和 `deployment.json` 中的提交。演练验证记录见 `changes/deploy-rehearsal.md`。
 
-## 旧 URL
+## 路由范围
 
-文章 `originalUrl` 映射到新 `/reviews/<id>/`。构建生成旧路径的 meta-refresh 回退和 `dist/_redirects`：当前两条旧文章路径加 `/feed/`，共 3 个目标、8 条兼容编码规则。支持 `_redirects` 的主机可使用该文件；Nginx 等需转换成自己的 HTTP 301 配置。静态回退不等于已部署的 HTTP 301。
-
-正文 `review.legacyAnchors` 保存原 WordPress TOC 锚点映射，并处理单次/双次 URL 编码。不要随意改变已有文章 ID、原 URL 或块 ID。
+按用户决定，新站从零开始，不实施旧文章网址迁移，也不添加旧站 HTTP 301 规则。当前构建保留已有 `/feed/` 到 `/rss.xml` 的静态回退；`dist/_redirects` 不会被 OpenResty 自动解释为配置。文章撤下后不存在历史文章页面。
 
 ## Figma 与调试脚本
 

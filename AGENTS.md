@@ -48,7 +48,7 @@ Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、
 - [x] 阶段 2：设计系统。
 - [x] 阶段 3A：本地原型与用户确认。
 - [x] 阶段 3B：Figma 原生交付与用户确认。
-- [x] 阶段 4：本地工程与验证；未部署。
+- [x] 阶段 4：工程与验证；2026-11-09 已完成 HTTPS 静态产物部署演练，保持 noindex。
 
 撤下原有文章记录：`docs/changes/remove-existing-posts.md`；OpenViking：`viking://resources/projects/lowendaff-ui/remove-existing-posts.md`。
 
@@ -56,7 +56,7 @@ VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking�
 
 ## Git & Agent Workflow
 
-部署方式：CI 构建产物，服务器 adnanh/webhook + systemd 接收签名通知；不在服务器安装 Node/npm，不复制长期 GitHub 凭据。演练保持 noindex；版本切换使用 1Panel 挂载目录内的相对软链接，禁止恢复服务器拉源码构建的旧方案。运行结果见 `docs/changes/deploy-rehearsal.md` 与 `test-results/deploy-rehearsal/`。
+部署方式：CI 构建产物，服务器 adnanh/webhook + systemd 接收签名通知；不在服务器安装 Node/npm，不复制长期 GitHub 凭据。演练保持 noindex；版本切换使用 1Panel 挂载目录内的相对软链接，禁止恢复服务器拉源码构建的旧方案。运行结果见 `docs/changes/deploy-rehearsal.md` 与 `test-results/deploy-rehearsal/`；OpenViking：`viking://resources/projects/lowendaff-ui/deploy-rehearsal.md`。首次真实 CI 发布、重复/旧通知及实际回退恢复均已验证。
 
 Taste / Impeccable 局部优化已完成：`docs/changes/design-polish.md`；OpenViking：`viking://resources/projects/lowendaff-ui/design-polish.md`，回执见 `test-results/design-polish/openviking-receipt.json`。空文章库隐藏无效筛选，有文章时保留原筛选；关注卡整块可点击且无尾部按钮；手机菜单有关闭状态和键盘反馈。GitHub 提交与 CI 状态以 `test-results/design-polish/git-ci-receipt.json` 为准；本轮未同步 Figma。
 
