@@ -4,6 +4,7 @@ import { z } from 'astro/zod';
 import { postsLoader } from './loaders/posts';
 import { reviewTypes } from './lib/review-types';
 import { isReviewPermalink } from './lib/review-url';
+import { reviewGeoSchema } from './lib/review-map';
 import { compatibilitySchema, reviewImagesSchema } from './lib/readable-review';
 
 const httpUrl = z
@@ -156,6 +157,7 @@ const posts = defineCollection({
       draft: z.boolean().default(false),
       country: z.string().regex(/^([A-Z]{2})?$/),
       location: z.string(),
+      geo: reviewGeoSchema,
       publishedAt: z.iso.date(),
       updatedAt: z.iso.date().optional(),
       testedAt: z.string().optional(),

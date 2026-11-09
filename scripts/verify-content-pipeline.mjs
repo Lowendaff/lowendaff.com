@@ -17,6 +17,7 @@ description: 'Temporary build fixture, removed after verification.'
 vendor: 'Fixture'
 country: 'US'
 location: 'Fixture'
+geo: { city: Fixture, latitude: 34.05, longitude: -118.24 }
 publishedAt: '2026-11-01'
 updatedAt: '2026-11-09'
 testedAt: '2026-11-01'
@@ -56,6 +57,7 @@ try {
   for (const file of [
     'index.html',
     'tags/index.html',
+    'map/index.html',
     'rss.xml',
     'sitemap.xml',
     'llms.txt',

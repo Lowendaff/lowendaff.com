@@ -9,6 +9,7 @@ export const GET: APIRoute = async ({ site }) => {
         { path: '/', lastmod: undefined },
         { path: '/ads/', lastmod: undefined },
         ...(posts.length ? [{ path: '/tags/', lastmod: undefined }] : []),
+        ...(posts.length ? [{ path: '/map/', lastmod: undefined }] : []),
         ...posts.map(({ data }) => ({
           path: postPath({ data }),
           lastmod: data.updatedAt ?? data.publishedAt,

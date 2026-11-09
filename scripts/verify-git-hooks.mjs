@@ -28,6 +28,7 @@ description: Hook integration fixture.
 vendor: Fixture
 country: US
 location: Test location
+geo: { city: Fixture, latitude: 34.05, longitude: -118.24 }
 route: Test route
 publishedAt: '2026-11-09'
 testedAt: '2026-11-09'
@@ -74,7 +75,11 @@ await test('native pre-commit validates the actual index in an isolated build', 
   let baseline;
   try {
     const files = new Set(
-      execFileSync('git', ['ls-files', '-z'], { cwd: source, encoding: 'utf8' })
+      execFileSync(
+        'git',
+        ['ls-files', '--cached', '--others', '--exclude-standard', '-z'],
+        { cwd: source, encoding: 'utf8' },
+      )
         .split('\0')
         .filter(Boolean),
     );
@@ -185,6 +190,19 @@ await test('native pre-commit validates the actual index in an isolated build', 
         assert.equal(result.status, 0, output(result));
         assert.equal(git('show', `HEAD:${article}`), good.trimEnd());
         assert.equal(await readFile(join(root, article), 'utf8'), bad);
+      },
+    );
+    await t.test(
+      'missing coordinates block both published and draft commits',
+      async () => {
+        for (const draft of [false, true]) {
+          await rejected(
+            valid
+              .replace(/^geo:.*\n/m, '')
+              .replace('draft: false', `draft: ${draft}`),
+            /geo/,
+          );
+        }
       },
     );
     await t.test('invalid draft schema is rejected', () =>

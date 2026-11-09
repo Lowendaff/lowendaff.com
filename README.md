@@ -12,7 +12,7 @@ npm run hooks:install
 npm run dev
 ```
 
-默认地址 `http://127.0.0.1:4321/`。页面包括 `/tags/`、`/ads/` 和 `/components/`。测评地址由 Frontmatter `permalink` 决定，使用 `/reviews/{规范化标题}-{测试日期YYYYMMDD}/`，保留末尾 `/`，与文件名解耦。
+默认地址 `http://127.0.0.1:4321/`。页面包括 `/tags/`、`/map/`、`/ads/` 和 `/components/`。测评地址由 Frontmatter `permalink` 决定，使用 `/reviews/{规范化标题}-{测试日期YYYYMMDD}/`，保留末尾 `/`，与文件名解耦。
 
 每份克隆执行一次 `hooks:install`；它只修改本仓库的 Git 配置，遇到其他 hook 会提示人工合并。
 
@@ -37,7 +37,7 @@ npm run dev
 
 ## 写作与提交
 
-1. 从模板创建文章，填写标题、测试日期、必填元数据与真实测试内容；`reviewType` 使用 `vps` 或 `dedicated`。
+1. 从模板创建文章，填写标题、测试日期、必填元数据与真实测试内容；每篇文章（含草稿）必须填写 `geo.city`、`geo.latitude`、`geo.longitude`；`reviewType` 使用 `vps` 或 `dedicated`。
 2. 运行 `npm run urls:fill` 补齐缺失的 `permalink`。已有地址不会被覆盖；已提交的非草稿地址保持不变。
 3. 草稿使用 `draft: true`，不生成文章页面，但仍须通过格式和字段校验。完成内容后改为 `draft: false` 并本地预览。
 4. `git add` 后正常提交。`pre-commit` 检查实际暂存内容的排版、URL、Schema 与 MDX 构建；失败会阻止提交，修复后需重新暂存。
@@ -58,6 +58,7 @@ npm run format:check
 npm run urls:check
 npm run verify:urls
 npm run verify:hooks
+npm run verify:map
 npm run check
 npm run build
 npm run verify:content

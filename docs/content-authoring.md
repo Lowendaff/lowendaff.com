@@ -10,6 +10,10 @@ Astro 在开发时监听内容，在构建时生成静态页面。Markdown 改�
 
 文章地址由 Frontmatter `permalink` 管理，采用 `/reviews/{规范化标题}-{测试日期YYYYMMDD}/`。填写标题和 `testedAt` 后运行 `npm run urls:fill`；已有地址不被覆盖。运行 `npm run urls:check` 可在提交前检查缺失、格式、重复及已发布地址变更。完整流程见 `templates/reviews/README.md` 与 `docs/changes/review-urls.md`。
 
+## 测评地图
+
+`/map/` 的 3D 地球只展示已发布测评。所有文章必须填写 `geo: { city, latitude, longitude }`，包括草稿；字段缺失、空城市、非数值或超出经纬度范围会阻止构建与提交。填写示例见 [模板坐标说明](../templates/reviews/README.md#地球地图坐标必填)。每次复测保留该城市名称与坐标，地图自动聚合文章，不用修改页面代码。
+
 ## 提交前校验
 
 每份克隆运行一次 `npm run hooks:install`。以后提交文章时会自动校验实际暂存的排版、URL、Schema 和 MDX；失败将阻止提交。修复后重新 `git add`，也可用 `npm run check:staged` 主动检查。详情见 [Git hooks](git-hooks.md)。

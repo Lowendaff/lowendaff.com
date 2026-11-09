@@ -34,7 +34,7 @@ export function validPage(url, site) {
       !parsed.hash &&
       parsed.href === url &&
       // Keep former ASCII article URLs valid for deletion notifications after migration.
-      /^\/(?:ads\/|tags\/|reviews\/[a-z0-9\p{Script=Han}]+(?:-[a-z0-9\p{Script=Han}]+)*\/)?$/u.test(
+      /^\/(?:ads\/|tags\/|map\/|reviews\/[a-z0-9\p{Script=Han}]+(?:-[a-z0-9\p{Script=Han}]+)*\/)?$/u.test(
         decodeURIComponent(parsed.pathname),
       ) &&
       encodeURI(decodeURIComponent(parsed.pathname)) === parsed.pathname

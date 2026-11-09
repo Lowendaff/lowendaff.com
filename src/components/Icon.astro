@@ -6,6 +6,8 @@ interface Props {
 const { name = 'arrow', size = 20 } = Astro.props;
 const paths: Record<string, string> = {
   arrow: 'M5 12h14m-6-6 6 6-6 6',
+  plus: 'M12 5v14M5 12h14',
+  minus: 'M5 12h14',
   external: 'M7 17 17 7M7 7h10v10',
   search: 'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0',
   monitor: 'M3 4h18v13H3zM8 21h8m-4-4v4',

@@ -42,6 +42,8 @@ jobs:
         run: npm run urls:check
       - name: Test URL generation and rejection rules
         run: npm run verify:urls
+      - name: Test map coordinates and published review aggregation
+        run: npm run verify:map
       - name: Test staged article commit hooks
         run: npm run verify:hooks
       - name: Check types and content schema

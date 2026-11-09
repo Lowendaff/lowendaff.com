@@ -56,6 +56,7 @@ npm run verify:analytics
 | `scripts/verify-carousel-layout.js` | dev :4321 | 单卡、居中箭头、随机顺序、无 JS/减少动效 |
 | `scripts/verify-carousel-autoplay.js` | dev :4321 | 连续自动循环、方向、缓动、暂停恢复 |
 | `scripts/verify-carousel-controls.js` | dev :4321 | 双向循环、键盘、广告链接隔离 |
+| `scripts/verify-globe-motion-browser.js` | dev :4321 | 自转、球体悬停、空白区恢复、键鼠切换、弹层暂停／恢复、减少动效；启动本机 Chrome 无界面实例，避免干扰用户预览 |
 
 运行 `npm run preview -- --port 4323` 启动构建预览。部分历史浏览器脚本面向旧文章及数量，不作为当前空文章库的验收入口；有意增删内容时同步调整预期，不能为通过测试删减真实数据。
 

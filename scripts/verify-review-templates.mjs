@@ -6,7 +6,15 @@ import { parse } from 'yaml';
 const root = new URL('../', import.meta.url);
 const created = [];
 const file = (path) => new URL(path, root);
-const read = (path) => readFile(file(path), 'utf8');
+const read = async (path) => {
+  const source = await readFile(file(path), 'utf8');
+  // Authors must fill coordinates; only integration fixtures replace the blanks.
+  return path.startsWith('templates/reviews/')
+    ? source
+        .replace('latitude: null', 'latitude: 34.05')
+        .replace('longitude: null', 'longitude: -118.24')
+    : source;
+};
 const build = () =>
   execFileSync('npm', ['run', 'build'], {
     cwd: root,
@@ -170,6 +178,24 @@ try {
     ) + validBody,
     /originalUrl/,
   );
+  for (const draft of [false, true]) {
+    const sample = header.replace('draft: false', `draft: ${draft}`);
+    await rejectsArticle(
+      `missing-geo-${draft}`,
+      sample.replace(/^geo:\n(?:[ \t]+.*\n)+/m, '') + validBody,
+      /geo/,
+    );
+    await rejectsArticle(
+      `missing-longitude-${draft}`,
+      sample.replace(/^  longitude:.*\n/m, '') + validBody,
+      /longitude/,
+    );
+    await rejectsArticle(
+      `invalid-latitude-${draft}`,
+      sample.replace(/^  latitude:.*$/m, '  latitude: 91') + validBody,
+      /latitude/,
+    );
+  }
   await rejectsArticle(
     'missing-title',
     header.replace(/^title:.*\n/m, '') + validBody,

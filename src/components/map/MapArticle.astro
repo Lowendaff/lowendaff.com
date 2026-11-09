@@ -1,0 +1,29 @@
+---
+import type { MapArticle } from '../../lib/review-map';
+import { reviewTypeLabels } from '../../lib/review-types';
+import Icon from '../Icon.astro';
+interface Props {
+  article: MapArticle;
+}
+const { article } = Astro.props;
+---
+
+<li
+  class="atlas-article"
+  data-map-article
+  data-review-type={article.reviewType}
+>
+  <a href={article.href}>
+    <div class="atlas-article-meta">
+      <span translate="no">{article.vendor}</span>
+      <span>{reviewTypeLabels[article.reviewType]}</span>
+    </div>
+    <h3>{article.title}</h3>
+    <div class="atlas-article-bottom">
+      <time datetime={article.date}>{article.date}</time>
+      <span>
+        阅读测评 <Icon name="arrow" size={16} />
+      </span>
+    </div>
+  </a>
+</li>

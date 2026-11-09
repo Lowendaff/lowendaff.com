@@ -1,0 +1,239 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import MapArticle from '../components/map/MapArticle.astro';
+import { getPublishedPosts } from '../lib/posts';
+import { buildReviewMap } from '../lib/review-map';
+import { countryEmoji, countryLabel } from '../lib/records';
+import { serializeJsonLd } from '../lib/seo';
+import '../styles/review-map.css';
+
+const posts = await getPublishedPosts();
+const { places } = buildReviewMap(posts);
+const articleCount = posts.length;
+const countries = new Set(places.map((place) => place.country).filter(Boolean));
+const types = [
+  { value: 'all', label: '全部' },
+  { value: 'vps', label: 'VPS' },
+  { value: 'dedicated', label: '独立服务器' },
+];
+---
+
+<BaseLayout
+  title="测评地图"
+  active="map"
+  noindex={!posts.length}
+  description="在 3D 地球上探索 LowEndAFF 测评过的地区，按城市查看 VPS 与独立服务器的实测记录。"
+  breadcrumbs={[
+    { name: '首页', path: '/' },
+    { name: '测评地图', path: '/map/' },
+  ]}
+>
+  <div class="shell atlas-page" data-review-map>
+    <header class="atlas-heading">
+      <div>
+        <h1>
+          测评地图<span class="accent-text">.</span>
+        </h1>
+        <p>点击城市，查看当地的测试记录。</p>
+      </div>
+      <p class="atlas-coverage">
+        <span data-map-place-count>{places.length}</span> 个城市{' '}
+        <span aria-hidden="true">/</span>{' '}
+        <span data-map-country-count>{countries.size}</span> 个国家或地区{' '}
+        <span aria-hidden="true">/</span>{' '}
+        <span data-map-article-count>{articleCount}</span> 条测评
+      </p>
+    </header>
+    <div class="atlas-workspace">
+      <section
+        class="atlas-scene"
+        aria-label="测评地区三维地球"
+        data-globe-scene
+      >
+        <div class="atlas-scene-heading">
+          <span class="atlas-map-key">
+            <span aria-hidden="true"></span> 已测评城市
+          </span>
+        </div>
+        <div class="atlas-viewport" data-globe-viewport></div>
+        <div class="atlas-markers" data-globe-markers></div>
+        <div class="atlas-loading" data-globe-status role="status">
+          <Icon name="globe" size={32} />
+          <p data-globe-status-text>
+            启用 JavaScript 可探索 3D 地球；测评可从下方列表阅读。
+          </p>
+          <button type="button" data-map-open hidden aria-haspopup="dialog">
+            浏览测评
+          </button>
+          <button type="button" data-globe-retry hidden>
+            重新加载
+          </button>
+        </div>
+        <div
+          class="atlas-controls"
+          data-globe-controls
+          hidden
+          aria-label="地球视角控制"
+        >
+          <button
+            type="button"
+            data-globe-zoom="in"
+            aria-label="放大地球"
+            title="放大"
+          >
+            <Icon name="plus" size={19} />
+          </button>
+          <button
+            type="button"
+            data-globe-zoom="out"
+            aria-label="缩小地球"
+            title="缩小"
+          >
+            <Icon name="minus" size={19} />
+          </button>
+          <button
+            type="button"
+            data-globe-home
+            aria-label="回到初始视角"
+            title="回到初始视角"
+          >
+            <Icon name="globe" size={19} />
+          </button>
+        </div>
+        <div class="atlas-scene-bottom">
+          <p class="atlas-gesture" id="globe-instructions">
+            <span class="atlas-desktop-hint">拖动旋转 · 滚轮缩放</span>
+            <span class="atlas-touch-hint">单指旋转 · 双指缩放</span>
+          </p>
+          <span
+            class="atlas-coordinates"
+            data-globe-coordinates
+            aria-hidden="true"
+          ></span>
+        </div>
+      </section>
+    </div>
+    <dialog
+      class="atlas-directory"
+      id="map-records"
+      aria-labelledby="map-dialog-title"
+      data-map-dialog
+    >
+      <div class="atlas-directory-heading">
+        <h2 id="map-dialog-title" tabindex="-1" data-map-title>
+          测评城市
+        </h2>
+        <button type="button" data-map-close aria-label="关闭测评列表">
+          <Icon name="close" size={20} />
+        </button>
+      </div>
+      <div class="atlas-dialog-body">
+        <div
+          class="atlas-type-filter"
+          data-map-filters
+          hidden
+          role="group"
+          aria-label="测评类型"
+        >
+          {types.map(({ value, label }) => (
+            <button
+              type="button"
+              data-map-type={value}
+              aria-pressed={value === 'all'}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <p
+          class="atlas-result-status"
+          data-map-result-status
+          role="status"
+          hidden
+        ></p>
+        <div class="atlas-place-list">
+          {places.map((place) => (
+            <section
+              class="atlas-place"
+              data-map-place={place.id}
+              data-city-label={`${countryEmoji(place.country)} ${place.city}`}
+              data-country-label={countryLabel(place.country || 'unspecified')}
+            >
+              <h3 class="atlas-place-heading">
+                <button
+                  type="button"
+                  data-map-select={place.id}
+                  disabled
+                  aria-pressed="false"
+                  aria-label={`查看${place.city}的测评`}
+                >
+                  <span class="atlas-place-flag" aria-hidden="true">
+                    {countryEmoji(place.country)}
+                  </span>
+                  <span class="atlas-place-name">
+                    <strong>{place.city}</strong>
+                    <span>{countryLabel(place.country || 'unspecified')}</span>
+                  </span>
+                  <span class="atlas-place-count" data-place-count>
+                    {place.articles.length} 条
+                  </span>
+                  <Icon name="arrow" size={16} />
+                </button>
+              </h3>
+              <ul class="atlas-articles">
+                {place.articles.map((article) => (
+                  <MapArticle article={article} />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+        <p class="atlas-empty" data-map-empty hidden={articleCount > 0}>
+          暂无测试记录。
+        </p>
+        <a class="atlas-all-records" href="/tags/">
+          按商家与国家浏览 <Icon name="arrow" size={16} />
+        </a>
+      </div>
+    </dialog>
+    <noscript>
+      <section class="atlas-fallback" aria-label="各城市测评">
+        {places.map((place) => (
+          <section>
+            <h2>
+              {countryEmoji(place.country)} {place.city}
+            </h2>
+            <ul class="atlas-articles">
+              {place.articles.map((article) => (
+                <MapArticle article={article} />
+              ))}
+            </ul>
+          </section>
+        ))}
+      </section>
+    </noscript>
+    <div class="atlas-footnote">
+      <p>标记表示测评所在城市，不代表机房精确地址。</p>
+      <p>
+        地理轮廓：
+        <a
+          href="https://www.naturalearthdata.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Natural Earth
+        </a>
+      </p>
+    </div>
+    <script
+      type="application/json"
+      data-map-data
+      set:html={serializeJsonLd({ places })}
+    />
+  </div>
+</BaseLayout>
+<script>
+  import { initReviewMap } from '../scripts/review-map';
+  initReviewMap();
+</script>

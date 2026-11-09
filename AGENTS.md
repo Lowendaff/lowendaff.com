@@ -20,7 +20,7 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 - 新文章模板在 `templates/reviews/`：VPS 与独服分别使用 `reviewType: vps | dedicated`，均可用易读 Markdown；不把模板占位内容导入集合。章节可按实测省略，SMART/RAID 放磁盘、拓扑/dmidecode 放系统子标题；原始输出用代码围栏。验证用 `npm run verify:templates`。
 - 100TB 从 Git 历史恢复，保留 2026-10-08 发布日期及 2026-10-07 测试时间；PanstarCloud 仍撤下。历史快照仅用于内容来源核对，不承担旧网址兼容。新增文章从模板创建，验证使用临时合成夹具，结束后清理。
 - 广告分别由 `src/content/ads/{home,article-top,article-bottom,article-sidebar}/` 的 Markdown 控制；Sponsors 独立集合与 SVG。不得恢复共享广告 placements 或按商家名写死展示。
-- 导航：首页、广告、标签云；不恢复搜索。首页每页 20 条，无价格/配置/历史原文标签；友链仅首页显示。
+- 导航：首页、广告、标签云、测评地图；不恢复搜索。首页每页 20 条，无价格/配置/历史原文标签；友链仅首页显示。
 - 测评类型只读 Frontmatter `reviewType: vps | dedicated`（缺省 VPS）。首页与标签云提供「全部 / VPS / 独立服务器」，列表和文章头部显示文字标签；类型与商家/国家组合筛选，URL 保留状态，切换类型重置页码。此项不包含置顶排序。回归：`verify:types` 及 `scripts/verify-review-type-browser.js`。
 - 首页广告随机起序，单商家连续自动循环，左右箭头居中且不激活广告链接；尊重减少动效。文章广告纵排独立随机，Sponsors 仅文章侧栏。
 - 文章表头与内容左对齐，数字等宽；套餐直接展示，BGP 不折叠。保留分组及自定义路由选择器，不提供展开全部、测评概览、IP 质量分析、Generated at、底部方案与优惠或对照原始快照入口。
@@ -60,6 +60,12 @@ Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、
 VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking：`viking://resources/projects/lowendaff-ui/review-types.md`，全文回读一致。Git 同步回执见 `test-results/review-types/git-push-receipt.json`；本次未同步 Figma。
 
 ## Git & Agent Workflow
+
+测评地图发布授权更新：用户已在本地迭代后要求提交 Git；本轮允许提交并推送 GitHub，按现有 CI / Webhook 验证自动部署。下方地图记录中的“仅本地预览”是此前阶段限制，已由此次授权取代。最终提交和发布证据记录于 `test-results/review-globe/deployment-receipt.json`；不提交测试产物或同步 Figma。
+
+测评地图交互补充：不恢复右上角「选择城市」入口；地球约三分钟一圈缓慢自转，悬停、触摸、键盘操作和测评弹层期间暂停，退出交互后缓慢恢复。悬停只覆盖球体投影及操作按钮，不含容器空白；鼠标移动解除键盘暂停状态。遵循减少动效，后台和离屏停止动画。交互回归 `scripts/verify-globe-motion-browser.js` 使用独立无界面 Chrome。
+
+2026-11-09：新增本地 `/map/` 测评地图。用户选择可旋转缩放的 3D 地球，并否决黑色背景和真实地表纹理；必须使用现有 Tokyo 语义色板绘制抽象陆地与海洋，背景跟随主题。国境线使用共享地理边界，保持细线与柔和对比度，不恢复粗重描边。测评列表点击城市后弹出，桌面居中、手机底部展示，不恢复常驻右侧列表。文章集合驱动标记，所有文章（包括草稿）强制 `geo.city`、`geo.latitude`、`geo.longitude`；无自动猜测或未知坐标兜底，草稿不展示。用户明确本轮仅本地预览，不提交或推送 Git、不同步 Figma。维护说明 `templates/reviews/README.md`，验证 `verify:map`、`verify:templates`、`verify:hooks`；归档 `docs/changes/review-map.md`，OpenViking `viking://resources/projects/lowendaff-ui/review-map.md`。
 
 2026-11-09：新增原生 `.githooks/pre-commit`；每份克隆执行 `npm run hooks:install`，本机已启用。仅验证实际暂存快照，复用排版、URL、Schema/MDX 构建；不得自动格式化、补 URL、暂存或 stash，不影响预览缓存。纯文档提交跳过，CI 保留最终门禁并运行 `verify:hooks`。安装/范围说明 `docs/git-hooks.md`，归档 `docs/changes/git-hooks.md`；OpenViking `viking://resources/projects/lowendaff-ui/git-hooks.md`。
 

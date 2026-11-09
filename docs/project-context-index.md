@@ -76,3 +76,11 @@ OpenViking 本机配置 `.openviking/config.json` 保留且忽略，不包含在
 ## 提交前文章校验
 
 2026-11-09：原生 pre-commit 校验暂存快照，安装命令 `npm run hooks:install`，主动校验 `npm run check:staged`。使用说明 `git-hooks.md`，实现与回归记录 `changes/git-hooks.md`；OpenViking `viking://resources/projects/lowendaff-ui/git-hooks.md`。本机已启用；用户随后授权连同 README 更新提交 GitHub，提交与 CI 证据见 `test-results/git-hooks/git-push-receipt.json`。
+
+## 本地测评地图
+
+发布授权更新：用户已要求提交 Git，此前本地限制已解除；允许推送并核验现有自动部署。最终提交及公网版本回执：`test-results/review-globe/deployment-receipt.json`。
+
+交互更新：移除右上角城市选择入口，地球缓慢自转；悬停暂停、移出恢复，触摸、键盘和弹层操作期间暂停。详见下方归档。
+
+2026-11-09：`/map/` 使用主题色抽象 3D 地球，拖动/缩放/定位测评；坐标强制写入所有文章，草稿也校验。用户否决卫星纹理与黑底，按 Tokyo 主题绘制 Natural Earth 海岸轮廓及细国境线；用户否决粗重边界，采用柔和细线。点击城市后弹出该城市测评列表，取消常驻侧栏；手机使用底部弹层。仅本地预览，禁止本轮推送；报告 `changes/review-map.md`，OpenViking `viking://resources/projects/lowendaff-ui/review-map.md`。

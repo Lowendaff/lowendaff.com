@@ -25,7 +25,8 @@
     "verify:urls": "node --experimental-strip-types --test scripts/verify-review-urls.mjs",
     "hooks:install": "node scripts/install-git-hooks.mjs",
     "check:staged": "node scripts/check-staged-content.mjs",
-    "verify:hooks": "node --experimental-strip-types --test scripts/verify-git-hooks.mjs"
+    "verify:hooks": "node --experimental-strip-types --test scripts/verify-git-hooks.mjs",
+    "verify:map": "node --experimental-strip-types --test scripts/verify-review-map.mjs"
   },
   "engines": {
     "node": ">=22.12.0"
@@ -43,6 +44,7 @@
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.2",
     "tailwindcss": "4.3.5",
+    "three": "0.187.0",
     "unified": "11.0.5"
   },
   "devDependencies": {
@@ -50,6 +52,7 @@
     "@types/hast": "3.0.5",
     "@types/mdast": "4.0.4",
     "@types/node": "24.19.2",
+    "@types/three": "0.187.0",
     "parse5": "8.0.1",
     "prettier": "3.9.10",
     "prettier-plugin-astro": "1.1.2",
