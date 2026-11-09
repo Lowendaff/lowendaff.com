@@ -1,0 +1,29 @@
+[Unit]
+Description=LowEndAFF signed static artifact deployment
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lowendaff-deploy
+Group=lowendaff-deploy
+WorkingDirectory=/var/lib/lowendaff-webhook
+ExecStart=/usr/bin/webhook -ip 127.0.0.1 -port 9000 -hooks /etc/lowendaff-webhook/hooks.json
+Restart=on-failure
+RestartSec=3
+UMask=0022
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/lowendaff-webhook /opt/1panel/www/sites/lowendaff.com/.deploy
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+TasksMax=32
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "deploy-site",
+    "execute-command": "/usr/local/lib/lowendaff-deploy/deploy.py",
+    "command-working-directory": "/var/lib/lowendaff-webhook",
+    "http-methods": ["POST"],
+    "include-command-output-in-response": true,
+    "include-command-output-in-response-on-error": false,
+    "trigger-rule-mismatch-http-response-code": 403,
+    "pass-file-to-command": [
+      { "source": "entire-payload", "envname": "DEPLOY_PAYLOAD" }
+    ],
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "payload-hmac-sha256",
+            "secret": "REPLACE_WITH_RANDOM_SECRET",
+            "parameter": { "source": "header", "name": "X-Hub-Signature-256" }
+          }
+        },
+        {
+          "match": {
+            "type": "value",
+            "value": "artifact-ready",
+            "parameter": { "source": "header", "name": "X-Lowendaff-Event" }
+          }
+        }
+      ]
+    }
+  }
+]

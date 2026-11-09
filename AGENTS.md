@@ -8,7 +8,7 @@ LowEndAFF 从 WordPress 迁移至 Astro、Content Collections、MDX 与 Tailwind
 
 使用 Node >=22.12 与锁文件：`npm ci`、`npm run dev`、`npm run build`。提交前执行 `npm run format:check`、`npm run check`、构建、`npm run verify:content`、`npm run verify:release`、`npm run verify:readable`。集合变更另执行 `verify:pipeline` 和 `verify:markdown`；二者不能并行。浏览器验证入口见 `docs/verification.md`。
 
-GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、Schema 与正式构建，并运行解析器和模板正反例回归；草稿同样校验，空集合合法。工作流使用 Node 24，检查名 `Article format and build`，不部署。修改 CI 或模板校验时运行 `verify:templates`，规则详见 `docs/verification.md`。
+GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、Schema 与正式构建，并运行解析器和模板正反例回归；草稿同样校验，空集合合法。工作流使用 Node 24，检查名 `Article format and build`。main 成功构建上传静态产物，独立 `Deploy static site` 工作流通过签名 Webhook 通知服务器发布；PR 不部署。修改 CI 或模板校验时运行 `verify:templates`；部署修改另执行 `python3 -m unittest discover -s tests/deployment -v`，说明见 `docs/deployment.md`。
 
 遵循 Prettier：两空格、单引号，组件 PascalCase、路径 kebab-case。静态正文优先，交互局部增强；测试使用 Node 内置框架、Python 离线比较和 Playwright MCP，没有覆盖率阈值。
 
@@ -55,6 +55,8 @@ Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、
 VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking：`viking://resources/projects/lowendaff-ui/review-types.md`，全文回读一致。Git 同步回执见 `test-results/review-types/git-push-receipt.json`；本次未同步 Figma。
 
 ## Git & Agent Workflow
+
+部署方式：CI 构建产物，服务器 adnanh/webhook + systemd 接收签名通知；不在服务器安装 Node/npm，不复制长期 GitHub 凭据。演练保持 noindex；版本切换使用 1Panel 挂载目录内的相对软链接，禁止恢复服务器拉源码构建的旧方案。运行结果见 `docs/changes/deploy-rehearsal.md` 与 `test-results/deploy-rehearsal/`。
 
 Taste / Impeccable 局部优化已完成：`docs/changes/design-polish.md`；OpenViking：`viking://resources/projects/lowendaff-ui/design-polish.md`，回执见 `test-results/design-polish/openviking-receipt.json`。空文章库隐藏无效筛选，有文章时保留原筛选；关注卡整块可点击且无尾部按钮；手机菜单有关闭状态和键盘反馈。GitHub 提交与 CI 状态以 `test-results/design-polish/git-ci-receipt.json` 为准；本轮未同步 Figma。
 

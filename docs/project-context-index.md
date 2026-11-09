@@ -10,6 +10,7 @@ VPS / 独服类型区分已完成：首页筛选、列表/文章类型标签及�
 
 ## 当前文档
 
+- `deployment.md`：GitHub Actions 产物、adnanh/webhook、systemd、OpenResty 和版本回退操作；服务器不构建源码，演练保持 noindex。
 - `changes/design-polish.md`：Taste / Impeccable 驱动的空状态、手机导航、点击区域与冗余文字优化；GitHub 提交与 CI 回执见 `test-results/design-polish/git-ci-receipt.json`，未同步 Figma。OpenViking：`viking://resources/projects/lowendaff-ui/design-polish.md`，全文回读回执见 `test-results/design-polish/openviking-receipt.json`。
 - `changes/content-ci.md`：GitHub push/PR 文章格式校验与构建反例测试；OpenViking：`viking://resources/projects/lowendaff-ui/content-ci.md`。
 - `content-authoring.md`：文章、广告及 Sponsors 维护。

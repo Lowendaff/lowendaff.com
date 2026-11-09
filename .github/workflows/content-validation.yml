@@ -46,3 +46,16 @@ jobs:
       # Keep this after formatting and the real article build, and run serially.
       - name: Test both review templates and invalid article rejection
         run: npm run verify:templates
+      - name: Test artifact deployment rules
+        run: python3 -m unittest discover -s tests/deployment -v
+      - name: Identify the deployable build
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: node scripts/create-deploy-manifest.mjs
+      - name: Upload static site
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site-dist-${{ github.sha }}-${{ github.run_attempt }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
