@@ -10,6 +10,8 @@ VPS / 独服类型区分已完成：首页筛选、列表/文章类型标签及�
 
 ## 当前文档
 
+- `changes/motion-preview.md`：2026-11-09 本地八城市、11 条海缆/陆缆组合通道，2.4 秒随机起终点连通路径动效；美国东西岸直连线加强显示；按用户要求地图不再跟随 reduced-motion 停播；OpenViking：`viking://resources/projects/lowendaff-ui/motion-preview.md`，全文回读一致，回执在 `test-results/global-network/openviking-receipt.json`。用户已授权推送并通过 CI/Webhook 发布，结果以 `test-results/motion-deploy/final-receipt.json` 为准；未同步 Figma。
+
 - `deployment.md`：GitHub Actions 产物、adnanh/webhook、systemd、OpenResty 和版本回退操作；服务器不构建源码，演练保持 noindex。
 - `changes/deploy-rehearsal.md`：2026-11-09 真实 CI 发布与回退演练。OpenViking：`viking://resources/projects/lowendaff-ui/deploy-rehearsal.md`，全文回读与运行回执在 `test-results/deploy-rehearsal/`。
 - `changes/design-polish.md`：Taste / Impeccable 驱动的空状态、手机导航、点击区域与冗余文字优化；GitHub 提交与 CI 回执见 `test-results/design-polish/git-ci-receipt.json`，未同步 Figma。OpenViking：`viking://resources/projects/lowendaff-ui/design-polish.md`，全文回读回执见 `test-results/design-polish/openviking-receipt.json`。

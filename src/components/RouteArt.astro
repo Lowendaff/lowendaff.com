@@ -1,38 +1,275 @@
 ---
-const { compact = false } = Astro.props;
+import land from '../data/world-land.json';
+import network from '../data/global-network.json';
+
+// Metro nodes, real cable-system corridors and schematic terrestrial backhaul.
+const project = ([longitude, latitude]: number[]) => ({
+  x: (longitude + 180) * 1.27 + 11,
+  y: (80 - latitude) * 1.27 + 30,
+});
+const nodes = network.nodes.map((node) => ({
+  ...node,
+  ...project(node.coordinates),
+}));
+const pathFor = (coordinates: number[][]) =>
+  coordinates
+    .map((point, index) => {
+      const { x, y } = project(point);
+      return `${index ? 'L' : 'M'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    })
+    .join(' ');
 ---
 
-<div class:list={['route-art', { compact }]} aria-hidden="true">
-  <div class="orbit orbit-one"></div>
-  <div class="orbit orbit-two"></div>
-  <div class="orbit orbit-three"></div>
-  <div class="route-line line-one"></div>
-  <div class="route-line line-two"></div>
-  <div class="map-node node-a">
-    <i></i>
-    <span>LOS ANGELES</span>
-  </div>
-  <div class="map-node node-b">
-    <i></i>
-    <span>SINGAPORE</span>
-  </div>
-  <div class="map-node node-c">
-    <i></i>
-    <span>TOKYO</span>
-  </div>
-  <div class="network-core">
-    <img
-      class="brand-avatar"
-      src="/brand/lowendaff-avatar.jpg"
-      width="56"
-      height="56"
-      alt=""
-      decoding="async"
-    />
-    <b>lowendaff</b>
-    <small>我们评测全世界</small>
-  </div>
-  {!compact && (
-    <span class="map-caption">GLOBAL PERSPECTIVE · LOCAL INSIGHT</span>
-  )}
+<div class="route-art" data-route-map aria-hidden="true">
+  <svg class="route-map" viewBox="0 0 480 260" fill="none" focusable="false">
+    <defs>
+      <pattern
+        id="route-land-dots"
+        width="4"
+        height="4"
+        patternUnits="userSpaceOnUse"
+      >
+        <circle cx="2" cy="2" r="0.85" fill="currentColor" />
+      </pattern>
+    </defs>
+    <g class="map-grid">
+      <path d="M12 67H468M12 131.6H468M12 196H468M87 35V218M239 35V218M391 35V218" />
+    </g>
+    <path class="map-land" d={land.path} fill="url(#route-land-dots)" />
+    <g class="map-routes">
+      {network.links.map((cable) => (
+        <g data-link={cable.id} data-from={cable.from} data-to={cable.to}>
+          {cable.segments.map((segment) => (
+            <g>
+              <path
+                class:list={[
+                  'map-route-track',
+                  { 'map-route-land': segment.kind === 'terrestrial' },
+                  {
+                    'map-route-backbone': cable.segments.every(
+                      (part) => part.kind === 'terrestrial',
+                    ),
+                  },
+                ]}
+                d={pathFor(segment.coordinates)}
+              />
+              <path
+                class="map-route-signal"
+                d={pathFor(segment.coordinates)}
+                pathLength="100"
+              />
+            </g>
+          ))}
+        </g>
+      ))}
+    </g>
+    {nodes.map((node) => (
+      <g class="map-city" data-city={node.id}>
+        <g transform={`translate(${node.x} ${node.y})`}>
+          <circle class="map-city-ring" r="5.5" />
+          <circle class="map-city-pulse" r="5.5" />
+          <circle class="map-city-dot" r="2.3" />
+        </g>
+        <text x={node.x + node.dx} y={node.y + node.dy}>
+          {node.label}
+        </text>
+      </g>
+    ))}
+  </svg>
 </div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-route-map]').forEach((map) => {
+    const nodes = Array.from(map.querySelectorAll<SVGGElement>('[data-city]'));
+    const links = Array.from(map.querySelectorAll<SVGGElement>('[data-link]'));
+    const cycleMs = 2400;
+    const travelMs = 1700;
+    let visible = false;
+    let previous = '';
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let animations: Animation[] = [];
+
+    const stop = () => {
+      clearTimeout(timer);
+      animations.forEach((animation) => animation.cancel());
+      animations = [];
+    };
+    const pulse = (id: string, delay: number) => {
+      const ring = nodes
+        .find((node) => node.dataset.city === id)
+        ?.querySelector('.map-city-pulse');
+      if (!ring) return;
+      animations.push(
+        ring.animate(
+          [
+            { opacity: 0.6, transform: 'scale(0.8)' },
+            { opacity: 0, transform: 'scale(1.8)' },
+          ],
+          { duration: 380, delay, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+        ),
+      );
+    };
+    const play = () => {
+      stop();
+      // Explicit user preference for this illustration; background work stops.
+      if (!visible || document.hidden) return;
+      const candidates = nodes.filter((node) => node.dataset.city !== previous);
+      const origin =
+        candidates[Math.floor(Math.random() * candidates.length)].dataset.city!;
+      const destinations = nodes.filter((node) => node.dataset.city !== origin);
+      const destination =
+        destinations[Math.floor(Math.random() * destinations.length)].dataset
+          .city!;
+      previous = origin;
+
+      // Find a connected route through the depicted network, never invent a
+      // direct cable between arbitrary cities. Hop count is illustrative routing.
+      type Hop = { parent: string; link: SVGGElement; forward: boolean };
+      const visited = new Set([origin]);
+      const parents = new Map<string, Hop>();
+      const queue = [origin];
+      for (const city of queue) {
+        if (city === destination) break;
+        for (const link of links) {
+          const from = link.dataset.from!;
+          const to = link.dataset.to!;
+          const neighbor = from === city ? to : to === city ? from : undefined;
+          if (!neighbor || visited.has(neighbor)) continue;
+          visited.add(neighbor);
+          parents.set(neighbor, { parent: city, link, forward: from === city });
+          queue.push(neighbor);
+        }
+      }
+      if (!parents.has(destination)) return;
+      const path: (Hop & { destination: string })[] = [];
+      for (let city = destination; city !== origin;) {
+        const hop = parents.get(city)!;
+        path.unshift({ ...hop, destination: city });
+        city = hop.parent;
+      }
+      map.dataset.routeOrigin = origin;
+      map.dataset.routeTarget = destination;
+      map.dataset.activeLinks = path
+        .map((hop) => hop.link.dataset.link)
+        .join(',');
+      const hopMs = travelMs / path.length;
+      pulse(origin, 0);
+      path.forEach((hop, hopIndex) => {
+        const segments = Array.from(
+          hop.link.querySelectorAll<SVGPathElement>('.map-route-signal'),
+        );
+        if (!hop.forward) segments.reverse();
+        const lengths = segments.map((segment) => segment.getTotalLength());
+        const total = lengths.reduce((sum, length) => sum + length, 0);
+        let delay = hopIndex * hopMs;
+        segments.forEach((segment, index) => {
+          const duration = (hopMs * lengths[index]) / total;
+          animations.push(
+            segment.animate(
+              [
+                {
+                  strokeDashoffset: hop.forward ? '10' : '-100',
+                  opacity: 0,
+                  offset: 0,
+                },
+                { opacity: 1, offset: 0.1 },
+                { opacity: 1, offset: 0.9 },
+                {
+                  strokeDashoffset: hop.forward ? '-100' : '10',
+                  opacity: 0,
+                  offset: 1,
+                },
+              ],
+              { duration, delay, easing: 'linear' },
+            ),
+          );
+          delay += duration;
+        });
+        pulse(hop.destination, (hopIndex + 1) * hopMs);
+      });
+      timer = setTimeout(play, cycleMs);
+    };
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      play();
+    }).observe(map);
+    document.addEventListener('visibilitychange', play);
+  });
+</script>
+
+<style>
+  .route-art {
+    position: relative;
+    height: 260px;
+    display: flex;
+    align-items: center;
+    isolation: isolate;
+  }
+  .route-map {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  @media (max-width: 760px) {
+    .route-art {
+      display: none;
+    }
+  }
+  .map-grid {
+    stroke: var(--border);
+    stroke-width: 0.6;
+    opacity: 0.35;
+    stroke-dasharray: 2 6;
+  }
+  .map-land {
+    color: var(--muted);
+    opacity: 0.42;
+  }
+  .map-route-track {
+    stroke: var(--accent);
+    stroke-width: 1.1;
+    stroke-linejoin: round;
+    opacity: 0.34;
+  }
+  .map-route-land {
+    stroke-dasharray: 2 2;
+    opacity: 0.3;
+  }
+  .map-route-backbone {
+    stroke-width: 1.4;
+    stroke-dasharray: 3 1.5;
+    opacity: 0.75;
+  }
+  .map-route-signal {
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 8 192;
+    stroke-dashoffset: 10;
+    opacity: 0;
+  }
+  .map-city-ring {
+    fill: var(--canvas);
+    stroke: var(--border);
+  }
+  .map-city-dot {
+    fill: var(--accent);
+  }
+  .map-city-pulse {
+    stroke: var(--accent);
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .map-city text {
+    fill: var(--muted);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    paint-order: stroke;
+    stroke: var(--canvas);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+  }
+</style>

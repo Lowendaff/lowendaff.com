@@ -382,129 +382,6 @@ table,
   align-items: center;
   gap: 6px;
 }
-.route-art {
-  height: 320px;
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background: radial-gradient(
-    ellipse at center,
-    color-mix(in srgb, var(--accent-soft), transparent 10%),
-    transparent 65%
-  );
-}
-.orbit {
-  position: absolute;
-  border: 1px solid color-mix(in srgb, var(--accent), transparent 82%);
-  border-radius: 50%;
-  left: 50%;
-  top: 48%;
-  transform: translate(-50%, -50%) rotate(-25deg);
-}
-.orbit-one {
-  width: 320px;
-  height: 180px;
-}
-.orbit-two {
-  width: 450px;
-  height: 250px;
-}
-.orbit-three {
-  width: 590px;
-  height: 330px;
-}
-.network-core {
-  position: absolute;
-  left: 50%;
-  top: 48%;
-  transform: translate(-50%, -50%) rotate(-7deg);
-  width: 148px;
-  height: 148px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow:
-    0 18px 45px color-mix(in srgb, var(--accent), transparent 86%),
-    inset 0 1px var(--highlight);
-  border-radius: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-.network-core > span {
-  font-size: 54px;
-  line-height: 1;
-  color: var(--accent);
-  font-weight: 450;
-}
-.network-core b {
-  font-size: 17px;
-  letter-spacing: -0.8px;
-}
-.network-core small {
-  font-size: 9px;
-  color: var(--muted);
-  margin-top: 3px;
-  letter-spacing: 0.1em;
-}
-.map-node {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 9px;
-  font-family: 'JetBrains Mono Variable', monospace;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  z-index: 2;
-}
-.map-node i {
-  width: 9px;
-  height: 9px;
-  border: 2px solid var(--surface);
-  background: var(--accent);
-  box-shadow: 0 0 0 4px var(--accent-soft);
-  border-radius: 50%;
-}
-.node-a {
-  top: 45px;
-  left: 60px;
-}
-.node-b {
-  bottom: 72px;
-  right: 35px;
-}
-.node-c {
-  top: 85px;
-  right: 20px;
-}
-.route-line {
-  position: absolute;
-  border-top: 1px dashed color-mix(in srgb, var(--accent), transparent 55%);
-  transform-origin: left;
-  width: 160px;
-  z-index: -1;
-}
-.line-one {
-  left: 75px;
-  top: 58px;
-  transform: rotate(32deg);
-}
-.line-two {
-  left: 290px;
-  top: 160px;
-  transform: rotate(28deg);
-}
-.map-caption {
-  position: absolute;
-  bottom: 7px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 8px;
-  letter-spacing: 0.17em;
-  white-space: nowrap;
-  color: var(--muted);
-}
 .filter-bar {
   display: flex;
   align-items: center;
@@ -1578,66 +1455,6 @@ table,
     margin-top: 20px;
     font-size: 10px;
   }
-  .route-art {
-    height: 240px;
-    margin-top: 2px;
-  }
-  .network-core {
-    width: 116px;
-    height: 116px;
-    border-radius: 26px;
-  }
-  .network-core > span {
-    font-size: 42px;
-  }
-  .network-core b {
-    font-size: 15px;
-  }
-  .network-core small {
-    font-size: 7px;
-  }
-  .orbit-one {
-    width: 240px;
-    height: 140px;
-  }
-  .orbit-two {
-    width: 350px;
-    height: 205px;
-  }
-  .orbit-three {
-    width: 460px;
-    height: 270px;
-  }
-  .map-node {
-    font-size: 7px;
-  }
-  .node-a {
-    left: 15px;
-    top: 37px;
-  }
-  .node-b {
-    right: 6px;
-    bottom: 52px;
-  }
-  .node-c {
-    right: 3px;
-    top: 62px;
-  }
-  .line-one {
-    left: 25px;
-    top: 45px;
-    width: 110px;
-    transform: rotate(30deg);
-  }
-  .line-two {
-    left: 180px;
-    top: 120px;
-    width: 120px;
-  }
-  .map-caption {
-    font-size: 7px;
-    bottom: 0;
-  }
   .filter-bar {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -1971,8 +1788,7 @@ table,
 @media (forced-colors: active) {
   .panel,
   .button,
-  .tag,
-  .network-core {
+  .tag {
     border: 1px solid CanvasText;
   }
   .site-header {

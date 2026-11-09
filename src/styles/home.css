@@ -8,10 +8,6 @@
   border-radius: 50%;
   border: 1px solid var(--border);
 }
-.network-core .brand-avatar {
-  width: 56px;
-  height: 56px;
-}
 .home-revision .hero {
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
   gap: 40px;
