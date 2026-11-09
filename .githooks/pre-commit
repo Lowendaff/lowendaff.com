@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+if ! command -v node >/dev/null 2>&1; then
+  echo '文章校验需要 Node.js >=22.12，请先安装 Node.js 并运行 npm ci。' >&2
+  exit 1
+fi
+exec node scripts/check-staged-content.mjs

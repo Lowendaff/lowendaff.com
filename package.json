@@ -22,7 +22,10 @@
     "verify:types": "node scripts/verify-review-types.mjs",
     "urls:fill": "node --experimental-strip-types scripts/fill-review-urls.mjs",
     "urls:check": "node --experimental-strip-types scripts/check-review-urls.mjs",
-    "verify:urls": "node --experimental-strip-types --test scripts/verify-review-urls.mjs"
+    "verify:urls": "node --experimental-strip-types --test scripts/verify-review-urls.mjs",
+    "hooks:install": "node scripts/install-git-hooks.mjs",
+    "check:staged": "node scripts/check-staged-content.mjs",
+    "verify:hooks": "node --experimental-strip-types --test scripts/verify-git-hooks.mjs"
   },
   "engines": {
     "node": ">=22.12.0"

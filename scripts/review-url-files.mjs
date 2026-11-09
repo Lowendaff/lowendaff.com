@@ -11,7 +11,12 @@ export function parsePost(source, file) {
   return { id: file, file, source, data };
 }
 export async function readPosts(root = process.cwd()) {
-  const names = (await readdir(`${root}/${postsDirectory}`))
+  const names = (
+    await readdir(`${root}/${postsDirectory}`).catch((error) => {
+      if (error.code === 'ENOENT') return [];
+      throw error;
+    })
+  )
     .filter((name) => name.endsWith('.mdx'))
     .sort();
   return Promise.all(

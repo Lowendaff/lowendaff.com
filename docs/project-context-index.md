@@ -72,3 +72,7 @@ Figma file key：`vZ3h8djsL9yAt0WIlhyCSm`。三个最终 Frame：UI Kit `40:1521
 - 官方工具关联的 `figma-use`、`figma-generate-design`、`figma-design-to-code` 按可用 Figma Skill 包挂载；操作前先读取相应规范。
 
 OpenViking 本机配置 `.openviking/config.json` 保留且忽略，不包含在源码交付中。结构探索先按 codebase-memory 查询图谱；当前索引未覆盖实际源码，须读取源文件确认。
+
+## 提交前文章校验
+
+2026-11-09：原生 pre-commit 校验暂存快照，安装命令 `npm run hooks:install`，主动校验 `npm run check:staged`。使用说明 `git-hooks.md`，实现与回归记录 `changes/git-hooks.md`；OpenViking `viking://resources/projects/lowendaff-ui/git-hooks.md`。本机已启用；用户随后授权连同 README 更新提交 GitHub，提交与 CI 证据见 `test-results/git-hooks/git-push-receipt.json`。

@@ -44,6 +44,7 @@ if (base) {
     '-z',
     '--find-renames',
     base,
+    ...(process.env.URL_TARGET_TREE ? [process.env.URL_TARGET_TREE] : []),
     '--',
     postsDirectory,
   ).split('\0');
