@@ -1,0 +1,8 @@
+{
+  "site": "https://lowendaff.com",
+  "indexNow": {
+    "enabled": true,
+    "key": "9edda26392f00fb63de8024ccd5a4106",
+    "endpoint": "https://api.indexnow.org/indexnow"
+  }
+}

@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { appendFile, readFile } from 'node:fs/promises';
 import { createHmac } from 'node:crypto';
 
 const repo = 'Lowendaff/lowendaff.com';
@@ -87,6 +87,8 @@ for (let attempt = 1; attempt <= 3; attempt++) {
     });
     status = response.status;
     if (response.ok) {
+      if (process.env.GITHUB_OUTPUT)
+        await appendFile(process.env.GITHUB_OUTPUT, 'acknowledged=true\n');
       console.log(
         `Deployment acknowledged for run ${id}, commit ${run.head_sha}`,
       );

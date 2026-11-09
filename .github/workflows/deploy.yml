@@ -1,6 +1,7 @@
 name: Deploy static site
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ['Content validation']
     branches: [main]
@@ -17,20 +18,47 @@ concurrency:
 jobs:
   notify:
     if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
-      (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch')
+      (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch'))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24'
+      - name: Snapshot the previous public content index
+        if: github.event_name == 'workflow_run'
+        continue-on-error: true
+        run: node scripts/notify-indexnow.mjs --snapshot
       - name: Notify the deployment receiver
+        id: deploy
+        if: github.event_name == 'workflow_run'
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DEPLOY_WEBHOOK_SECRET: ${{ secrets.DEPLOY_WEBHOOK_SECRET }}
         run: node scripts/notify-deploy.mjs
+      - name: Notify IndexNow after verifying the public release
+        id: indexnow
+        if: steps.deploy.outputs.acknowledged == 'true' || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/notify-indexnow.mjs
+      - name: Retain notification state and pending retries
+        if: always() && hashFiles('test-results/indexnow/state.json') != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: indexnow-state
+          path: test-results/indexnow/state.json
+          retention-days: 90
+          if-no-files-found: error
+          overwrite: true
+      - name: Report a notification failure without rolling back the site
+        if: steps.indexnow.outcome == 'failure'
+        run: echo '::warning::IndexNow notification failed. Check the step summary and retry Deploy static site manually. Website deployment is unaffected.'

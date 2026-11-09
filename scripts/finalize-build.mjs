@@ -1,5 +1,6 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { buildSearchIndex } from './build-search-index.mjs';
 
 // Derive hosting rules from Astro's actual generated redirects, not a second URL list.
 const root = new URL('../dist/', import.meta.url);
@@ -37,3 +38,4 @@ await writeFile(new URL('_redirects', root), `${[...lines].join('\n')}\n`);
 console.log(
   `Generated ${redirects.length} redirect targets (${lines.size} hosting rules).`,
 );
+await buildSearchIndex();

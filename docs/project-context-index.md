@@ -2,6 +2,10 @@
 
 ## 当前状态
 
+2026-11-09 后续：IndexNow 自动通知实现与维护见 `search-engines.md`、`changes/indexnow.md`，JSON 配置、内容差异、发布后公网核验及失败队列独立于浏览器统计；OpenViking `viking://resources/projects/lowendaff-ui/indexnow.md`。实际发布与 HTTP 回执以 `test-results/indexnow/deployment-receipt.json` 为准。
+
+2026-11-09 后续：Google / Bing 站长平台接入完成；当前 Sitemap 均已成功抓取并发现 2 个页面，旧 WordPress 的三条 Sitemap 提交记录已按用户授权清理。归档 `changes/search-console-onboarding.md`，OpenViking `viking://resources/projects/lowendaff-ui/search-console-onboarding.md`；本轮无代码发布，百度与 IndexNow 待后续执行。
+
 2026-11-09 后续：已修复 OpenResty 静态文本缺 charset 导致的中文乱码；统计使用 `src/config/analytics.json`，支持 GA4 与外部脚本型平台，生产域名门禁和预览排除。指南 `analytics.md`，归档 `changes/analytics-charset.md`；OpenViking `viking://resources/projects/lowendaff-ui/analytics-charset.md`，最终上线证据 `test-results/analytics/deployment-receipt.json`。
 
 2026-11-09 后续：用户明确授权线上开放收录。本轮 sitemap / SEO / GEO 说明 `changes/seo-geo.md`，采用 GitHub `SITE_INDEXABLE` 与服务器 `LOWENDAFF_SITE_INDEXABLE` 双端一致配置；本地/PR 默认预览。最终发布证据 `test-results/seo/deployment-receipt.json`，OpenViking `viking://resources/projects/lowendaff-ui/seo-geo.md`。此决定取代下文早期演练的 noindex 限制。

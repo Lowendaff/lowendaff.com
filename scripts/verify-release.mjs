@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
+import { validateConfig, validateIndex } from './indexnow-core.mjs';
+import { pageFingerprint } from './build-search-index.mjs';
 
 const root = new URL('../dist/', import.meta.url);
 const indexable =
@@ -27,6 +29,45 @@ const sitemap = await read('sitemap.xml');
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
   (match) => match[1],
 );
+const searchConfig = validateConfig(
+  JSON.parse(
+    await readFile(
+      new URL('../src/config/search-engines.json', import.meta.url),
+      'utf8',
+    ),
+  ),
+);
+const searchIndex = validateIndex(
+  JSON.parse(await read('search-index.json')),
+  searchConfig.site,
+);
+assert.equal(searchIndex.indexable, indexable, 'Search index publication mode');
+assert.deepEqual(
+  new Set(Object.keys(searchIndex.entries)),
+  new Set(urls),
+  'Search index matches sitemap',
+);
+for (const url of urls) {
+  const html = await read(new URL(url).pathname.slice(1) + 'index.html');
+  assert.equal(
+    searchIndex.entries[url],
+    await pageFingerprint(html, root),
+    'Search content fingerprint',
+  );
+}
+const keyName = `${searchConfig.indexNow.key}.txt`;
+if (indexable && searchConfig.indexNow.enabled)
+  assert.equal(
+    (await read(keyName)).trim(),
+    searchConfig.indexNow.key,
+    'Public IndexNow verification key',
+  );
+else
+  await assert.rejects(
+    read(keyName),
+    { code: 'ENOENT' },
+    'Preview excludes IndexNow key',
+  );
 assert.equal(new Set(urls).size, urls.length, 'Unique sitemap URLs');
 const expectedUrls = new Set();
 const redirects = [];

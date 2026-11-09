@@ -1,4 +1,5 @@
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import { hash } from './indexnow-core.mjs';
 
 const required = (name, pattern) => {
   const value = process.env[name] || '';
@@ -13,5 +14,6 @@ const manifest = {
   runNumber: required('GITHUB_RUN_NUMBER', /^\d+$/),
   runAttempt: required('GITHUB_RUN_ATTEMPT', /^\d+$/),
   indexable: process.env.PUBLIC_SITE_INDEXABLE === 'true',
+  searchIndexSha256: hash(await readFile('dist/search-index.json')),
 };
 await writeFile('dist/deployment.json', JSON.stringify(manifest) + '\n');

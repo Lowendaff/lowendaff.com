@@ -9,6 +9,7 @@
 3. 通知任务使用仅本次有效的 `GITHUB_TOKEN` 获取产物短期下载地址，通过 HTTPS 发送 HMAC-SHA256 签名请求。GitHub 仓库只保存 `DEPLOY_WEBHOOK_SECRET`，不保存服务器 SSH 凭据。
 4. OpenResty 将 `/hooks/deploy-site` 代理到 `127.0.0.1:9000`。webhook 验签并执行固定程序，同步返回部署结果；500/网络错误会触发通知端重试，每次重新获取下载地址。
 5. 安装程序校验来源、时间、产物 SHA-256、ZIP 文件类型/路径/大小及构建清单；加锁、拒绝重复和旧运行，再原子切换相对软链接。通过本机 OpenResty HTTPS 检查清单和首页；失败恢复原链接。
+6. CI 收到部署回执后核对公网版本和内容索引摘要，再执行 IndexNow 差异通知。通知失败不回滚网站，待办以 Actions 产物保留；手动运行 Deploy static site 只重试通知，不重新部署，详见 `search-engines.md`。
 
 服务器不保存 GitHub 长期令牌、源码或 npm 依赖。短期下载地址不会写入部署状态或日志。hook 请求临时文件由 webhook 清理；不要启用 debug 或记录请求正文。
 

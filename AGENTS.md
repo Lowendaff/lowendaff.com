@@ -56,6 +56,10 @@ VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking�
 
 ## Git & Agent Workflow
 
+2026-11-09：IndexNow 由 `src/config/search-engines.json` 管理；构建生成内容索引与验证文件，CI 在 Webhook 发布后核验公网 commit/runId/runAttempt 和内容索引摘要再通知。纯样式变化不触发，草稿/组件/空标签页不提交；失败队列保存在 `indexnow-state` 产物 90 天，不回滚站点。手动运行 Deploy static site 只重试通知。新增检查 `npm run verify:indexnow`；维护说明 `docs/search-engines.md`，归档 `docs/changes/indexnow.md`；OpenViking `viking://resources/projects/lowendaff-ui/indexnow.md`，实际发布结果见 `test-results/indexnow/deployment-receipt.json`。
+
+2026-11-09：Google 网域验证已完成，Bing 复用已有站点权限；两家平台的 `sitemap.xml` 均成功抓取并发现 2 个页面。按用户授权清理三条旧 WordPress Sitemap 提交记录，各只保留当前 Sitemap；没有删除站点资源或申请全站搜索结果移除。详情 `docs/changes/search-console-onboarding.md`；OpenViking `viking://resources/projects/lowendaff-ui/search-console-onboarding.md`。百度与 IndexNow 尚未接入。
+
 2026-11-09：统计统一由 `src/config/analytics.json` 管理，不把 ID 写进组件或环境变量。只在正式构建与配置允许的 hostname 加载，组件页默认排除；GA4 与通用 HTTPS script/data-* 适配器不执行任意配置代码。提交前增加 `npm run verify:analytics`。llms.txt 中文字符集由 OpenResty server 级 `charset utf-8` 声明，不能只修改 Astro Response。指南 `docs/analytics.md`，归档 `docs/changes/analytics-charset.md`；OpenViking `viking://resources/projects/lowendaff-ui/analytics-charset.md`；发布证据 `test-results/analytics/deployment-receipt.json`。
 
 2026-11-09 用户已授权开启线上收录并发布 sitemap / SEO / GEO。正式 main 使用 GitHub 变量 `SITE_INDEXABLE=true`，服务器服务环境 `LOWENDAFF_SITE_INDEXABLE=true`；本地和 PR 默认仍为 noindex。CI 夹具测试后必须按发布模式重建再上传，禁止发布临时文章。sitemap、llms.txt 只列正式本地文章，空标签页与组件页 noindex；更新时间只读 Frontmatter `updatedAt ?? publishedAt`，不可用构建时间。说明 `docs/changes/seo-geo.md`；OpenViking `viking://resources/projects/lowendaff-ui/seo-geo.md`；最终线上证据 `test-results/seo/deployment-receipt.json`。不要恢复演练时期的强制 noindex 配置。
