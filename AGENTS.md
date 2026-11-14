@@ -29,6 +29,8 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 
 ## Design Skills & Delivery
 
+2026-11-15：用户确认产品定位后完成 Impeccable init；持久产品上下文见根目录 `PRODUCT.md`，初始化记录见 `docs/changes/impeccable-init.md`。后续设计先读取产品事实，再遵循本文件的具体交互与工程约束。OpenViking：`viking://resources/projects/lowendaff-ui/PRODUCT.md` 与 `viking://resources/projects/lowendaff-ui/impeccable-init.md`；回执见 `test-results/impeccable-init/`。本次仅文档初始化，不修改视觉系统或发布站点。
+
 目标 Figma：https://www.figma.com/design/vZ3h8djsL9yAt0WIlhyCSm/lowendaff?node-id=0-1 。修订 13 已确认；后续文字和滚动修复未再同步画布。设计变更按下列本机挂载加载，来源与恢复见 `docs/project-context-index.md`：
 
 | Skill 本地路径 | 调用时机 |
