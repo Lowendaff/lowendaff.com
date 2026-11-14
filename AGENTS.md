@@ -29,6 +29,8 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 
 ## Design Skills & Delivery
 
+2026-11-15：Impeccable document 完成两轮用户确认；现有视觉系统记录在 `DESIGN.md`，预览扩展为 `.impeccable/design.json`。设计理念为“全球服务器测试手记”，轻松亲近的博客气质，日光蓝 / 月光蓝 / 暮色灰，平整安静的阅读背景，组件温和清楚顺手。描述不授权重做界面；sidecar 色带仅用于预览。归档 `docs/changes/impeccable-document.md`；OpenViking 为项目根下 `DESIGN.md`、`design.json`、`impeccable-document.md`，核验回执见 `test-results/impeccable-init/document-*`。保留这两份设计文件的版本控制，不整体忽略 `.impeccable/`。
+
 2026-11-15：用户确认产品定位后完成 Impeccable init；持久产品上下文见根目录 `PRODUCT.md`，初始化记录见 `docs/changes/impeccable-init.md`。后续设计先读取产品事实，再遵循本文件的具体交互与工程约束。OpenViking：`viking://resources/projects/lowendaff-ui/PRODUCT.md` 与 `viking://resources/projects/lowendaff-ui/impeccable-init.md`；回执见 `test-results/impeccable-init/`。本次仅文档初始化，不修改视觉系统或发布站点。
 
 目标 Figma：https://www.figma.com/design/vZ3h8djsL9yAt0WIlhyCSm/lowendaff?node-id=0-1 。修订 13 已确认；后续文字和滚动修复未再同步画布。设计变更按下列本机挂载加载，来源与恢复见 `docs/project-context-index.md`：

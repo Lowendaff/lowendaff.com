@@ -4,6 +4,8 @@
 
 ## 当前状态
 
+2026-11-15：现有视觉系统归档为根目录 `DESIGN.md` 和 `.impeccable/design.json`，产品语气更新至 `PRODUCT.md`。用户确认“全球服务器测试手记”、轻松亲近、日光蓝 / 月光蓝 / 暮色灰、平整安静与温和顺手；页面未改。详见 `changes/impeccable-document.md`。OpenViking 入口为 `viking://resources/projects/lowendaff-ui/DESIGN.md`、`viking://resources/projects/lowendaff-ui/design.json`、`viking://resources/projects/lowendaff-ui/impeccable-document.md`。
+
 2026-11-15：Impeccable init 已记录用户确认的产品定位。根目录 `PRODUCT.md` 为产品事实入口，归档 `changes/impeccable-init.md`；OpenViking `viking://resources/projects/lowendaff-ui/PRODUCT.md`、`viking://resources/projects/lowendaff-ui/impeccable-init.md`，核验回执 `test-results/impeccable-init/`。本轮仅更新文档。
 
 2026-11-09 URL 规则：`/reviews/{规范化中文标题}-{测试日期YYYYMMDD}/`，保留末尾斜杠；显式 permalink、自动补全、唯一性与基线冻结检查纳入 CI。用户明确要求全新站点，撤销旧地址兼容、301、静态跳转页和 `_redirects` 生成；旧地址返回 404。见 `changes/review-urls.md`、`changes/remove-legacy-redirects.md`，最新发布回执 `test-results/remove-legacy-redirects/deployment-receipt.json`；OpenViking `viking://resources/projects/lowendaff-ui/review-urls.md`。
