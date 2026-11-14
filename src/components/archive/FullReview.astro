@@ -70,9 +70,6 @@ const verdict = model.section('评');
         <section class="review-chapter" id={reviewNavigation[i + 1].id}>
           <header class="chapter-heading">
             <div>
-              <span class="chapter-index mono">
-                {String(i + 1).padStart(2, '0')}
-              </span>
               {hints[reviewNavigation[i + 1].id] ? (
                 <HintHeading
                   id={`${reviewNavigation[i + 1].id}-hint`}

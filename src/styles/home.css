@@ -1,4 +1,4 @@
-/* Revision 7: source avatar, readable statement and clear friend destinations. */
+/* Homepage: a short introduction, real records, then the blog's community. */
 .brand-avatar {
   display: block;
   width: 40px;
@@ -8,29 +8,37 @@
   border-radius: 50%;
   border: 1px solid var(--border);
 }
-.home-revision .hero {
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
-  gap: 40px;
+.home-page .hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: center;
+  gap: 32px;
+  padding-block: 24px;
 }
-.home-revision .hero h1 {
-  font-size: clamp(38px, 4vw, 56px);
-  line-height: 1.35;
-  letter-spacing: -0.045em;
+.home-page .hero h1 {
+  max-width: 24em;
+  font-size: clamp(24px, 2.25vw, 32px);
+  font-weight: 550;
+  line-height: 1.5;
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
-.home-revision .hero h1 span {
-  display: block;
+.home-page .hero h1 span {
+  display: inline-block;
+  max-width: 100%;
 }
-/* Revision 11: remove duplicated section space on the homepage only. */
-.home-page .hero {
-  min-height: 0;
-  padding-block: 32px 24px;
+.home-page .hero .route-art {
+  height: 144px;
+}
+.home-page .hero .route-map {
+  height: 100%;
 }
 .home-page .home-layout {
-  margin-top: 24px;
+  display: block;
+  margin-top: 8px;
 }
 .home-page .latest-section {
-  padding-top: 28px;
+  padding-top: 32px;
 }
 .home-page .section-heading {
   margin-bottom: 16px;
@@ -40,75 +48,105 @@
   padding-block: 12px;
 }
 .home-page .follow-banner {
-  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-block: 16px;
+  min-height: 64px;
 }
-.home-page .follow-banner:hover,
-.home-page .follow-banner:focus-visible {
-  color: var(--text);
-  border-color: var(--accent);
+.follow-banner h2 {
+  font-size: 16px;
+  font-weight: 550;
 }
-.home-page .follow-banner:hover h2,
-.home-page .follow-banner:focus-visible h2 {
+.follow-banner p {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.follow-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--accent);
+  width: 32px;
+  height: 32px;
+}
+.follow-icon svg {
+  width: 22px;
+}
+.follow-banner:hover h2,
+.follow-banner:focus-visible h2 {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.home-page .friend-links {
-  margin-top: 32px;
+.friend-links {
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
   padding-top: 24px;
+  scroll-margin-top: 110px;
 }
-.friend-links .friend-grid {
+.friend-links .section-heading p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.friend-grid {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 0 32px;
 }
-.friend-grid > .friend-button,
-.friend-grid > .friend-unavailable {
+.friend-button,
+.friend-unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   min-width: 0;
-  min-height: 72px;
-  gap: 16px;
-  padding: 14px 18px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--surface);
+  min-height: 48px;
+  gap: 12px;
+  padding-block: 10px;
   font-size: 15px;
 }
-.friend-grid > .friend-button {
-  box-shadow:
-    0 1px 2px #00000004,
-    0 4px 12px #00000004;
-}
-.friend-button .friend-name {
+.friend-name {
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.friend-button .friend-arrow {
+.friend-arrow {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
   flex-shrink: 0;
-  border-left: 1px solid var(--border);
   color: var(--muted);
 }
-.friend-grid > .friend-button:hover,
-.friend-grid > .friend-button:focus-visible {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-soft);
+.friend-button:hover .friend-name,
+.friend-button:focus-visible .friend-name {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .friend-button:hover .friend-arrow,
 .friend-button:focus-visible .friend-arrow {
   color: var(--accent);
-  border-color: var(--accent);
 }
-.friend-grid > .friend-unavailable {
-  background: transparent;
-  border-style: dashed;
-  box-shadow: none;
+.friend-unavailable {
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+.friend-unavailable small {
+  font-size: 12px;
+}
+@media (min-width: 761px) {
+  .home-page .article-list {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
 }
 @media (max-width: 1000px) {
-  .friend-links .friend-grid {
+  .home-page .hero {
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 24px;
+  }
+  .friend-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -117,40 +155,31 @@
     width: 32px;
     height: 32px;
   }
-  .home-revision .hero {
-    display: block;
-  }
-  .home-revision .hero h1 {
-    font-size: clamp(29px, 7.6vw, 40px);
-    line-height: 1.45;
-    letter-spacing: -0.04em;
-  }
   .home-page .hero {
-    padding-block: 24px 20px;
+    display: block;
+    padding-block: 24px 16px;
   }
-  .home-page .home-layout {
-    margin-top: 20px;
+  .home-page .hero h1 {
+    font-size: 24px;
+  }
+  .home-page .hero h1 span {
+    display: block;
   }
   .home-page .home-layout .article-row {
     min-height: 80px;
   }
-  .home-page .follow-banner {
-    margin-top: 28px;
-  }
   .home-page .friend-links {
-    margin-top: 24px;
+    margin-top: 16px;
     padding-top: 20px;
   }
-  .friend-grid > .friend-button,
-  .friend-grid > .friend-unavailable {
-    min-height: 64px;
-    padding: 12px 16px;
-    font-size: 15px;
+  .friend-links .section-heading {
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 16px;
   }
 }
 @media (max-width: 520px) {
-  .friend-links .friend-grid {
+  .friend-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
   }
 }

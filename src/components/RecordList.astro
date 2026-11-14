@@ -35,7 +35,7 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
       id="result-count"
       hidden={records.length === 0}
     >
-      {records.length} 条记录 · 每页 20 条
+      {records.length} 条记录{records.length > 20 ? ' · 每页 20 条' : ''}
     </p>
   </div>
   {showTypeFilter && records.length > 0 && <ReviewTypeFilter />}
@@ -68,6 +68,7 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
           </div>
           <h3>
             {post.title
+              .replace(/^(?:\p{Regional_Indicator}{2}\s*)+/u, '')
               .replace(' VPS 测试记录', '')
               .replace(/ VPS$/, '')
               .replace('（CN2）', 'CN2')}
@@ -80,7 +81,13 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
       <h3>{records.length ? '这个组合还没有测试记录' : '暂无测试记录'}</h3>
       {records.length > 0 && (
         <>
-          <p>换一个类型、商家或国家，也可以清除筛选。</p>
+          <p>
+            {filters
+              ? '换一个类型、商家或国家，也可以清除筛选。'
+              : showTypeFilter
+                ? '换一个类型，也可以清除筛选。'
+                : '可以清除筛选，查看全部记录。'}
+          </p>
           <button class="button secondary" data-reset-filters type="button">
             清除筛选
           </button>

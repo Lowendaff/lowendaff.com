@@ -1,28 +1,32 @@
 /* Revision 6: simple navigation, merchant/country directory and ad information. */
 .directory-page {
-  padding-block: 60px 72px;
+  padding-block: 36px 48px;
 }
 .directory-heading {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 .directory-heading h1 {
-  font-size: clamp(34px, 4vw, 52px);
+  font-size: clamp(30px, 3vw, 40px);
   line-height: 1.25;
 }
 .directory-heading p {
   color: var(--muted);
-  margin-top: 18px;
+  margin-top: 12px;
   font-size: 16px;
 }
 .directory-page .latest-section {
   margin-top: 36px;
 }
 .directory-page .article-list {
-  padding: 8px 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
 }
 .tag-filters {
-  padding: 20px;
-  border-radius: 30px;
+  padding-block: 20px;
+  border-block: 1px solid var(--border);
 }
 .tag-group + .tag-group {
   margin-top: 26px;
@@ -111,7 +115,7 @@
   align-items: end;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 56px;
+  margin-bottom: 36px;
 }
 .ads-heading .button {
   flex-shrink: 0;
@@ -129,7 +133,8 @@
 }
 .placement-card {
   padding: 24px;
-  border-radius: 20px;
+  border-radius: 16px;
+  box-shadow: none;
 }
 .placement-card > p {
   font-size: 14px;
@@ -230,6 +235,7 @@
   padding: 30px;
   margin-top: 24px;
   background: var(--accent-soft);
+  box-shadow: none;
 }
 .bundle-panel h2 {
   font-size: 23px;
@@ -281,7 +287,8 @@
   max-width: 72ch;
 }
 .terms-panel {
-  padding: 30px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
 }
 .ads-contact {
   display: flex;
@@ -303,14 +310,6 @@
   }
   .directory-heading p {
     font-size: 15px;
-  }
-  .directory-page .article-list {
-    padding: 6px 16px;
-    border-radius: 16px;
-  }
-  .tag-filters {
-    padding: 18px;
-    border-radius: 28px;
   }
   .tag-cloud {
     gap: 8px;
@@ -352,9 +351,6 @@
   .ads-details-grid {
     gap: 32px;
     margin-block: 36px;
-  }
-  .terms-panel {
-    padding: 24px;
   }
 }
 

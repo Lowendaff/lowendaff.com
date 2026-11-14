@@ -104,7 +104,7 @@ if (root) {
     });
     const count = root.querySelector('#result-count');
     if (count)
-      count.textContent = `${matches.length} 条记录 · 每页 ${PAGE_SIZE} 条`;
+      count.textContent = `${matches.length} 条记录${pages > 1 ? ` · 每页 ${PAGE_SIZE} 条` : ''}`;
     const empty = root.querySelector<HTMLElement>('#empty-results');
     if (empty) empty.hidden = matches.length > 0;
     const pagination = root.querySelector<HTMLElement>('.record-pagination');

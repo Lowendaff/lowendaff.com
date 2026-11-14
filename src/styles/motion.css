@@ -10,11 +10,6 @@
     animation: statement-arrive 480ms var(--motion-arrive) both;
   }
 
-  .home-page .hero-description,
-  .home-page .hero-meta {
-    animation: statement-arrive 420ms var(--motion-arrive) 70ms both;
-  }
-
   .theme-picker[open] .theme-options,
   .mobile-nav[open] nav {
     transform-origin: top right;

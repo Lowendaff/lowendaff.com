@@ -68,7 +68,7 @@ async function verifyCarouselLayout(page) {
       );
       if (width >= 1024)
         check(
-          result.height >= 180 && result.height <= 200,
+          result.height >= 140 && result.height <= 180,
           'Compact desktop banner',
         );
       report.layouts.push({ theme, width, ...result });

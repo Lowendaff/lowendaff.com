@@ -17,22 +17,6 @@ const records = getRecords(await getCollection('posts'));
         <h1>
           我们评测全世界，<span>让每一次选择都有依据。</span>
         </h1>
-        <p class="hero-description">
-          从全球机房到三网回程，
-          <br class="mobile-break" />
-          我们认真测试，你安心选择。
-        </p>
-        <div class="hero-meta">
-          <span>
-            <Icon name="globe" size={15} /> 全球视野
-          </span>
-          <span>
-            <Icon name="route" size={15} /> 线路实测
-          </span>
-          <span>
-            <Icon name="shield" size={15} /> 证据可查
-          </span>
-        </div>
       </div>
       <RouteArt />
     </section>
@@ -41,18 +25,18 @@ const records = getRecords(await getCollection('posts'));
         <HomeAds />
         <RecordList records={records} />
         <a
-          class="follow-banner panel"
+          class="follow-banner"
           href="https://t.me/lowendaff_blog"
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="关注 LowEndAFF Telegram 更新（在新标签页打开）"
+          aria-label="在 Telegram 关注更新（LowEndAFF，在新标签页打开）"
         >
           <div class="follow-icon">
             <Icon name="send" size={28} />
           </div>
           <div>
-            <h2>下一台值得关注的服务器，别错过。</h2>
-            <p>新测评、新节点，保持好奇，也保持判断。</p>
+            <h2>在 Telegram 关注更新</h2>
+            <p>有新的测试记录时，在频道里见。</p>
           </div>
         </a>
       </div>

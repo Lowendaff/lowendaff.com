@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow-wrap: anywhere;
 }
 .home-revision .article-main h3 {
   order: -1;

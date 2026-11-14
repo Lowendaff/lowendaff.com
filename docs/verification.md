@@ -55,6 +55,7 @@ npm run verify:analytics
 | `scripts/verify-theme-scroll.js` | dev :4321 | 主题切换保持阅读位置、系统/键盘/跨页行为 |
 | `scripts/verify-carousel-layout.js` | dev :4321 | 单卡、居中箭头、随机顺序、无 JS/减少动效 |
 | `scripts/verify-carousel-autoplay.js` | dev :4321 | 连续自动循环、方向、缓动、暂停恢复 |
+| `scripts/verify-carousel-motion-preference.js` | dev :4321 | 动效偏好双向切换保留商户、原生滚动同步、循环动画中途切换 |
 | `scripts/verify-carousel-controls.js` | dev :4321 | 双向循环、键盘、广告链接隔离 |
 | `scripts/verify-globe-motion-browser.js` | dev :4321 | 自转、球体悬停、空白区恢复、键鼠切换、弹层暂停／恢复、减少动效；启动本机 Chrome 无界面实例，避免干扰用户预览 |
 
@@ -63,3 +64,7 @@ npm run verify:analytics
 ## 发布边界
 
 默认构建 noindex，Figma 捕获脚本不可进入生产输出。`verify:release` 检查 SEO 元数据、RSS、sitemap，并拒绝静态跳转页、`_redirects` 与旧 `/feed/` 路由。公开发布另按 `release-guide.md` 执行。
+
+## 字体构建验证
+
+`npm run verify:fonts` 验证内容字符集增删、完整字体回退、可变字重与原始许可元信息保留。构建期字体优化由 `scripts/site-font-subsets.mjs` 执行，源码更新后重新构建会自动生成新的内容哈希资源；开发服务器使用原字体。优化只追加覆盖当前源码字符的字体声明，未覆盖字符仍按原始 Unicode 范围加载完整分片。生成目录 `.astro/font-subsets/` 不提交。OFL 许可位于 `public/fonts/OFL-NotoSansSC.txt`。

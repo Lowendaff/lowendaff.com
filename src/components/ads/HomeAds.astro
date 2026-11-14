@@ -118,6 +118,14 @@ const products = await getAds('homeAds');
     let onScreen = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let animation: Animation | undefined;
+    const scrollIndex = () =>
+      Math.max(
+        0,
+        Math.min(
+          cards.length - 1,
+          Math.round(viewport.scrollLeft / Math.max(1, viewport.clientWidth)),
+        ),
+      );
     const updateActive = () => {
       cards.forEach((card, index) => {
         card.inert = !reducedMotion.matches && index !== current;
@@ -144,11 +152,7 @@ const products = await getAds('homeAds');
       if (animation) return;
       clearTimeout(timer);
       if (reducedMotion.matches) {
-        current =
-          (Math.round(viewport.scrollLeft / viewport.clientWidth) +
-            direction +
-            cards.length) %
-          cards.length;
+        current = (scrollIndex() + direction + cards.length) % cards.length;
         viewport.scrollTo({
           left: current * viewport.clientWidth,
           behavior: 'instant',
@@ -197,12 +201,26 @@ const products = await getAds('homeAds');
       ?.removeAttribute('hidden');
     const applyMotionPreference = () => {
       clearTimeout(timer);
+      // Read the old mode before switching between transforms and native scroll.
+      if (!viewport.hasAttribute('data-carousel-ready'))
+        current = scrollIndex();
+      else if (animation) {
+        const offset = new DOMMatrixReadOnly(getComputedStyle(track).transform)
+          .m41;
+        current =
+          Math.round(-offset / Math.max(1, viewport.clientWidth)) %
+          cards.length;
+      }
       animation?.cancel();
       animation = undefined;
       if (reducedMotion.matches) {
         clone.remove();
         delete viewport.dataset.carouselReady;
         track.style.transform = '';
+        viewport.scrollTo({
+          left: current * viewport.clientWidth,
+          behavior: 'instant',
+        });
       } else {
         track.append(clone);
         viewport.scrollLeft = 0;
@@ -212,6 +230,15 @@ const products = await getAds('homeAds');
       updateActive();
       schedule();
     };
+    viewport.addEventListener(
+      'scroll',
+      () => {
+        if (!reducedMotion.matches) return;
+        current = scrollIndex();
+        updateActive();
+      },
+      { passive: true },
+    );
     carousel.addEventListener('pointerenter', (event) => {
       if (event.pointerType !== 'mouse') return;
       hovering = true;

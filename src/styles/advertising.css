@@ -1,4 +1,8 @@
 /* Single sponsor, continuous forward loop; native scrolling without motion/JS. */
+.sponsor-products .section-heading h2 {
+  font-size: 16px;
+  font-weight: 550;
+}
 .sponsor-products .product-carousel {
   position: relative;
 }
@@ -25,34 +29,75 @@
 }
 .sponsor-products .product-card {
   min-width: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
   display: grid;
   grid-template-columns: 160px minmax(0, 640px);
   align-items: center;
   justify-content: center;
   gap: 24px;
-  min-height: 190px;
-  padding: 24px 76px;
+  min-height: 144px;
+  padding: 20px 76px;
+  box-shadow: none;
   scroll-snap-align: start;
 }
 .sponsor-products .product-brand {
+  display: flex;
+  align-items: center;
   align-self: center;
   gap: 12px;
   margin: 0;
 }
+.sponsor-products .product-brand,
+.sponsor-products .product-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.sponsor-products .product-brand strong,
+.sponsor-products .product-copy li {
+  min-width: 0;
+}
 .sponsor-products .product-brand strong {
-  font-size: 30px;
+  font-size: 24px;
+  letter-spacing: -0.025em;
 }
 .sponsor-products .product-card h3 {
-  font-size: 26px;
+  font-size: 20px;
+  line-height: 1.45;
 }
 .sponsor-products .product-copy p {
   font-size: 16px;
-  line-height: 1.9;
+  line-height: 1.7;
   color: var(--muted);
-  margin: 8px 0 14px;
+  margin: 6px 0 10px;
 }
 .sponsor-products .product-copy ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
   margin: 0;
+  padding: 0;
+}
+.sponsor-products .product-copy li {
+  font-size: 11px;
+  background: var(--subtle);
+  padding: 5px 8px;
+  border-radius: 5px;
+}
+.sponsor-products .product-card:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.product-indigo .product-brand {
+  color: var(--accent);
+}
+.product-orange .product-brand {
+  color: var(--brand-orange);
+}
+.product-teal .product-brand {
+  color: var(--brand-teal);
 }
 .product-overlay-controls button {
   position: absolute;
@@ -92,23 +137,26 @@
 @media (max-width: 760px) {
   .sponsor-products .product-card {
     grid-template-columns: minmax(0, 1fr);
-    gap: 22px;
-    padding: 22px 28px;
+    gap: 8px;
+    align-content: center;
+    padding: 16px 28px;
   }
   .sponsor-products .product-brand {
     margin: 0;
-    min-height: 44px;
-    justify-content: center;
+    justify-content: flex-start;
   }
   .sponsor-products .product-brand strong {
-    font-size: 22px;
+    font-size: 18px;
   }
   .sponsor-products .product-card h3 {
-    font-size: 23px;
+    font-size: 18px;
   }
   .sponsor-products .product-copy p {
     font-size: 15px;
-    margin: 10px 0 18px;
+    margin: 6px 0 10px;
+  }
+  .sponsor-products .product-copy li {
+    font-size: 12px;
   }
   .product-overlay-controls [data-product-prev] {
     left: -16px;

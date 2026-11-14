@@ -65,6 +65,16 @@ VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking�
 
 ## Git & Agent Workflow
 
+2026-11-15 提交授权更新：用户要求「提交」，本次将已完成的首页与全站 Impeccable 优化纳入本地 Git 提交；下方「未提交」记录为此前验证阶段状态。本次不推送、部署或同步 Figma。提交前检查及提交回执保存在 `test-results/impeccable-commit/`。
+
+2026-11-15：按用户要求将 Impeccable audit / harden / optimize / document / polish 推广至全部页面，已本地完成。标签筛选与列表平整化，目录页标题 30–40px；广告介绍页保留报价分组、减轻阴影，合作须知直接排版；文章移除装饰编号并修正 BGP 缺图提示，105 张表 / 9,132 个单元格不变；组件页使用确认标语和集合驱动空状态；地图保持外观与行为，类型按钮至少 44px。长标题换行放入共享列表规则，不能只覆盖首页。报告 `docs/changes/all-pages-impeccable.md`，OpenViking `viking://resources/projects/lowendaff-ui/all-pages-impeccable.md`；报告、DESIGN.md、design.json 三份全文回读一致，语义索引完成状态未确认。本轮截图、检查与回执见 `test-results/all-pages-impeccable/`。未提交、推送、部署或同步 Figma。
+
+2026-11-15：按用户授权完成 Impeccable harden → optimize → document → polish → audit，仍仅本地，未提交/推送/部署。Telegram 可访问名称与可见标题统一；广告动效偏好切换及原生滚动保持当前商户，回归 `scripts/verify-carousel-motion-preference.js`。构建期 Noto 字体子集保留原字库回退和可变字重，排除空轮廓子集；验证 `npm run verify:fonts`，生成文件仅在 `.astro/font-subsets/`，开发服务器仍用原字体。DESIGN.md / .impeccable/design.json 已同步紧凑引言与轻量友链。归档 `docs/changes/homepage-audit-follow-through.md`，证据 `test-results/homepage-follow-through/`；OpenViking：`viking://resources/projects/lowendaff-ui/homepage-audit-follow-through.md`、项目根 `DESIGN.md` 与 `design.json`，三份全文回读一致，语义索引仍排队。
+
+2026-11-15：首页 polish 在上一轮本地优化基础上修复平板标语分句、长英文记录标题及广告商家名/标签溢出。仅 home.css / advertising.css 增加局部换行与收缩规则，不改真实内容、字号或动效行为。十种视口/主题、交互、长文本和工程验证见 `docs/changes/homepage-polish.md`，证据在 `test-results/homepage-polish/`；仍未提交/推送/部署。OpenViking：`viking://resources/projects/lowendaff-ui/homepage-polish.md`，首次归档已写入，修订回读待核验。
+
+2026-11-15：首页按已确认 critique 完成本地阅读优先优化，未提交/推送/部署或同步 Figma。标语原文保留，改为单色紧凑引言，删除重复副句及三项图标声明；线路图只调整尺寸，行为不变。赞助横幅收紧布局，390×844 首条完整记录约位于 633–713px，文章字号不变。友链保留全部 9 项，改为至少 48px 高的轻量链接行；Telegram 整块入口明确写“在 Telegram 关注更新”，不恢复尾部按钮。桌面列表去面板包装；列表标题国旗仅显示一次，不改源标题/permalink。仅需分页时显示“每页20条”，空状态按首页/标签云实际筛选范围提示。首页相关旧 CSS 已归拢至 home.css / advertising.css；本轮尺寸与表现以源码和 `docs/changes/homepage-refinement.md` 为准，DESIGN.md 的此前尺寸记录不应覆盖本轮改动。验证、四种前后截图及持久化回执在 `test-results/homepage-refinement/`。OpenViking：`viking://resources/projects/lowendaff-ui/homepage-refinement.md`，全文回读一致，语义/向量索引完成状态未确认。
+
 测评地图发布授权更新：用户已在本地迭代后要求提交 Git；本轮允许提交并推送 GitHub，按现有 CI / Webhook 验证自动部署。下方地图记录中的“仅本地预览”是此前阶段限制，已由此次授权取代。最终提交和发布证据记录于 `test-results/review-globe/deployment-receipt.json`；不提交测试产物或同步 Figma。
 
 测评地图交互补充：不恢复右上角「选择城市」入口；地球约三分钟一圈缓慢自转，悬停、触摸、键盘操作和测评弹层期间暂停，退出交互后缓慢恢复。悬停只覆盖球体投影及操作按钮，不含容器空白；鼠标移动解除键盘暂停状态。遵循减少动效，后台和离屏停止动画。交互回归 `scripts/verify-globe-motion-browser.js` 使用独立无界面 Chrome。

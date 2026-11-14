@@ -289,3 +289,11 @@
     display: none !important;
   }
 }
+
+/* Content titles may include long provider names or machine identifiers. */
+.review-heading h1,
+.review-heading .tag,
+.review-meta,
+.archive-prose {
+  overflow-wrap: anywhere;
+}

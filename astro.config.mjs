@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import tailwindcss from '@tailwindcss/vite';
+import { siteFontSubsets } from './scripts/site-font-subsets.mjs';
 
 export default defineConfig({
   devToolbar: { enabled: false },
@@ -8,5 +9,5 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
   integrations: [mdx()],
-  vite: { plugins: [tailwindcss()] },
+  vite: { plugins: [siteFontSubsets(), tailwindcss()] },
 });

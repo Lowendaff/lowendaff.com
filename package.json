@@ -26,7 +26,8 @@
     "hooks:install": "node scripts/install-git-hooks.mjs",
     "check:staged": "node scripts/check-staged-content.mjs",
     "verify:hooks": "node --experimental-strip-types --test scripts/verify-git-hooks.mjs",
-    "verify:map": "node --experimental-strip-types --test scripts/verify-review-map.mjs"
+    "verify:map": "node --experimental-strip-types --test scripts/verify-review-map.mjs",
+    "verify:fonts": "node --test scripts/verify-font-subsets.mjs"
   },
   "engines": {
     "node": ">=22.12.0"
@@ -53,9 +54,11 @@
     "@types/mdast": "4.0.4",
     "@types/node": "24.19.2",
     "@types/three": "0.187.0",
+    "fontverter": "2.1.0",
     "parse5": "8.0.1",
     "prettier": "3.9.10",
     "prettier-plugin-astro": "1.1.2",
+    "subset-font": "2.9.0",
     "typescript": "6.0.3",
     "yaml": "2.9.1"
   }
