@@ -30,18 +30,13 @@ const initial = EXOTIC_TERRITORIES[0];
 <BaseLayout
   title="奇葩小国"
   active="exotic"
-  noindex={exoticRecords.length === 0}
   description="收录全球 42 处冷门国家、极地群岛、孤岛海缆与袖珍自治域（ASN）的 VPS 与独立服务器实测手记。"
   breadcrumbs={[
     { name: '首页', path: '/' },
     { name: '奇葩小国', path: '/exotic/' },
   ]}
 >
-  <div
-    class="shell exotic-page home-revision"
-    data-exotic-page
-    data-exotic-empty={exoticRecords.length === 0 ? 'true' : 'false'}
-  >
+  <div class="shell exotic-page home-revision" data-exotic-page>
     <header class="exotic-hero">
       <div class="exotic-hero-main">
         <span class="badge-pill">

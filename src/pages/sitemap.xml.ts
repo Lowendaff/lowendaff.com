@@ -1,15 +1,13 @@
 import type { APIRoute } from 'astro';
 import { getPublishedPosts, postPath } from '../lib/posts';
-import { isExoticPost } from '../lib/exotic';
 import { escapeXml, siteIndexable } from '../lib/site';
 
 export const GET: APIRoute = async ({ site }) => {
   const posts = siteIndexable ? await getPublishedPosts() : [];
-  const hasExotic = posts.some(isExoticPost);
   const entries = siteIndexable
     ? [
         { path: '/', lastmod: undefined },
-        ...(hasExotic ? [{ path: '/exotic/', lastmod: undefined }] : []),
+        { path: '/exotic/', lastmod: undefined },
         ...(posts.length ? [{ path: '/map/', lastmod: undefined }] : []),
         ...(posts.length ? [{ path: '/tags/', lastmod: undefined }] : []),
         { path: '/ads/', lastmod: undefined },
