@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
-import RouteArt from '../components/RouteArt.astro';
+import TelegramLogo from '../components/TelegramLogo.astro';
 import HomeAds from '../components/ads/HomeAds.astro';
 import FriendLinks from '../components/FriendLinks.astro';
 import RecordList from '../components/RecordList.astro';
@@ -12,18 +12,45 @@ const records = getRecords(await getCollection('posts'));
 
 <BaseLayout title="VPS 与独立服务器测试记录">
   <div class="shell home-revision home-page">
-    <section class="hero">
-      <div class="hero-copy">
+    <header class="journal-masthead">
+      <div class="masthead-main">
+        <div class="masthead-eyebrow">
+          <span class="badge-pill">
+            <Icon name="quill-pen-line" size={14} />
+            <span>全球服务器独立测评手记</span>
+          </span>
+        </div>
         <h1>
           我们评测全世界，<span>让每一次选择都有依据。</span>
         </h1>
+        <p class="masthead-lead">
+          以真实机器、原始基准输出、流媒体解锁与全国三网回程路由，诚实记录每一份服务器实测档案。
+        </p>
       </div>
-      <RouteArt />
-    </section>
-    <div class="home-layout">
-      <div class="home-editorial">
+      <div class="masthead-links">
+        <a class="button secondary" href="/exotic/">
+          <Icon name="planet-line" size={16} />
+          奇葩小国
+        </a>
+        <a class="button secondary" href="/map/">
+          <Icon name="earth-2-line" size={16} />
+          测评地图
+        </a>
+        <a class="button secondary" href="/tags/">
+          <Icon name="tag-line" size={16} />
+          标签云
+        </a>
+      </div>
+    </header>
+
+    <div class="home-workspace">
+      <div class="home-reading-column">
+        <RecordList records={records} prependCarousel />
+      </div>
+
+      <aside class="home-partner-rail" aria-label="赞助商与订阅动态">
         <HomeAds />
-        <RecordList records={records} />
+
         <a
           class="follow-banner"
           href="https://t.me/lowendaff_blog"
@@ -32,15 +59,17 @@ const records = getRecords(await getCollection('posts'));
           aria-label="在 Telegram 关注更新（LowEndAFF，在新标签页打开）"
         >
           <div class="follow-icon">
-            <Icon name="send" size={28} />
+            <TelegramLogo size={36} />
           </div>
-          <div>
+          <div class="follow-copy">
             <h2>在 Telegram 关注更新</h2>
-            <p>有新的测试记录时，在频道里见。</p>
+            <p>新测评发布时第一时间推送。</p>
           </div>
+          <Icon name="arrow-right-up-line" size={16} />
         </a>
-      </div>
+      </aside>
     </div>
+
     <FriendLinks />
   </div>
 </BaseLayout>

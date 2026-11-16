@@ -1,5 +1,7 @@
 ---
 name: Evoxt
+brandLogo: /brand/evoxt-light.png
+brandLogoDark: /brand/evoxt-dark.png
 url: https://console.evoxt.com/aff.php?aff=160
 logo: 08.svg
 enabled: true

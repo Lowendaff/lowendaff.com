@@ -1,0 +1,209 @@
+---
+import { getAds } from '../../lib/commercial';
+import BrandMark from './BrandMark.astro';
+import Icon from '../Icon.astro';
+const products = await getAds('homeAds');
+---
+
+{products.length > 0 && (
+  <article
+    class="journal-card feed-ad-carousel"
+    data-feed-carousel
+    aria-roledescription="carousel"
+    aria-label="精选赞助商轮播推荐"
+  >
+    <div class="journal-card-meta feed-ad-toolbar">
+      <div class="feed-ad-meta-left">
+        <span class="feed-ad-badge">
+          <Icon name="sparkles-line" size={13} />
+          <span>精选推荐</span>
+        </span>
+        {products.map((product, index) => (
+          <span
+            class="feed-ad-meta-group"
+            data-feed-meta={index}
+            hidden={index !== 0}
+          >
+            <BrandMark
+              name={product.name}
+              logo={product.logo}
+              logoDark={product.logoDark}
+              size="sm"
+            />
+            {product.tags.slice(0, 2).map((tag) => (
+              <span class="review-type-label" translate="no">
+                {tag}
+              </span>
+            ))}
+          </span>
+        ))}
+      </div>
+
+      {products.length > 1 && (
+        <div class="feed-ad-controls" aria-label="切换推荐内容">
+          <div class="feed-ad-dots" role="tablist" aria-label="推荐条目">
+            {products.map((product, index) => (
+              <button
+                type="button"
+                role="tab"
+                class="feed-ad-dot"
+                data-feed-dot={index}
+                aria-selected={index === 0 ? 'true' : 'false'}
+                aria-label={`切换到 ${product.name}`}
+              />
+            ))}
+          </div>
+          <span class="feed-ad-counter mono" data-feed-counter>
+            1 / {products.length}
+          </span>
+          <button
+            type="button"
+            class="feed-ad-arrow"
+            data-feed-prev
+            aria-label="上一条推荐"
+          >
+            <Icon name="left-line" size={15} />
+          </button>
+          <button
+            type="button"
+            class="feed-ad-arrow"
+            data-feed-next
+            aria-label="下一条推荐"
+          >
+            <Icon name="right-line" size={15} />
+          </button>
+        </div>
+      )}
+    </div>
+
+    <div class="feed-ad-slides">
+      {products.map((product, index) => (
+        <a
+          class="feed-ad-slide"
+          href={product.url}
+          target="_blank"
+          rel="sponsored nofollow noopener noreferrer"
+          data-feed-slide={index}
+          data-feed-brand={product.name}
+          hidden={index !== 0}
+        >
+          <div class="article-main">
+            <h3>{product.title}</h3>
+            <p class="journal-excerpt">{product.description}</p>
+          </div>
+          <div class="journal-card-footer">
+            <BrandMark
+              name={product.name}
+              logo={product.logo}
+              logoDark={product.logoDark}
+              size="sm"
+            />
+            <span class="journal-read-more">
+              前往官网
+              <Icon name="arrow-right-up-line" size={16} />
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </article>
+)}
+<script>
+  document
+    .querySelectorAll<HTMLElement>('[data-feed-carousel]')
+    .forEach((carousel) => {
+      const slides = Array.from(
+        carousel.querySelectorAll<HTMLElement>('[data-feed-slide]'),
+      );
+      const metas = Array.from(
+        carousel.querySelectorAll<HTMLElement>('[data-feed-meta]'),
+      );
+      const dots = Array.from(
+        carousel.querySelectorAll<HTMLButtonElement>('[data-feed-dot]'),
+      );
+      const counter = carousel.querySelector<HTMLElement>(
+        '[data-feed-counter]',
+      );
+      const prev =
+        carousel.querySelector<HTMLButtonElement>('[data-feed-prev]');
+      const next =
+        carousel.querySelector<HTMLButtonElement>('[data-feed-next]');
+      if (slides.length <= 1) return;
+
+      let active = Math.floor(Math.random() * slides.length);
+      let hovered = false;
+      let focused = false;
+      let timer = 0;
+      const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      const show = (index: number) => {
+        active = (index + slides.length) % slides.length;
+        slides.forEach((slide, i) => {
+          slide.hidden = i !== active;
+        });
+        metas.forEach((meta, i) => {
+          meta.hidden = i !== active;
+        });
+        dots.forEach((dot, i) => {
+          dot.setAttribute('aria-selected', String(i === active));
+        });
+        if (counter) counter.textContent = `${active + 1} / ${slides.length}`;
+      };
+
+      const stop = () => {
+        if (timer) {
+          window.clearInterval(timer);
+          timer = 0;
+        }
+      };
+
+      const start = () => {
+        stop();
+        if (motionQuery.matches || hovered || focused || document.hidden)
+          return;
+        timer = window.setInterval(() => show(active + 1), 4600);
+      };
+
+      prev?.addEventListener('click', () => {
+        show(active - 1);
+        start();
+      });
+      next?.addEventListener('click', () => {
+        show(active + 1);
+        start();
+      });
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          show(i);
+          start();
+        });
+      });
+
+      carousel.addEventListener('pointerenter', () => {
+        hovered = true;
+        stop();
+      });
+      carousel.addEventListener('pointerleave', () => {
+        hovered = false;
+        start();
+      });
+      carousel.addEventListener('focusin', () => {
+        focused = true;
+        stop();
+      });
+      carousel.addEventListener('focusout', (event) => {
+        if (
+          !(event.relatedTarget instanceof Node) ||
+          !carousel.contains(event.relatedTarget)
+        ) {
+          focused = false;
+          start();
+        }
+      });
+      document.addEventListener('visibilitychange', start);
+      motionQuery.addEventListener('change', start);
+
+      show(active);
+      start();
+    });
+</script>

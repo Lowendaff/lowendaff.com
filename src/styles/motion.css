@@ -1,102 +1,35 @@
-/* Brief entrance and interaction feedback, then a quiet reading surface. */
+/* Smooth opacity & color transitions with zero element displacement and zero shadow changes. */
 :root {
   --motion-quick: 140ms;
-  --motion-panel: 200ms;
+  --motion-panel: 180ms;
   --motion-arrive: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .home-page .hero-copy h1 {
-    animation: statement-arrive 480ms var(--motion-arrive) both;
+    animation: statement-fade 360ms var(--motion-arrive) both;
   }
 
   .theme-picker[open] .theme-options,
   .mobile-nav[open] nav {
-    transform-origin: top right;
-    animation: menu-arrive var(--motion-panel) var(--motion-arrive);
-  }
-
-  .friend-arrow svg,
-  .follow-icon svg,
-  .nav-subscribe svg,
-  .product-overlay-controls button svg,
-  .theme-picker summary svg,
-  .mobile-nav summary svg {
-    transition: transform var(--motion-quick) var(--motion-arrive);
-  }
-
-  .friend-button:focus-visible .friend-arrow svg,
-  .nav-subscribe:focus-visible svg,
-  .follow-banner:focus-visible .follow-icon svg {
-    transform: translate(2px, -2px);
-  }
-
-  .product-overlay-controls button:active svg,
-  .theme-picker summary:active svg,
-  .mobile-nav summary:active svg {
-    transform: scale(0.88);
-  }
-
-  /* Avoid sticky hover movement on touchscreens. The clickable boxes never move. */
-  @media (hover: hover) and (pointer: fine) {
-    .friend-button:hover .friend-arrow svg,
-    .nav-subscribe:hover svg,
-    .follow-banner:hover .follow-icon svg {
-      transform: translate(2px, -2px);
-    }
-
-    .product-overlay-controls [data-product-prev]:hover svg {
-      transform: translateX(-2px);
-    }
-
-    .product-overlay-controls [data-product-next]:hover svg {
-      transform: translateX(2px);
-    }
-
-    .product-overlay-controls button:active svg {
-      transform: scale(0.88);
-    }
-
-    .desktop-nav a {
-      position: relative;
-    }
-
-    .desktop-nav a::after {
-      content: '';
-      position: absolute;
-      inset: auto 0 5px;
-      height: 1px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 180ms var(--motion-arrive);
-    }
-
-    .desktop-nav a:hover::after,
-    .desktop-nav a:focus-visible::after {
-      transform: scaleX(1);
-    }
+    animation: menu-fade var(--motion-panel) var(--motion-arrive);
   }
 }
 
-@keyframes statement-arrive {
+@keyframes statement-fade {
   from {
-    opacity: 0.78;
-    transform: translateY(6px);
+    opacity: 0.82;
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 
-@keyframes menu-arrive {
+@keyframes menu-fade {
   from {
     opacity: 0;
-    transform: translateY(-4px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }

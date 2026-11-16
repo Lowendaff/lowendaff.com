@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
 import VpsSpecCard from '../components/mdx/VpsSpecCard.astro';
 import BenchmarkTerminal from '../components/mdx/BenchmarkTerminal.astro';
 import { getPublishedPosts } from '../lib/posts';
@@ -52,11 +53,17 @@ const colors = [
       </div>
       <div class="kit-type">
         <h2>状态样式</h2>
-        <p>状态同时提供文字与颜色标识。</p>
-        <p>
-          <span class="state-chip success">● 正常</span>{' '}
-          <span class="state-chip warning">▲ 波动</span>{' '}
-          <span class="state-chip danger">× 异常</span>
+        <p>状态同时提供文字、Mingcute 线型图标与色彩标识。</p>
+        <p class="state-chip-group">
+          <span class="state-chip success">
+            <Icon name="check-line" size={14} /> 正常
+          </span>
+          <span class="state-chip warning">
+            <Icon name="information-line" size={14} /> 波动
+          </span>
+          <span class="state-chip danger">
+            <Icon name="close-line" size={14} /> 异常
+          </span>
         </p>
       </div>
     </section>

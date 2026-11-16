@@ -1,5 +1,7 @@
 ---
 name: Misaka
+brandLogo: /brand/misaka-light.png
+brandLogoDark: /brand/misaka-dark.png
 url: https://misaka.io/
 logo: 05.svg
 enabled: true

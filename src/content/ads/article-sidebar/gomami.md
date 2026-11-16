@@ -1,5 +1,7 @@
 ---
 name: GoMami
+logo: /brand/gomami-light.png
+logoDark: /brand/gomami-dark.png
 title: 亚太高性能 VPS
 description: 香港、日本、新加坡节点，兼顾线路选择与 DDoS 防护。
 url: https://gomami.io/aff.php?aff=192

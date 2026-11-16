@@ -1,5 +1,7 @@
 ---
 name: Evoxt
+logo: /brand/evoxt-light.png
+logoDark: /brand/evoxt-dark.png
 title: 高频 CPU 云服务器
 description: 亚太、欧洲与美洲多地可选，探索适合业务的实例配置。
 tags:

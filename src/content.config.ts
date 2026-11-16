@@ -238,12 +238,15 @@ const posts = defineCollection({
     }),
 });
 // Each placement owns its Markdown files; creatives are never shared implicitly.
+const adLogoPath = z.string().regex(/^\/brand\/[a-z0-9-]+\.(?:png|svg|webp)$/i);
 const adSchema = z
   .object({
     name: z.string().min(1),
     title: z.string().min(1),
     description: z.string(),
     url: httpUrl,
+    logo: adLogoPath.optional(),
+    logoDark: adLogoPath.optional(),
     tags: z.array(z.string()).default([]),
     theme: z.enum(['indigo', 'orange', 'teal', 'slate']),
     enabled: z.boolean().default(true),
@@ -273,6 +276,8 @@ const sponsors = defineCollection({
     name: z.string().min(1),
     url: httpUrl,
     logo: z.string().regex(/^[a-zA-Z0-9_-]+\.svg$/),
+    brandLogo: adLogoPath.optional(),
+    brandLogoDark: adLogoPath.optional(),
     enabled: z.boolean().default(true),
     order: z.number().int().default(0),
     placements: z

@@ -29,6 +29,8 @@ export async function createReviewGlobe(
 ) {
   const viewport = root.querySelector<HTMLElement>('[data-globe-viewport]')!;
   const stage = root.querySelector<HTMLElement>('[data-globe-scene]')!;
+  const stageBox =
+    root.querySelector<HTMLElement>('.atlas-globe-stage') ?? viewport;
   const markerLayer = root.querySelector<HTMLElement>('[data-globe-markers]')!;
   const coordinateLabel = root.querySelector<HTMLElement>(
     '[data-globe-coordinates]',
@@ -156,9 +158,10 @@ export async function createReviewGlobe(
     texture.needsUpdate = true;
     requestDraw();
   }
+  const baseHalfTan = Math.tan((40 * Math.PI) / 360);
   const camera = new PerspectiveCamera(40, 1, 0.1, 30);
   const home = initialPlaces[0] ?? { latitude: 20, longitude: 25 };
-  const homeDistance = () => (viewport.clientWidth < 500 ? 3.8 : 3.35);
+  const homeDistance = () => (stageBox.clientWidth < 500 ? 3.8 : 3.35);
   camera.position.fromArray(
     globePoint(home.latitude, home.longitude, homeDistance()),
   );
@@ -282,7 +285,17 @@ export async function createReviewGlobe(
     renderer.render(scene, camera);
     const width = viewport.clientWidth;
     const height = viewport.clientHeight;
+    const stageWidth = stageBox.clientWidth || width;
+    const stageHeight = stageBox.clientHeight || height;
+    const offsetX = (width - stageWidth) / 2;
+    const offsetY = (height - stageHeight) / 2;
     const distance = camera.position.length();
+    const sphereRadius =
+      height /
+      (2 *
+        Math.tan((camera.fov * Math.PI) / 360) *
+        Math.sqrt(Math.max(0.04, distance * distance - 1)));
+    canvas.style.clipPath = `circle(${Math.ceil(sphereRadius + 14)}px at 50% 50%)`;
     const facing = camera.position.clone().normalize();
     const occupied: { x: number; y: number }[] = [];
     for (const { button, position, label } of [...markers].sort(
@@ -291,14 +304,14 @@ export async function createReviewGlobe(
         Number(a.button.getAttribute('aria-pressed') === 'true'),
     )) {
       projected.copy(position).project(camera);
-      const x = (projected.x * 0.5 + 0.5) * width;
-      const y = (-projected.y * 0.5 + 0.5) * height;
+      const x = (projected.x * 0.5 + 0.5) * width - offsetX;
+      const y = (-projected.y * 0.5 + 0.5) * height - offsetY;
       const hidden =
         position.clone().normalize().dot(facing) < 1 / distance + 0.025 ||
-        x < 16 ||
-        x > width - 16 ||
-        y < 52 ||
-        y > height - 48;
+        x < -60 ||
+        x > stageWidth - 12 ||
+        y < -40 ||
+        y > stageHeight + 24;
       button.hidden = hidden;
       if (!hidden) {
         button.style.left = `${x}px`;
@@ -309,10 +322,11 @@ export async function createReviewGlobe(
         label.hidden = crowded;
         if (!crowded) occupied.push({ x, y });
         button.style.transform =
-          x > width - 170
+          x > stageWidth - 170
             ? 'translate(calc(-100% + 14px), -50%)'
             : 'translate(-14px, -50%)';
-        button.style.flexDirection = x > width - 170 ? 'row-reverse' : 'row';
+        button.style.flexDirection =
+          x > stageWidth - 170 ? 'row-reverse' : 'row';
       }
     }
     const latitude = (Math.asin(facing.y) * 180) / Math.PI;
@@ -405,16 +419,21 @@ export async function createReviewGlobe(
   );
   stage.addEventListener('focusin', requestDraw, { signal: events.signal });
   stage.addEventListener('focusout', requestDraw, { signal: events.signal });
-  const resize = new ResizeObserver(() => {
+  const updateSize = () => {
     const width = viewport.clientWidth;
     const height = viewport.clientHeight;
+    const stageHeight = stageBox.clientHeight || height;
     if (!width || !height) return;
     renderer.setSize(width, height, false);
+    camera.fov =
+      (Math.atan(baseHalfTan * (height / stageHeight)) * 360) / Math.PI;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     requestDraw();
-  });
+  };
+  const resize = new ResizeObserver(updateSize);
   resize.observe(viewport);
+  resize.observe(stageBox);
   const intersection = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
     previousFrame = undefined;
@@ -533,7 +552,7 @@ export async function createReviewGlobe(
       move(
         place.latitude,
         place.longitude,
-        viewport.clientWidth < 500 ? 3.4 : 2.7,
+        stageBox.clientWidth < 500 ? 3.4 : 2.7,
       );
     },
     setPlaces(places: Place[], selected = '') {

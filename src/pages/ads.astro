@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
+import TelegramLogo from '../components/TelegramLogo.astro';
 import { getEntry } from 'astro:content';
 const entry = await getEntry('advertising', 'policy');
 if (!entry) throw new Error('Missing src/content/advertising/policy.md');
@@ -11,21 +12,20 @@ const money = new Intl.NumberFormat('zh-CN', {
   currency: 'CNY',
   maximumFractionDigits: 0,
 });
+const priceByType = Object.fromEntries(
+  placements.map((item) => [item.type, money.format(item.price)]),
+);
 ---
 
 <BaseLayout
   title="广告"
   active="ads"
-  description="了解 LowEndAFF 的广告位置、赞助权益与合作方式。"
+  description="了解 LowEndAFF 的广告位置、页面实景分布、赞助权益与合作方式。"
 >
-  <div class="shell directory-page ads-page">
+  <div class="shell directory-page ads-page" data-ads-studio>
     <header class="directory-heading ads-heading">
       <div>
-        <h1>
-          让好产品，
-          <br />
-          被对的人看见<span class="accent-text">.</span>
-        </h1>
+        <h1>让好产品，被对的人看见</h1>
         <p>面向关注服务器、网络与基础设施的读者。</p>
       </div>
       <a
@@ -37,37 +37,341 @@ const money = new Intl.NumberFormat('zh-CN', {
         联系广告合作 <Icon name="external" size={17} />
       </a>
     </header>
+
     <section aria-labelledby="placements-heading">
       <div class="section-heading">
-        <h2 id="placements-heading">广告位置</h2>
+        <h2 id="placements-heading">广告位置与页面实景骨架</h2>
+        <span class="subtle-label">点击任一版位，按真实页面比例定位预览</span>
       </div>
       <p class="ads-reference">{policy.reference}</p>
-      <div class="placement-grid">
-        {placements.map((item) => (
-          <article class="placement-card panel">
+
+      <div class="ad-browser-mockup panel" aria-label="广告位页面布局骨架预览">
+        <div class="browser-chrome">
+          <div class="browser-window-bar" aria-hidden="true">
+            <div class="browser-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="browser-nav-btns">
+              <span class="browser-nav-btn">
+                <Icon name="arrow-left-line" size={14} />
+              </span>
+              <span class="browser-nav-btn is-muted">
+                <Icon name="arrow-right-line" size={14} />
+              </span>
+              <span class="browser-nav-btn">
+                <Icon name="refresh-2-line" size={13} />
+              </span>
+              <span class="browser-nav-btn">
+                <Icon name="home-4-line" size={13} />
+              </span>
+            </div>
+          </div>
+          <div class="browser-address mono" aria-live="polite">
+            <Icon name="shield-line" size={13} />
+            <span class="browser-url-text" data-browser-url>
+              https://demo.example/reviews/sample-vps-benchmark/
+            </span>
+            <span class="browser-url-actions" aria-hidden="true">
+              <Icon name="copy-2-line" size={12} />
+              <Icon name="star-line" size={12} />
+            </span>
+          </div>
+          <div
+            class="browser-slot-pills"
+            role="tablist"
+            aria-label="切换预览广告位"
+          >
+            <button
+              type="button"
+              role="tab"
+              data-slot-pill="top"
+              aria-selected="true"
+            >
+              文章顶部
+            </button>
+            <button
+              type="button"
+              role="tab"
+              data-slot-pill="side"
+              aria-selected="false"
+            >
+              文章侧栏
+            </button>
+            <button
+              type="button"
+              role="tab"
+              data-slot-pill="bottom"
+              aria-selected="false"
+            >
+              文章尾部
+            </button>
+            <button
+              type="button"
+              role="tab"
+              data-slot-pill="home"
+              aria-selected="false"
+            >
+              首页双位
+            </button>
+            <button
+              type="button"
+              role="tab"
+              data-slot-pill="bundle"
+              aria-selected="false"
+            >
+              组合全亮
+            </button>
+          </div>
+        </div>
+
+        <div class="browser-viewport">
+          <div class="wire-site-header-bar" aria-hidden="true">
+            <div class="wire-page-shell wire-nav-inner">
+              <span class="wire-brand">
+                <i></i> DemoBlog
+              </span>
+              <span class="wire-nav-pills">
+                <b></b>
+                <b></b>
+                <b></b>
+                <b></b>
+                <b></b>
+              </span>
+              <span class="wire-cta-pill"></span>
+            </div>
+          </div>
+
+          <div class="wire-page-shell wire-stage-stack">
+            <!-- Article Detail Page Skeleton (True ~67% : 33% Page Proportions) -->
             <div
-              class:list={['placement-diagram', `placement-${item.type}`]}
+              class="wire-canvas wire-article-view"
+              data-browser-view="article"
+            >
+              <div class="wire-main-col">
+                <div class="wire-doc-head" aria-hidden="true">
+                  <div class="wire-crumb"></div>
+                  <div class="wire-h1"></div>
+                  <div class="wire-props">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <div class="wire-toc">
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="wire-ad-zone is-active"
+                  data-wire-slot="top"
+                  aria-label="预览文章顶部广告位"
+                >
+                  <div class="wire-zone-head">
+                    <span class="wire-zone-title">
+                      <Icon name="layout-top-line" size={13} />
+                      文章顶部（三列卡片）
+                    </span>
+                    <span class="wire-zone-price mono">
+                      {priceByType.top ?? '¥500'}/月
+                    </span>
+                  </div>
+                  <div class="wire-mini-cols-3" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </button>
+
+                <div class="wire-prose-block" aria-hidden="true">
+                  <div class="wire-h2"></div>
+                  <div class="wire-table">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <div class="wire-h2 short-h"></div>
+                  <div class="wire-terminal">
+                    <span></span>
+                    <span></span>
+                    <span class="short"></span>
+                  </div>
+                  <div class="wire-lines">
+                    <span></span>
+                    <span></span>
+                    <span class="short"></span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="wire-ad-zone"
+                  data-wire-slot="bottom"
+                  aria-label="预览文章尾部广告位"
+                >
+                  <div class="wire-zone-head">
+                    <span class="wire-zone-title">
+                      <Icon name="layout-bottom-line" size={13} />
+                      文章尾部（双列卡片）
+                    </span>
+                    <span class="wire-zone-price mono">
+                      {priceByType.bottom ?? '¥200'}/月
+                    </span>
+                  </div>
+                  <div class="wire-mini-cols-2" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                  </div>
+                </button>
+              </div>
+
+              <div class="wire-side-col">
+                <div class="wire-sponsors-box" aria-hidden="true">
+                  <small>Sponsors 品牌墙</small>
+                  <div class="wire-sponsor-cells">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="wire-ad-zone wire-ad-side"
+                  data-wire-slot="side"
+                  aria-label="预览文章侧栏广告位"
+                >
+                  <div class="wire-zone-head">
+                    <span class="wire-zone-title">
+                      <Icon name="layout-right-line" size={13} />
+                      文章侧栏
+                    </span>
+                    <span class="wire-zone-price mono">
+                      {priceByType.side ?? '¥200'}/月
+                    </span>
+                  </div>
+                  <div class="wire-mini-stack" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Homepage Skeleton (True ~66% : 34% Page Proportions) -->
+            <div
+              class="wire-canvas wire-home-view is-inactive-view"
+              data-browser-view="home"
               aria-hidden="true"
             >
-              <div class="diagram-bar">
-                <i></i>
-                <i></i>
-                <i></i>
-              </div>
-              <div class="diagram-content">
-                <div class="diagram-main">
-                  <b></b>
-                  <i></i>
-                  <i></i>
-                  <i></i>
-                  <b></b>
-                </div>
-                <div class="diagram-side">
-                  <b></b>
-                  <i></i>
-                  <i></i>
+              <div class="wire-home-hero" aria-hidden="true">
+                <div class="wire-badge"></div>
+                <div class="wire-h1 wide"></div>
+                <div class="wire-lines">
+                  <span class="short"></span>
                 </div>
               </div>
+
+              <div class="wire-home-cols">
+                <div class="wire-main-col">
+                  <div class="wire-toc" aria-hidden="true">
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                  </div>
+                  <button
+                    type="button"
+                    class="wire-ad-zone is-active"
+                    data-wire-slot="home"
+                    aria-label="预览首页列表首位原生轮播推荐位"
+                  >
+                    <div class="wire-zone-head">
+                      <span class="wire-zone-title">
+                        <Icon name="home-4-line" size={13} />
+                        列表第 1 位 · 原生文章轮播
+                      </span>
+                      <span class="wire-zone-price mono">
+                        {priceByType.home ?? '¥500'}/月
+                      </span>
+                    </div>
+                    <div class="wire-lines" aria-hidden="true">
+                      <span></span>
+                      <span class="short"></span>
+                    </div>
+                  </button>
+                  <div class="wire-article-card" aria-hidden="true">
+                    <div class="wire-h2"></div>
+                    <div class="wire-lines">
+                      <span></span>
+                      <span class="short"></span>
+                    </div>
+                  </div>
+                  <div class="wire-article-card" aria-hidden="true">
+                    <div class="wire-h2 short-h"></div>
+                    <div class="wire-lines">
+                      <span></span>
+                      <span class="short"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="wire-side-col">
+                  <div class="wire-toc" aria-hidden="true">
+                    <i></i>
+                  </div>
+                  <button
+                    type="button"
+                    class="wire-ad-zone is-active"
+                    data-wire-slot="home"
+                    aria-label="预览首页首屏右侧赞助商精选位"
+                  >
+                    <div class="wire-zone-head">
+                      <span class="wire-zone-title">
+                        <Icon name="star-line" size={13} />
+                        首屏右侧 · 赞助商精选
+                      </span>
+                    </div>
+                    <div class="wire-mini-stack" aria-hidden="true">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="placement-grid">
+        {placements.map((item, idx) => (
+          <article
+            class:list={[
+              'placement-card',
+              'panel',
+              idx === 1 && 'is-highlighted',
+            ]}
+            data-placement-card={item.type}
+            tabindex="0"
+          >
+            <div class:list={['placement-badge', `placement-${item.type}`]}>
+              <Icon name={`${item.type}-slot`} size={20} />
+              <span>点击在上方骨架中定位</span>
             </div>
             <div class="placement-title">
               <h3>{item.name}</h3>
@@ -82,7 +386,13 @@ const money = new Intl.NumberFormat('zh-CN', {
         ))}
       </div>
     </section>
-    <section class="bundle-panel panel" aria-labelledby="bundle-heading">
+
+    <section
+      class="bundle-panel panel"
+      aria-labelledby="bundle-heading"
+      data-placement-card="bundle"
+      tabindex="0"
+    >
       <div>
         <h2 id="bundle-heading">组合投放</h2>
         <p>{policy.bundle.description}</p>
@@ -93,6 +403,7 @@ const money = new Intl.NumberFormat('zh-CN', {
         <p>{policy.bundle.availability}</p>
       </div>
     </section>
+
     <div class="ads-details-grid">
       <section aria-labelledby="benefits-heading">
         <h2 id="benefits-heading">赞助权益</h2>
@@ -117,6 +428,7 @@ const money = new Intl.NumberFormat('zh-CN', {
         </dl>
       </section>
     </div>
+
     <section class="terms-panel" aria-labelledby="terms-heading">
       <h2 id="terms-heading">合作须知</h2>
       <dl class="ads-details">
@@ -134,10 +446,86 @@ const money = new Intl.NumberFormat('zh-CN', {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Telegram <span translate="no">{policy.contactLabel}</span>
+          <TelegramLogo size={16} />
+          <span>Telegram</span>
+          <span translate="no">{policy.contactLabel}</span>
           <Icon name="external" size={16} />
         </a>
       </div>
     </section>
   </div>
 </BaseLayout>
+<script>
+  const studio = document.querySelector<HTMLElement>('[data-ads-studio]');
+  if (studio) {
+    const pills = Array.from(
+      studio.querySelectorAll<HTMLButtonElement>('[data-slot-pill]'),
+    );
+    const views = Array.from(
+      studio.querySelectorAll<HTMLElement>('[data-browser-view]'),
+    );
+    const zones = Array.from(
+      studio.querySelectorAll<HTMLElement>('[data-wire-slot]'),
+    );
+    const cards = Array.from(
+      studio.querySelectorAll<HTMLElement>('[data-placement-card]'),
+    );
+    const urlText = studio.querySelector<HTMLElement>('[data-browser-url]');
+
+    const activate = (slot: string) => {
+      const showHome = slot === 'home';
+      views.forEach((v) => {
+        const inactive = showHome
+          ? v.dataset.browserView !== 'home'
+          : v.dataset.browserView !== 'article';
+        v.classList.toggle('is-inactive-view', inactive);
+        v.setAttribute('aria-hidden', String(inactive));
+      });
+      if (urlText) {
+        urlText.textContent = showHome
+          ? 'https://demo.example/'
+          : 'https://demo.example/reviews/sample-vps-benchmark/';
+      }
+      pills.forEach((pill) => {
+        pill.setAttribute(
+          'aria-selected',
+          String(pill.dataset.slotPill === slot),
+        );
+      });
+      zones.forEach((zone) => {
+        const match = slot === 'bundle' || zone.dataset.wireSlot === slot;
+        zone.classList.toggle('is-active', match);
+      });
+      cards.forEach((card) => {
+        const type = card.dataset.placementCard;
+        card.classList.toggle(
+          'is-highlighted',
+          slot === 'bundle' ? true : type === slot,
+        );
+      });
+    };
+
+    pills.forEach((pill) => {
+      pill.addEventListener('click', () =>
+        activate(pill.dataset.slotPill || 'top'),
+      );
+    });
+    zones.forEach((zone) => {
+      zone.addEventListener('click', () =>
+        activate(zone.dataset.wireSlot || 'top'),
+      );
+    });
+    cards.forEach((card) => {
+      const slot = card.dataset.placementCard || 'top';
+      card.addEventListener('click', () => activate(slot));
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          activate(slot);
+        }
+      });
+    });
+
+    activate('top');
+  }
+</script>

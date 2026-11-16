@@ -1,34 +1,20 @@
-/* Revision 5: quiet article headings and a themed route picker. */
+/* Sticky Notion chapter bar, tooltip hints, and custom route combobox. */
 .article-toc {
   position: sticky;
-  top: 84px;
+  top: 60px;
   z-index: 19;
-  display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  padding: 4px 0;
-  margin-bottom: 24px;
-  border-block: 1px solid var(--border);
+  margin: 6px 0 22px;
   background: var(--canvas);
-  scrollbar-width: thin;
-  scrollbar-color: var(--muted) var(--canvas);
 }
-.article-toc a {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  min-height: 44px;
-  padding: 0 2px;
-  font-size: 14px;
-  color: var(--text);
-}
-.article-toc a:hover {
+.article-toc > a[aria-current='true'] {
   color: var(--accent);
+  font-weight: 600;
 }
-@media (min-width: 901px) {
-  .review-revision .review-body [id] {
-    scroll-margin-top: 56px;
-  }
+.article-toc > a[aria-current='true']::after {
+  background: var(--accent);
+}
+.review-revision .review-body [id] {
+  scroll-margin-top: 0;
 }
 @media (max-width: 900px) {
   .article-toc {
@@ -40,6 +26,7 @@
     display: none;
   }
 }
+
 .hint-heading {
   position: relative;
 }
@@ -49,25 +36,26 @@
 .heading-hint-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  min-height: 44px;
+  gap: 8px;
+  min-height: var(--control-h-md);
   padding: 0;
   border: 0;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: inherit;
   font: inherit;
   letter-spacing: inherit;
   text-align: left;
+  transition: var(--transition-ui);
 }
 .heading-hint-trigger > span {
-  font-size: 15px;
-  font-weight: 400;
+  display: inline-flex;
   color: var(--muted);
+  transition: var(--transition-ui);
 }
 .heading-hint-trigger:hover > span,
 .heading-hint-trigger:focus-visible > span {
-  color: var(--accent);
+  color: var(--text);
 }
 .heading-tooltip {
   position: absolute;
@@ -76,21 +64,19 @@
   top: 100%;
   width: max-content;
   max-width: min(320px, calc(100vw - 86px));
-  padding: 12px 15px;
+  padding: var(--space-sm) var(--space-md);
   background: var(--raised);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   font-size: 13px;
-  line-height: 1.8;
-  box-shadow:
-    0 2px 4px #0000000a,
-    0 10px 28px #00000014;
+  line-height: 1.75;
+  box-shadow: var(--shadow-md);
 }
 .route-picker {
   position: relative;
   min-width: 0;
-  margin: 16px 0;
+  margin: 14px 0;
 }
 .route-picker-trigger {
   display: flex;
@@ -98,16 +84,18 @@
   justify-content: space-between;
   gap: 16px;
   width: 100%;
-  min-height: 50px;
-  padding: 13px 16px;
+  min-height: var(--control-h-lg);
+  padding: 12px var(--control-px-md);
   font-size: 14px;
+  font-weight: 500;
   line-height: 1.5;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   text-align: left;
-  box-shadow: 0 1px 2px #00000004;
+  box-shadow: none;
+  transition: var(--transition-ui);
 }
 .route-picker-trigger > span {
   min-width: 0;
@@ -116,17 +104,18 @@
 .route-picker-trigger > svg {
   flex-shrink: 0;
   color: var(--muted);
-  transition: transform 150ms ease;
+  transition: var(--transition-ui);
 }
 .route-picker-trigger:hover {
-  border-color: var(--accent);
+  border-color: var(--border-strong);
+  background: var(--subtle);
 }
 .route-picker-trigger[aria-expanded='true'] {
   border-color: var(--accent);
-  background: var(--accent-soft);
+  background: var(--surface);
 }
 .route-picker-trigger[aria-expanded='true'] > svg {
-  transform: rotate(180deg);
+  color: var(--accent);
 }
 .route-picker-list {
   position: absolute;
@@ -136,13 +125,11 @@
   max-height: 320px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 5px;
+  padding: 6px;
   background: var(--raised);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow:
-    0 2px 5px #0000000a,
-    0 14px 32px #0000001a;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   scrollbar-width: thin;
   scrollbar-color: var(--muted) var(--raised);
 }
@@ -155,16 +142,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  min-height: 44px;
+  min-height: var(--control-h-md);
   padding: 10px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.5;
   color: var(--text);
   overflow-wrap: anywhere;
+  transition: var(--transition-ui);
 }
 .option-check {
+  display: inline-flex;
   flex-shrink: 0;
   visibility: hidden;
   color: var(--accent);
@@ -177,20 +166,7 @@
   visibility: visible;
 }
 .route-picker-option[data-active='true'] {
-  background: var(--accent-soft);
-  outline: 1px solid var(--border);
-  outline-offset: -1px;
-}
-.review-revision .full-review .source-note {
-  padding: 0;
-  background: transparent;
-  border: 0;
-}
-.review-revision .full-review .source-note a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  margin-top: 0;
+  background: var(--subtle);
 }
 
 /* Scroll feedback stays outside the moving table and never intercepts input. */
@@ -199,7 +175,7 @@
   isolation: isolate;
   display: flow-root;
   margin: 10px 0;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 .review-revision .route-explorer .route-table-frame .data-table {
   margin: 0;
@@ -214,7 +190,7 @@
 }
 .route-table-frame .data-table::-webkit-scrollbar-thumb {
   border: 2px solid var(--subtle);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--muted);
 }
 .route-table-frame .data-table table {
@@ -230,7 +206,8 @@
   z-index: 2;
   pointer-events: none;
   opacity: 0;
-  --edge-ink: color-mix(in srgb, var(--muted) 28%, transparent);
+  transition: opacity var(--transition-base);
+  --edge-ink: color-mix(in srgb, var(--muted) 22%, transparent);
 }
 .scroll-edge-left,
 .scroll-edge-right {
@@ -240,12 +217,12 @@
 }
 .scroll-edge-left {
   left: 1px;
-  border-radius: 9px 0 0 9px;
+  border-radius: 7px 0 0 7px;
   background: linear-gradient(to right, var(--edge-ink), transparent);
 }
 .scroll-edge-right {
   right: 1px;
-  border-radius: 0 9px 9px 0;
+  border-radius: 0 7px 7px 0;
   background: linear-gradient(to left, var(--edge-ink), transparent);
 }
 .scroll-edge-top,
@@ -260,7 +237,7 @@
 }
 .scroll-edge-bottom {
   bottom: 1px;
-  border-radius: 0 0 9px 9px;
+  border-radius: 0 0 7px 7px;
   background: linear-gradient(to top, var(--edge-ink), transparent);
 }
 [data-scroll-left='true'] > .scroll-edge-left,
@@ -274,12 +251,7 @@
     padding: 12px 14px;
   }
   .route-picker-option {
-    padding: 11px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .route-picker-trigger > svg {
-    transition: none;
+    padding: 10px 12px;
   }
 }
 @media print {
@@ -290,10 +262,7 @@
   }
 }
 
-/* Content titles may include long provider names or machine identifiers. */
-.review-heading h1,
-.review-heading .tag,
-.review-meta,
+.notion-doc-header h1,
 .archive-prose {
   overflow-wrap: anywhere;
 }

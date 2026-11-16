@@ -52,7 +52,7 @@ const options = [
       .forEach((meta) => {
         const mode =
           appearance === 'system' ? meta.dataset.themeColor : appearance;
-        meta.content = mode === 'dark' ? '#1a1b26' : '#e1e2e7';
+        meta.content = mode === 'dark' ? '#191919' : '#f6f5f4';
       });
     const label = { system: '跟随系统', light: '浅色', dark: '深色' }[
       appearance
@@ -123,18 +123,26 @@ const options = [
   .theme-picker summary {
     display: grid;
     place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
     list-style: none;
     color: var(--muted);
+    transition: var(--transition-ui);
+  }
+  @media (max-width: 760px) {
+    .theme-picker summary {
+      width: var(--control-h-md);
+      height: var(--control-h-md);
+      border-radius: var(--radius-md);
+    }
   }
   .theme-picker summary::-webkit-details-marker {
     display: none;
   }
   .theme-picker summary:hover,
   .theme-picker[open] summary {
-    color: var(--accent);
+    color: var(--text);
     background: var(--subtle);
   }
   [data-theme-icon] {
@@ -152,22 +160,24 @@ const options = [
     width: 184px;
     padding: 6px;
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
     background: var(--raised);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-md);
   }
   .theme-options button {
     width: 100%;
     min-height: 44px;
-    padding: 8px 10px;
-    border-radius: 7px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 14px;
+    font-weight: 500;
     text-align: left;
     background: transparent;
     color: var(--text);
+    transition: var(--transition-ui);
   }
   .theme-options button:hover {
     background: var(--subtle);

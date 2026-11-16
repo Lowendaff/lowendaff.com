@@ -1,6 +1,7 @@
 ---
 import BenchmarkResultsTable from '../mdx/BenchmarkResultsTable.astro';
 import BenchmarkTerminal from '../mdx/BenchmarkTerminal.astro';
+import Icon from '../Icon.astro';
 import type { ReviewBlock } from '../../lib/review-model';
 interface Props {
   block: ReviewBlock;
@@ -62,7 +63,7 @@ const local =
           {block.alt?.includes('BGP') ? 'BGP 透视图暂不可用' : '图片暂不可用'}
         </strong>
         <a href={block.src} target="_blank" rel="noopener noreferrer">
-          查看图片 ↗
+          查看图片 <Icon name="external-link-line" size={14} />
         </a>
       </div>
     )}

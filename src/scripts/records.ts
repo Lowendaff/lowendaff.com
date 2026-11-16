@@ -20,7 +20,7 @@ if (root) {
     ...document.querySelectorAll<HTMLButtonElement>('[data-review-type]'),
   ];
   let reviewType: ReviewType | '' = '';
-  let category = 'merchant';
+  let category = 'all';
   let merchant = '';
   let country = '';
   let page = 1;
@@ -33,7 +33,9 @@ if (root) {
     const params = new URLSearchParams(location.search);
     const requestedType = params.get('type');
     reviewType = isReviewType(requestedType) ? requestedType : '';
-    category = params.get('by') === 'country' ? 'country' : 'merchant';
+    const byParam = params.get('by');
+    category =
+      byParam === 'country' || byParam === 'merchant' ? byParam : 'all';
     merchant =
       filters && valid('merchant', params.get('merchant') || '')
         ? params.get('merchant') || ''
@@ -55,6 +57,7 @@ if (root) {
         String(button.dataset.reviewType === reviewType),
       ),
     );
+    const prevCategory = root.dataset.activeCategory;
     tabs.forEach((tab) => {
       const selected = tab.dataset.tagTab === category;
       tab.setAttribute('aria-selected', String(selected));
@@ -65,6 +68,14 @@ if (root) {
       .forEach((panel) => {
         panel.hidden = panel.dataset.tagPanel !== category;
       });
+    chips.forEach((chip) => {
+      if (!tabs.length) return;
+      chip.hidden = category !== 'all' && chip.dataset.tagKind !== category;
+    });
+    if (prevCategory !== category) {
+      root.dataset.activeCategory = category;
+      window.dispatchEvent(new CustomEvent('tag-cloud-relayout'));
+    }
     const resultLink = document.querySelector('[data-tag-results]');
     const matches = rows.filter(
       (row) =>
@@ -72,7 +83,7 @@ if (root) {
         (!merchant || row.dataset.merchant === merchant) &&
         (!country || row.dataset.region === country),
     );
-    if (resultLink) resultLink.textContent = `查看 ${matches.length} 条记录 ↓`;
+    if (resultLink) resultLink.textContent = `查看 ${matches.length} 条记录`;
     const pages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
     page = Math.min(page, pages);
     const visible = new Set(
@@ -137,7 +148,8 @@ if (root) {
     ['q', 'region', 'country', 'merchant', 'page', 'by', 'type'].forEach(
       (key) => url.searchParams.delete(key),
     );
-    if (filters && category === 'country') url.searchParams.set('by', category);
+    if (filters && (category === 'country' || category === 'merchant'))
+      url.searchParams.set('by', category);
     if (merchant) url.searchParams.set('merchant', merchant);
     if (reviewType) url.searchParams.set('type', reviewType);
     if (country) url.searchParams.set('country', country);

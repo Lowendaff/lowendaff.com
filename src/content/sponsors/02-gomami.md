@@ -1,5 +1,7 @@
 ---
 name: GoMami
+brandLogo: /brand/gomami-light.png
+brandLogoDark: /brand/gomami-dark.png
 url: https://gomami.io/
 logo: 02.svg
 enabled: true

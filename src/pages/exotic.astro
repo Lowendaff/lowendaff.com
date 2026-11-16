@@ -1,0 +1,379 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import Flag from '../components/Flag.astro';
+import TelegramLogo from '../components/TelegramLogo.astro';
+import RecordList from '../components/RecordList.astro';
+import { getRecords } from '../lib/records';
+import { isExoticPost, EXOTIC_TERRITORIES, EXOTIC_ZONES } from '../lib/exotic';
+import { serializeJsonLd } from '../lib/seo';
+import '../styles/exotic.css';
+
+const allPosts = (await getCollection('posts')).filter(
+  ({ data }) => !data.draft,
+);
+const exoticPosts = allPosts.filter(isExoticPost);
+const exoticRecords = getRecords(exoticPosts);
+const countByCode = new Map<string, number>();
+for (const post of exoticPosts) {
+  const code = post.data.country;
+  if (code) countByCode.set(code, (countByCode.get(code) || 0) + 1);
+}
+const countByZone = new Map<string, number>();
+for (const item of EXOTIC_TERRITORIES) {
+  countByZone.set(item.zone, (countByZone.get(item.zone) || 0) + 1);
+}
+const initial = EXOTIC_TERRITORIES[0];
+---
+
+<BaseLayout
+  title="奇葩小国"
+  active="exotic"
+  noindex={exoticRecords.length === 0}
+  description="收录全球 42 处冷门国家、极地群岛、孤岛海缆与袖珍自治域（ASN）的 VPS 与独立服务器实测手记。"
+  breadcrumbs={[
+    { name: '首页', path: '/' },
+    { name: '奇葩小国', path: '/exotic/' },
+  ]}
+>
+  <div
+    class="shell exotic-page home-revision"
+    data-exotic-page
+    data-exotic-empty={exoticRecords.length === 0 ? 'true' : 'false'}
+  >
+    <header class="exotic-hero">
+      <div class="exotic-hero-main">
+        <span class="badge-pill">
+          <Icon name="planet-line" size={14} />
+          <span>冷门地区 · 孤岛海缆 · 稀有自治域收藏馆</span>
+        </span>
+        <h1>奇葩小国</h1>
+        <p>
+          跳出美西与港日新的常规航线，横跨六大边缘分区，专门记录那些极圈光缆站、海缆咽喉、双重内陆国与袖珍城邦
+          IP 的真实网络表现。
+        </p>
+      </div>
+      <dl class="exotic-stats" aria-label="探索进度">
+        <div>
+          <dt>已点亮奇葩档案</dt>
+          <dd class="mono">{exoticRecords.length} 篇</dd>
+        </div>
+        <div>
+          <dt>全球奇葩领地图鉴</dt>
+          <dd class="mono">{EXOTIC_TERRITORIES.length} 处</dd>
+        </div>
+      </dl>
+    </header>
+
+    <section class="exotic-studio panel" aria-labelledby="exotic-studio-title">
+      <div class="exotic-studio-header">
+        <div>
+          <h2 id="exotic-studio-title">
+            <Icon name="compass-3-line" size={18} />
+            <span>全球冷门机房图鉴与盲盒罗盘</span>
+          </h2>
+          <p>
+            切换六大地理分区浏览 42
+            枚边缘节点邮票，或转动盲盒抽选下一站探险目标。
+          </p>
+        </div>
+        <button
+          type="button"
+          class="button primary exotic-spin-btn"
+          data-exotic-spin
+        >
+          <Icon name="magic-2-line" size={16} />
+          <span>随机抽一个冷门节点</span>
+        </button>
+      </div>
+
+      <div
+        class="exotic-zone-tabs notion-view-tabs"
+        role="tablist"
+        aria-label="奇葩地区地理分区"
+      >
+        {EXOTIC_ZONES.map((z, idx) => (
+          <button
+            type="button"
+            role="tab"
+            data-exotic-zone={z.id}
+            aria-selected={idx === 0 ? 'true' : 'false'}
+          >
+            <span>{z.label}</span>
+            <span class="exotic-zone-count mono">
+              {z.id === 'all'
+                ? EXOTIC_TERRITORIES.length
+                : countByZone.get(z.id) || 0}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div class="exotic-studio-grid">
+        <article class="exotic-spotlight" aria-live="polite" data-exotic-card>
+          <div class="exotic-spotlight-top">
+            <div class="exotic-spotlight-place">
+              <span class="exotic-flag-slot" data-exotic-flag>
+                <Flag code={initial.code} size={24} />
+              </span>
+              <div>
+                <h3 data-exotic-title>
+                  {initial.name} · {initial.city}
+                </h3>
+                <span class="exotic-code mono" data-exotic-code>
+                  ISO {initial.code} · {initial.tag}
+                </span>
+              </div>
+            </div>
+            <span class="exotic-rarity-pill" data-exotic-rarity>
+              {initial.rarity}
+            </span>
+          </div>
+
+          <dl class="exotic-meta-strip">
+            <div>
+              <dt>
+                <Icon name="route-line" size={14} /> 出境海缆 / 链路
+              </dt>
+              <dd data-exotic-cable>{initial.cable}</dd>
+            </div>
+            <div>
+              <dt>
+                <Icon name="time-line" size={14} /> 国内往返参考延迟
+              </dt>
+              <dd class="mono" data-exotic-rtt>
+                {initial.rttHint}
+              </dd>
+            </div>
+          </dl>
+
+          <p class="exotic-trivia" data-exotic-note>
+            {initial.note}
+          </p>
+
+          <div class="exotic-spotlight-footer">
+            <span class="subtle-label" data-exotic-status>
+              {(countByCode.get(initial.code) || 0) > 0
+                ? `本站已收录 ${countByCode.get(initial.code)} 篇该地区实测`
+                : '暂未收录实测样机 · 持续蹲守库存中'}
+            </span>
+            <a
+              class="exotic-nominate-link"
+              href="https://t.me/lowendaff_blog"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <TelegramLogo size={15} />
+              <span>提供冷门商家线索</span>
+              <Icon name="arrow-right-up-line" size={14} />
+            </a>
+          </div>
+        </article>
+
+        <div
+          class="exotic-stamp-grid"
+          role="listbox"
+          aria-label="冷门机房地区集邮册"
+        >
+          {EXOTIC_TERRITORIES.map((item, idx) => {
+            const count = countByCode.get(item.code) || 0;
+            return (
+              <button
+                type="button"
+                role="option"
+                class="exotic-stamp"
+                data-exotic-stamp={idx}
+                data-stamp-zone={item.zone}
+                aria-selected={idx === 0 ? 'true' : 'false'}
+              >
+                <div class="exotic-stamp-top">
+                  <Flag code={item.code} size={16} />
+                  <span class="mono exotic-stamp-iso">{item.code}</span>
+                  <span
+                    class:list={[
+                      'exotic-stamp-badge',
+                      count > 0 && 'is-unlocked',
+                    ]}
+                  >
+                    {count > 0 ? `${count} 篇` : '图鉴'}
+                  </span>
+                </div>
+                <strong>{item.name}</strong>
+                <small>{item.tag}</small>
+                <span class="exotic-stamp-flag-tpl" hidden>
+                  <Flag code={item.code} size={24} />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    {exoticRecords.length > 0 ? (
+      <RecordList records={exoticRecords} />
+    ) : (
+      <section class="exotic-empty-vault panel" aria-labelledby="vault-title">
+        <div class="exotic-empty-icon">
+          <Icon name="compass-line" size={24} />
+        </div>
+        <h2 id="vault-title">探险档案柜正在等待第一台冷门小鸡</h2>
+        <p>
+          凡属于主流枢纽以外的冷门国家/地区，或在文章 Frontmatter 中标记为
+          <code>奇葩小国</code>、<code>冷门线路</code>
+          的实测记录，发布后都会自动归档至此。
+        </p>
+        <div class="exotic-empty-actions">
+          <a class="button secondary" href="/">
+            <Icon name="book-2-line" size={16} />
+            查看现有全部测评
+          </a>
+          <a class="button secondary" href="/map/">
+            <Icon name="earth-2-line" size={16} />
+            打开 3D 测评地图
+          </a>
+        </div>
+      </section>
+    )}
+
+    <script
+      type="application/json"
+      data-exotic-data
+      set:html={serializeJsonLd(
+        EXOTIC_TERRITORIES.map((t) => ({
+          ...t,
+          count: countByCode.get(t.code) || 0,
+        })),
+      )}
+    />
+  </div>
+</BaseLayout>
+<script>
+  const root = document.querySelector<HTMLElement>('[data-exotic-page]');
+  if (root) {
+    const data = JSON.parse(
+      root.querySelector('[data-exotic-data]')?.textContent || '[]',
+    ) as Array<{
+      code: string;
+      zone: string;
+      name: string;
+      city: string;
+      tag: string;
+      rarity: string;
+      rttHint: string;
+      cable: string;
+      note: string;
+      count: number;
+    }>;
+    const stamps = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('[data-exotic-stamp]'),
+    );
+    const zoneTabs = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('[data-exotic-zone]'),
+    );
+    const spinBtn = root.querySelector<HTMLButtonElement>('[data-exotic-spin]');
+    const flagSlot = root.querySelector<HTMLElement>('[data-exotic-flag]');
+    const titleEl = root.querySelector<HTMLElement>('[data-exotic-title]');
+    const codeEl = root.querySelector<HTMLElement>('[data-exotic-code]');
+    const rarityEl = root.querySelector<HTMLElement>('[data-exotic-rarity]');
+    const cableEl = root.querySelector<HTMLElement>('[data-exotic-cable]');
+    const rttEl = root.querySelector<HTMLElement>('[data-exotic-rtt]');
+    const noteEl = root.querySelector<HTMLElement>('[data-exotic-note]');
+    const statusEl = root.querySelector<HTMLElement>('[data-exotic-status]');
+
+    let current = 0;
+    let activeZone = 'all';
+    let spinning = false;
+
+    const getVisibleIndices = () =>
+      data
+        .map((item, idx) =>
+          activeZone === 'all' || item.zone === activeZone ? idx : -1,
+        )
+        .filter((idx) => idx >= 0);
+
+    const selectTerritory = (index: number, scrollStamp = false) => {
+      const item = data[index];
+      if (!item) return;
+      current = index;
+      stamps.forEach((btn, i) => {
+        btn.setAttribute('aria-selected', String(i === index));
+      });
+      if (scrollStamp) {
+        stamps[index]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+      const tpl = stamps[index]?.querySelector('.exotic-stamp-flag-tpl');
+      if (flagSlot && tpl) flagSlot.innerHTML = tpl.innerHTML;
+      if (titleEl) titleEl.textContent = `${item.name} · ${item.city}`;
+      if (codeEl) codeEl.textContent = `ISO ${item.code} · ${item.tag}`;
+      if (rarityEl) rarityEl.textContent = item.rarity;
+      if (cableEl) cableEl.textContent = item.cable;
+      if (rttEl) rttEl.textContent = item.rttHint;
+      if (noteEl) noteEl.textContent = item.note;
+      if (statusEl) {
+        statusEl.textContent =
+          item.count > 0
+            ? `本站已收录 ${item.count} 篇该地区实测`
+            : '暂未收录实测样机 · 持续蹲守库存中';
+      }
+    };
+
+    zoneTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        if (spinning) return;
+        activeZone = tab.dataset.exoticZone || 'all';
+        zoneTabs.forEach((t) =>
+          t.setAttribute('aria-selected', String(t === tab)),
+        );
+        stamps.forEach((btn) => {
+          btn.hidden =
+            activeZone !== 'all' && btn.dataset.stampZone !== activeZone;
+        });
+        const pool = getVisibleIndices();
+        if (pool.length && !pool.includes(current)) {
+          selectTerritory(pool[0]);
+        }
+      });
+    });
+
+    stamps.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        if (!spinning) selectTerritory(idx);
+      });
+    });
+
+    spinBtn?.addEventListener('click', () => {
+      const pool = getVisibleIndices();
+      if (spinning || pool.length <= 1) return;
+      const reduced = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+      let next = pool[Math.floor(Math.random() * pool.length)];
+      if (next === current) {
+        next = pool[(pool.indexOf(current) + 1) % pool.length];
+      }
+
+      if (reduced) {
+        selectTerritory(next, true);
+        return;
+      }
+
+      spinning = true;
+      let step = 0;
+      const totalSteps = 8;
+      const tick = () => {
+        step++;
+        if (step >= totalSteps) {
+          spinning = false;
+          selectTerritory(next, true);
+          return;
+        }
+        const hop = pool[Math.floor(Math.random() * pool.length)];
+        selectTerritory(hop);
+        window.setTimeout(tick, 60 + step * 16);
+      };
+      tick();
+    });
+  }
+</script>

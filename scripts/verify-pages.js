@@ -90,7 +90,7 @@ async function verifyPages(page) {
               result.ads['article-top'] !== 3 ||
               result.ads['article-bottom'] !== 4 ||
               result.ads.sidebar !== 7 ||
-              result.sponsors !== 11 ||
+              result.sponsors !== 12 ||
               !result.articleDate?.startsWith('测试时间：')
             )
               throw new Error(`Content mismatch ${path}`);

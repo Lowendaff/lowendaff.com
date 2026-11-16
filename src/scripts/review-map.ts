@@ -9,6 +9,7 @@ export function initReviewMap() {
   ) as { places: ReviewPlace[] };
   let globe: Awaited<ReturnType<typeof createReviewGlobe>> | undefined;
   let loading = false;
+
   const url = new URL(window.location.href);
   let type = ['vps', 'dedicated'].includes(url.searchParams.get('type') ?? '')
     ? url.searchParams.get('type')!
@@ -18,71 +19,91 @@ export function initReviewMap() {
   )
     ? url.searchParams.get('place')!
     : '';
+  let hovered = '';
+
   const mapPlaces = places.map((place) => ({
     ...place,
     count: place.articles.length,
   }));
-  const filters = root.querySelector<HTMLElement>('[data-map-filters]')!;
-  filters.hidden = false;
-  const dialog = root.querySelector<HTMLDialogElement>('[data-map-dialog]')!;
+
   const title = root.querySelector<HTMLElement>('[data-map-title]')!;
-  const openers = root.querySelectorAll<HTMLButtonElement>('[data-map-open]');
-  let returnPlace = '';
-  let returnFocus: HTMLElement | null = null;
-  let previousOverflow = '';
-  let scrollLocked = false;
+  const clearBtn = root.querySelector<HTMLButtonElement>('[data-map-clear]');
+  const resultStatus = root.querySelector<HTMLElement>(
+    '[data-map-result-status]',
+  )!;
+  const articlesScroll = root.querySelector<HTMLElement>(
+    '[data-map-articles-scroll]',
+  );
+  const articlesPanel = root.querySelector<HTMLElement>(
+    '[data-map-articles-panel]',
+  );
   const status = root.querySelector<HTMLElement>('[data-globe-status]')!;
   const statusText = root.querySelector<HTMLElement>(
     '[data-globe-status-text]',
   )!;
   const retry = root.querySelector<HTMLButtonElement>('[data-globe-retry]')!;
   const controls = root.querySelector<HTMLElement>('[data-globe-controls]')!;
+  const regionButtons = Array.from(
+    root.querySelectorAll<HTMLButtonElement>('[data-map-select]'),
+  );
+
   function render(updateUrl = true) {
-    const place = places.find((place) => place.id === selected);
-    const citySection = [
-      ...root!.querySelectorAll<HTMLElement>('[data-map-place]'),
-    ].find((section) => section.dataset.mapPlace === selected);
-    title.textContent = place ? citySection!.dataset.cityLabel! : '测评城市';
-    dialog.classList.toggle('has-city', Boolean(place));
-    root!
-      .querySelectorAll<HTMLButtonElement>('[data-map-type]')
+    const activePlace = places.find((place) => place.id === selected);
+    const activeButton = regionButtons.find(
+      (btn) => btn.dataset.mapSelect === selected,
+    );
+
+    title.textContent = activePlace
+      ? `${activePlace.city} 测评文章`
+      : '测评文章列表';
+    if (clearBtn) clearBtn.hidden = !selected;
+
+    root
+      ?.querySelectorAll<HTMLButtonElement>('[data-map-type]')
       .forEach((button) =>
         button.setAttribute(
           'aria-pressed',
           String(type === button.dataset.mapType),
         ),
       );
+
     let visibleCount = 0;
     for (const section of root!.querySelectorAll<HTMLElement>(
       '[data-map-place]',
     )) {
-      const id = section.dataset.mapPlace;
-      let count = 0;
+      const id = section.dataset.mapPlace!;
+      let totalForType = 0;
       for (const article of section.querySelectorAll<HTMLElement>(
         '[data-map-article]',
       )) {
         article.hidden = type !== 'all' && type !== article.dataset.reviewType;
-        if (!article.hidden) count++;
+        if (!article.hidden) totalForType++;
       }
-      section.hidden = !count || Boolean(selected && id !== selected);
-      if (!section.hidden) visibleCount += count;
-      const countLabel = section.querySelector('[data-place-count]');
-      if (countLabel) countLabel.textContent = `${count} 条`;
-      section
-        .querySelector('[data-map-select]')
-        ?.setAttribute('aria-pressed', String(selected === id));
+
+      const btn = regionButtons.find((b) => b.dataset.mapSelect === id);
+      if (btn) {
+        btn.setAttribute('aria-pressed', String(selected === id));
+        const countEl = btn.querySelector('[data-place-count]');
+        if (countEl) countEl.textContent = `${totalForType} 篇`;
+        btn.classList.toggle('is-dimmed', totalForType === 0);
+      }
+
+      section.hidden =
+        totalForType === 0 || Boolean(selected && id !== selected);
+      if (!section.hidden) visibleCount += totalForType;
     }
-    root!.querySelector<HTMLElement>('[data-map-empty]')!.hidden =
-      visibleCount > 0;
-    root!.querySelector('[data-map-empty]')!.textContent = place
-      ? '这个城市暂无此类型的测试记录。'
+
+    const emptyEl = root!.querySelector<HTMLElement>('[data-map-empty]')!;
+    emptyEl.hidden = visibleCount > 0;
+    emptyEl.textContent = activePlace
+      ? '该城市暂无此类型的测试记录。'
       : '暂无此类型的测试记录。';
-    const resultStatus = root!.querySelector<HTMLElement>(
-      '[data-map-result-status]',
-    )!;
-    resultStatus.hidden = false;
-    resultStatus.textContent = `${place ? citySection!.dataset.countryLabel : '全部地区'} · ${visibleCount} 条测评`;
-    globe?.setPlaces(mapPlaces, selected);
+
+    const countryText = activeButton?.dataset.countryLabel ?? '全部地区';
+    resultStatus.textContent = `${activePlace ? `${countryText} · ${activePlace.city}` : '全部地区'} · ${visibleCount} 条测评`;
+
+    globe?.setPlaces(mapPlaces, hovered || selected);
+
     if (updateUrl) {
       const next = new URL(location.href);
       type === 'all'
@@ -94,96 +115,38 @@ export function initReviewMap() {
       history.replaceState(null, '', next);
     }
   }
-  function open() {
-    globe?.setPaused(true);
-    if (!dialog.open) {
-      if (!scrollLocked) {
-        previousOverflow = document.documentElement.style.overflow;
-        document.documentElement.style.overflow = 'hidden';
-        scrollLocked = true;
-      }
-      dialog.showModal();
-    }
-    title.focus({ preventScroll: true });
-    root!.querySelector('.atlas-dialog-body')!.scrollTop = 0;
-  }
-  function select(id: string) {
-    if (!dialog.open) {
-      returnPlace = id;
-      returnFocus = null;
+
+  function select(id: string, fromGlobe = false) {
+    if (!fromGlobe && selected === id) {
+      selected = '';
+      globe?.setPaused(false);
+      render();
+      return;
     }
     selected = id;
-    type = 'all';
     render();
     const place = mapPlaces.find((entry) => entry.id === id);
-    if (place) globe?.focus(place);
-    open();
-  }
-  openers.forEach((button) => {
-    button.hidden = false;
-    button.addEventListener('click', () => {
-      returnPlace = '';
-      returnFocus = button;
-      selected = '';
-      render();
-      open();
-    });
-  });
-  root
-    .querySelector('[data-map-close]')!
-    .addEventListener('click', () => dialog.close());
-  let backdropDown = false;
-  const outside = (event: PointerEvent | MouseEvent) => {
-    const box = dialog.getBoundingClientRect();
-    return (
-      event.clientX < box.left ||
-      event.clientX > box.right ||
-      event.clientY < box.top ||
-      event.clientY > box.bottom
-    );
-  };
-  dialog.addEventListener('pointerdown', (event) => {
-    backdropDown = event.target === dialog && outside(event);
-  });
-  dialog.addEventListener('click', (event) => {
-    if (backdropDown && event.target === dialog && outside(event))
-      dialog.close();
-    backdropDown = false;
-  });
-  dialog.addEventListener('close', () => {
-    if (dialog.open) return;
-    document.documentElement.style.overflow = previousOverflow;
-    scrollLocked = false;
-    selected = '';
-    render();
-    const marker = [
-      ...root!.querySelectorAll<HTMLButtonElement>('[data-place-id]'),
-    ].find((button) => button.dataset.placeId === returnPlace);
-    (
-      marker ??
-      returnFocus ??
-      root!.querySelector<HTMLElement>('[data-globe-viewport] canvas')
-    )?.focus({ preventScroll: true });
-    globe?.setPaused(false);
-  });
-  dialog.addEventListener('keydown', (event) => {
-    if (event.key !== 'Tab') return;
-    const focusable = [
-      ...dialog.querySelectorAll<HTMLElement>('button:not(:disabled), a[href]'),
-    ].filter((element) => element.getClientRects().length);
-    const first = focusable[0];
-    const last = focusable.at(-1);
-    if (
-      event.shiftKey &&
-      (document.activeElement === first || document.activeElement === title)
-    ) {
-      event.preventDefault();
-      last?.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first?.focus();
+    if (place) {
+      globe?.focus(place);
+      globe?.setPaused(true);
     }
+    if (articlesScroll) articlesScroll.scrollTop = 0;
+
+    if (fromGlobe) {
+      const btn = regionButtons.find((b) => b.dataset.mapSelect === id);
+      btn?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      if (window.innerWidth <= 960) {
+        articlesPanel?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }
+
+  clearBtn?.addEventListener('click', () => {
+    selected = '';
+    globe?.setPaused(false);
+    render();
   });
+
   root
     .querySelectorAll<HTMLButtonElement>('[data-map-type]')
     .forEach((button) =>
@@ -192,19 +155,32 @@ export function initReviewMap() {
         render();
       }),
     );
-  root
-    .querySelectorAll<HTMLButtonElement>('[data-map-select]')
-    .forEach((button) => {
-      button.disabled = false;
-      button.addEventListener('click', () => select(button.dataset.mapSelect!));
+
+  regionButtons.forEach((button) => {
+    const id = button.dataset.mapSelect!;
+    button.addEventListener('click', () => select(id, false));
+    button.addEventListener('pointerenter', () => {
+      hovered = id;
+      const place = mapPlaces.find((entry) => entry.id === id);
+      if (place && !selected) {
+        globe?.focus(place);
+      }
+      globe?.setPlaces(mapPlaces, id);
     });
+    button.addEventListener('pointerleave', () => {
+      if (hovered === id) hovered = '';
+      globe?.setPlaces(mapPlaces, selected);
+    });
+  });
+
   function unavailable() {
     globe = undefined;
     status.hidden = false;
     controls.hidden = true;
-    statusText.textContent = '暂时无法显示 3D 地球，仍可浏览各城市测评。';
+    statusText.textContent = '暂时无法显示 3D 地球，仍可在右侧浏览各地区测评。';
     retry.hidden = false;
   }
+
   async function load() {
     if (loading || globe) return;
     loading = true;
@@ -213,8 +189,10 @@ export function initReviewMap() {
     statusText.textContent = '正在加载地球…';
     try {
       const { createReviewGlobe } = await import('./review-globe');
-      globe = await createReviewGlobe(root!, mapPlaces, select);
-      globe.setPaused(dialog.open);
+      globe = await createReviewGlobe(root!, mapPlaces, (id) =>
+        select(id, true),
+      );
+      globe.setPaused(Boolean(selected));
       status.hidden = true;
       controls.hidden = false;
       render(false);
@@ -227,13 +205,14 @@ export function initReviewMap() {
       loading = false;
     }
   }
+
   retry.addEventListener('click', load);
   root.addEventListener('globe-unavailable', unavailable);
   window.addEventListener('pagehide', (event) => {
     if (!event.persisted) globe?.destroy();
   });
+
   render(false);
-  if (selected) open();
   const observer = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {

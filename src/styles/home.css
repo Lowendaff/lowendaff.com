@@ -1,90 +1,108 @@
-/* Homepage: a short introduction, real records, then the blog's community. */
-.brand-avatar {
-  display: block;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  object-fit: cover;
-  border-radius: 50%;
-  border: 1px solid var(--border);
+/* Notion Editorial Blog Homepage — reading centerpiece on the left, first-screen sponsors on the right. */
+.journal-masthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  padding-block: 32px 12px;
 }
-.home-page .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  align-items: center;
-  gap: 32px;
-  padding-block: 24px;
+.masthead-main {
+  min-width: 0;
 }
-.home-page .hero h1 {
+.masthead-eyebrow {
+  margin-bottom: 12px;
+}
+.journal-masthead h1 {
   max-width: 24em;
-  font-size: clamp(24px, 2.25vw, 32px);
-  font-weight: 550;
-  line-height: 1.5;
-  letter-spacing: -0.025em;
+  font-size: clamp(28px, 3.2vw, 40px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--text);
   text-wrap: balance;
 }
-.home-page .hero h1 span {
+.journal-masthead h1 span {
   display: inline-block;
   max-width: 100%;
 }
-.home-page .hero .route-art {
-  height: 144px;
+.masthead-lead {
+  margin-top: 10px;
+  max-width: 58ch;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--muted);
 }
-.home-page .hero .route-map {
-  height: 100%;
+.masthead-links {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: 8px;
 }
-.home-page .home-layout {
-  display: block;
-  margin-top: 8px;
+
+/* Two-Column First-Screen Editorial Workspace */
+.home-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 336px;
+  gap: 36px;
+  align-items: start;
+  padding-top: 16px;
 }
-.home-page .latest-section {
-  padding-top: 32px;
+.home-reading-column {
+  min-width: 0;
 }
-.home-page .section-heading {
-  margin-bottom: 16px;
+.home-partner-rail {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-.home-page .home-layout .article-row {
-  min-height: 76px;
-  padding-block: 12px;
-}
-.home-page .follow-banner {
+
+.follow-banner {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 24px;
-  padding-block: 16px;
+  padding: 14px 16px;
   min-height: 64px;
-}
-.follow-banner h2 {
-  font-size: 16px;
-  font-weight: 550;
-}
-.follow-banner p {
-  margin-top: 4px;
-  font-size: 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
   color: var(--muted);
+  transition: var(--transition-ui);
 }
 .follow-icon {
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  color: var(--accent);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
 }
-.follow-icon svg {
-  width: 22px;
+.follow-copy {
+  flex: 1;
+  min-width: 0;
 }
-.follow-banner:hover h2,
-.follow-banner:focus-visible h2 {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.follow-banner h2 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text);
 }
+.follow-banner p {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.follow-banner:hover,
+.follow-banner:focus-visible {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
 .friend-links {
+  margin-top: 40px;
+  padding-top: 28px;
   border-top: 1px solid var(--border);
-  margin-top: 24px;
-  padding-top: 24px;
   scroll-margin-top: 110px;
 }
 .friend-links .section-heading p {
@@ -94,7 +112,7 @@
 .friend-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0 32px;
+  gap: 4px 24px;
 }
 .friend-button,
 .friend-unavailable {
@@ -102,10 +120,15 @@
   align-items: center;
   justify-content: space-between;
   min-width: 0;
-  min-height: 48px;
+  min-height: var(--control-h-lg);
   gap: 12px;
-  padding-block: 10px;
-  font-size: 15px;
+  padding: 10px 12px;
+  margin-inline: -12px;
+  border-radius: var(--radius-md);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--text);
+  transition: var(--transition-ui);
 }
 .friend-name {
   min-width: 0;
@@ -115,15 +138,16 @@
   display: inline-flex;
   flex-shrink: 0;
   color: var(--muted);
+  transition: var(--transition-ui);
 }
-.friend-button:hover .friend-name,
-.friend-button:focus-visible .friend-name {
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.friend-button:hover,
+.friend-button:focus-visible {
+  background: var(--subtle);
+  color: var(--text);
 }
 .friend-button:hover .friend-arrow,
 .friend-button:focus-visible .friend-arrow {
-  color: var(--accent);
+  color: var(--text);
 }
 .friend-unavailable {
   color: var(--muted);
@@ -132,45 +156,51 @@
 .friend-unavailable small {
   font-size: 12px;
 }
-@media (min-width: 761px) {
-  .home-page .article-list {
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    background: transparent;
-  }
-}
+
 @media (max-width: 1000px) {
-  .home-page .hero {
-    grid-template-columns: minmax(0, 1fr) 260px;
-    gap: 24px;
+  .journal-masthead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .home-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  /* Keep sponsors visible above the fold on tablet & mobile in a compact grid */
+  .home-partner-rail {
+    order: -1;
   }
   .friend-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 760px) {
-  .brand-avatar {
-    width: 32px;
-    height: 32px;
+  .journal-masthead {
+    padding-block: 20px 8px;
+    gap: 14px;
   }
-  .home-page .hero {
-    display: block;
-    padding-block: 24px 16px;
+  .journal-masthead h1 {
+    font-size: 25px;
+    line-height: 1.28;
   }
-  .home-page .hero h1 {
-    font-size: 24px;
-  }
-  .home-page .hero h1 span {
+  .journal-masthead h1 span {
     display: block;
   }
-  .home-page .home-layout .article-row {
-    min-height: 80px;
+  .masthead-lead {
+    font-size: 14.5px;
+    margin-top: 8px;
   }
-  .home-page .friend-links {
-    margin-top: 16px;
-    padding-top: 20px;
+  .home-workspace {
+    padding-top: 18px;
+    gap: 22px;
+  }
+  .home-partner-rail .follow-banner {
+    display: none;
+  }
+  .friend-links {
+    margin-top: 28px;
+    padding-top: 22px;
   }
   .friend-links .section-heading {
     align-items: baseline;

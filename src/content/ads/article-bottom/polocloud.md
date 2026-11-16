@@ -1,5 +1,7 @@
 ---
 name: PoloCloud
+logo: /brand/polocloud-light.png
+logoDark: /brand/polocloud-dark.png
 title: 为下一项计划，选择云服务
 description: 查看可选方案、产品规格与服务详情。
 url: https://polocloud.net/

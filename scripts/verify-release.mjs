@@ -109,6 +109,9 @@ for (const file of pages) {
     indexable &&
     file !== 'components/index.html' &&
     !(
+      file === 'exotic/index.html' && html.includes('data-exotic-empty="true"')
+    ) &&
+    !(
       ['tags/index.html', 'map/index.html'].includes(file) &&
       !pages.some((path) => path.startsWith('reviews/'))
     )

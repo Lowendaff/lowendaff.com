@@ -1,5 +1,7 @@
 ---
 name: ISIF Cloud
+logo: /brand/isif-light.png
+logoDark: /brand/isif-dark.png
 title: 探索云服务器方案
 description: 前往 ISIF Cloud，了解可选地区、实例规格与产品方案。
 url: https://cloud.isif.net/login?affiliation_code=lowendaff

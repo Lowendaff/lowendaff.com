@@ -18,7 +18,7 @@ const { article } = Astro.props;
       <span translate="no">{article.vendor}</span>
       <span>{reviewTypeLabels[article.reviewType]}</span>
     </div>
-    <h3>{article.title}</h3>
+    <h3>{article.title.replace(/^(?:\p{Regional_Indicator}{2}\s*)+/u, '')}</h3>
     <div class="atlas-article-bottom">
       <time datetime={article.date}>{article.date}</time>
       <span>

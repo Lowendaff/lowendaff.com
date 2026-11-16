@@ -1,137 +1,169 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import Flag from '../components/Flag.astro';
 import RecordList from '../components/RecordList.astro';
 import ReviewTypeFilter from '../components/ReviewTypeFilter.astro';
-import {
-  recordTags,
-  countryEmoji,
-  countryLabel,
-  getRecords,
-} from '../lib/records';
+import { recordTags, countryLabel, getRecords } from '../lib/records';
 const records = getRecords(await getCollection('posts'));
 const merchants = recordTags(records, 'merchant');
 const countries = recordTags(records, 'countryTag');
+const maxCount = Math.max(
+  1,
+  ...merchants.map((m) => m.count),
+  ...countries.map((c) => c.count),
+);
 ---
 
 <BaseLayout
   title="标签云"
   active="tags"
   noindex={records.every((record) => record.external)}
-  description="按类型、商家与国家浏览 LowEndAFF 的 VPS 与独立服务器测试记录。"
+  description="通过星空随机点阵与可自由拖拽的星云画板，按测评类型、商家与国家探索 LowEndAFF 的服务器实测记录。"
 >
   <div class="shell directory-page home-revision">
     <header class="directory-heading">
-      <h1>
-        标签云<span class="accent-text">.</span>
-      </h1>
-      <p>从商家出发，或看看下一个目的地。</p>
+      <h1>标签云</h1>
+      <p>
+        在星云点阵画板上拖拽漫游，点击任意服务商或地区标签即时组合筛选实测档案。
+      </p>
     </header>
     {records.length > 0 && (
       <>
-        <ReviewTypeFilter />
+        <div class="directory-type-bar">
+          <ReviewTypeFilter />
+        </div>
         <section
-          class="tag-filters"
+          class="tag-filters tag-cloud-board panel"
           aria-label="按商家与国家筛选"
           data-tag-filters
           hidden
         >
-          <div class="tag-tabs" role="tablist" aria-label="标签分类">
-            <button
-              type="button"
-              id="merchant-heading"
-              role="tab"
-              data-tag-tab="merchant"
-              aria-selected="true"
-              aria-controls="merchant-tags"
+          <div class="tag-board-header">
+            <div
+              class="tag-tabs notion-view-tabs"
+              role="tablist"
+              aria-label="标签分类"
             >
-              商家 <span>{merchants.length}</span>
-            </button>
-            <button
-              type="button"
-              id="country-heading"
-              role="tab"
-              data-tag-tab="country"
-              aria-selected="false"
-              aria-controls="country-tags"
-              tabindex="-1"
-            >
-              国家 <span>{countries.length}</span>
-            </button>
-          </div>
-          <div
-            class="tag-group"
-            id="merchant-tags"
-            role="tabpanel"
-            aria-labelledby="merchant-heading"
-            data-tag-panel="merchant"
-          >
-            <div class="tag-cloud">
               <button
                 type="button"
-                data-tag-kind="merchant"
-                data-tag-value=""
-                aria-pressed="true"
+                id="all-tags-heading"
+                role="tab"
+                data-tag-tab="all"
+                aria-selected="true"
+                aria-controls="interactive-tag-stage"
               >
-                全部 <span data-tag-count>{records.length}</span>
+                <Icon name="sparkles-line" size={15} />
+                星云全景 <span>{merchants.length + countries.length}</span>
               </button>
+              <button
+                type="button"
+                id="merchant-heading"
+                role="tab"
+                data-tag-tab="merchant"
+                aria-selected="false"
+                aria-controls="interactive-tag-stage"
+                tabindex="-1"
+              >
+                <Icon name="building-2-line" size={15} />
+                商家 <span>{merchants.length}</span>
+              </button>
+              <button
+                type="button"
+                id="country-heading"
+                role="tab"
+                data-tag-tab="country"
+                aria-selected="false"
+                aria-controls="interactive-tag-stage"
+                tabindex="-1"
+              >
+                <Icon name="earth-2-line" size={15} />
+                国家 <span>{countries.length}</span>
+              </button>
+            </div>
+
+            <div class="tag-board-tools">
+              <span class="cloud-drag-tip">
+                <Icon name="hand-grab-line" size={14} />
+                <span>按住星空漫游 · 标签可自由拖动</span>
+              </span>
+              <button
+                type="button"
+                class="cloud-reset-btn"
+                data-cloud-reset
+                aria-label="重置标签云位置"
+              >
+                <Icon name="refresh-2-line" size={14} />
+                <span>重置排布</span>
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="tag-cloud-stage"
+            id="interactive-tag-stage"
+            role="tabpanel"
+            aria-labelledby="all-tags-heading"
+            data-cloud-stage
+          >
+            <canvas
+              class="tag-starfield"
+              data-starfield
+              aria-hidden="true"
+            ></canvas>
+            <div class="tag-cloud tag-cloud-plane" data-cloud-plane>
               {merchants.map(({ value, count }) => (
                 <button
                   type="button"
+                  class:list={[
+                    'cloud-node',
+                    'cloud-node-merchant',
+                    count >= maxCount && maxCount > 1 && 'cloud-node-lg',
+                  ]}
                   data-tag-kind="merchant"
                   data-tag-value={value}
                   aria-pressed="false"
                 >
+                  <Icon name="building-2-line" size={14} />
                   <span class="tag-name" translate="no">
                     {value}
                   </span>
                   <span data-tag-count>{count}</span>
                 </button>
               ))}
-            </div>
-          </div>
-          <div
-            class="tag-group"
-            id="country-tags"
-            role="tabpanel"
-            aria-labelledby="country-heading"
-            data-tag-panel="country"
-            hidden
-          >
-            <div class="tag-cloud">
-              <button
-                type="button"
-                data-tag-kind="country"
-                data-tag-value=""
-                aria-pressed="true"
-              >
-                全部 <span data-tag-count>{records.length}</span>
-              </button>
               {countries.map(({ value, count }) => (
                 <button
                   type="button"
+                  class:list={[
+                    'cloud-node',
+                    'cloud-node-country',
+                    count >= maxCount && maxCount > 1 && 'cloud-node-lg',
+                  ]}
                   data-tag-kind="country"
                   data-tag-value={value}
                   data-tag-label={countryLabel(value)}
                   aria-pressed="false"
                 >
-                  <span aria-hidden="true">{countryEmoji(value)}</span>
+                  <Flag code={value} size={14} />
                   <span class="tag-name">{countryLabel(value)}</span>
                   <span data-tag-count>{count}</span>
                 </button>
               ))}
             </div>
           </div>
+
           <div class="tag-selection">
-            <div>
+            <div class="tag-selection-info">
               <p data-selection-summary aria-live="polite">
                 全部记录
               </p>
               <a href="#reviews" class="text-action" data-tag-results>
-                查看 {records.length} 条记录 ↓
+                查看 {records.length} 条记录
               </a>
             </div>
             <button type="button" class="text-action" data-clear-tags disabled>
+              <Icon name="refresh-2-line" size={15} />
               清除筛选
             </button>
           </div>
@@ -141,3 +173,344 @@ const countries = recordTags(records, 'countryTag');
     <RecordList filters showTypeFilter={false} records={records} />
   </div>
 </BaseLayout>
+<script>
+  const stage = document.querySelector<HTMLElement>('[data-cloud-stage]');
+  const plane = document.querySelector<HTMLElement>('[data-cloud-plane]');
+  const starCanvas =
+    document.querySelector<HTMLCanvasElement>('[data-starfield]');
+  const resetBtn =
+    document.querySelector<HTMLButtonElement>('[data-cloud-reset]');
+
+  if (stage && plane) {
+    stage.classList.add('is-interactive');
+    const nodes = Array.from(
+      plane.querySelectorAll<HTMLButtonElement>('.cloud-node'),
+    );
+    const coords = new Map<HTMLButtonElement, { x: number; y: number }>();
+    let panX = 0;
+    let panY = 0;
+    let topZ = 2;
+
+    // Deterministic PRNG for organic starfield dot-matrix distribution
+    let seed = 108473;
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+    const stars = Array.from({ length: 185 }, (_, idx) => ({
+      u: rand(),
+      v: rand(),
+      r: idx % 14 === 0 ? 2.1 : idx % 4 === 0 ? 1.45 : 0.9,
+      depth: idx % 14 === 0 ? 0.85 : idx % 4 === 0 ? 0.55 : 0.28,
+      sparkle: idx % 14 === 0,
+      accent: idx % 9 === 0,
+      alpha: 0.28 + rand() * 0.58,
+    }));
+
+    const drawStarfield = () => {
+      if (!starCanvas) return;
+      const rect = stage.getBoundingClientRect();
+      const w = Math.max(Math.round(rect.width), 300);
+      const h = Math.max(Math.round(rect.height), 220);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (starCanvas.width !== w * dpr || starCanvas.height !== h * dpr) {
+        starCanvas.width = w * dpr;
+        starCanvas.height = h * dpr;
+      }
+      const ctx = starCanvas.getContext('2d');
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      const isDark =
+        document.documentElement.dataset.theme === 'dark' ||
+        (document.documentElement.dataset.theme !== 'light' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      const baseRgb = isDark ? '176, 182, 194' : '132, 126, 118';
+      const accentRgb = isDark ? '98, 174, 240' : '0, 117, 222';
+
+      // Subtle constellation filaments between bright stars
+      const bright = stars
+        .filter((s) => s.sparkle)
+        .map((s) => ({
+          x: (((s.u * w + panX * s.depth) % w) + w) % w,
+          y: (((s.v * h + panY * s.depth) % h) + h) % h,
+        }));
+      ctx.strokeStyle = isDark
+        ? 'rgba(98, 174, 240, 0.11)'
+        : 'rgba(0, 117, 222, 0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < bright.length; i++) {
+        for (let j = i + 1; j < bright.length; j++) {
+          const dist = Math.hypot(
+            bright[i].x - bright[j].x,
+            bright[i].y - bright[j].y,
+          );
+          if (dist > 45 && dist < 150) {
+            ctx.beginPath();
+            ctx.moveTo(bright[i].x, bright[i].y);
+            ctx.lineTo(bright[j].x, bright[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      for (const s of stars) {
+        const x = (((s.u * w + panX * s.depth) % w) + w) % w;
+        const y = (((s.v * h + panY * s.depth) % h) + h) % h;
+        const rgb = s.accent ? accentRgb : baseRgb;
+        ctx.fillStyle = `rgba(${rgb}, ${s.alpha.toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(x, y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (s.sparkle) {
+          ctx.strokeStyle = `rgba(${rgb}, ${(s.alpha * 0.72).toFixed(2)})`;
+          ctx.lineWidth = 1;
+          const arm = 4.5;
+          ctx.beginPath();
+          ctx.moveTo(x - arm, y);
+          ctx.lineTo(x + arm, y);
+          ctx.moveTo(x, y - arm);
+          ctx.lineTo(x, y + arm);
+          ctx.stroke();
+        }
+      }
+    };
+
+    const applyStagePan = () => {
+      plane.style.transform = `translate3d(${panX}px, ${panY}px, 0)`;
+      drawStarfield();
+    };
+
+    const placeNode = (node: HTMLButtonElement, x: number, y: number) => {
+      coords.set(node, { x, y });
+      node.style.left = `${x}px`;
+      node.style.top = `${y}px`;
+    };
+
+    const layoutCloud = () => {
+      panX = 0;
+      panY = 0;
+      applyStagePan();
+
+      const visible = nodes.filter((n) => !n.hidden);
+      if (!visible.length) return;
+      const rect = stage.getBoundingClientRect();
+      const width = Math.max(rect.width || 680, 280);
+      const height = Math.max(rect.height || 300, 220);
+      const cx = width / 2;
+      const cy = height / 2;
+      const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
+      const boxes: Array<{
+        node: HTMLButtonElement;
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+      }> = [];
+
+      visible.forEach((node, index) => {
+        const w = node.offsetWidth || 124;
+        const h = node.offsetHeight || 44;
+        if (visible.length === 1) {
+          boxes.push({ node, x: cx - w / 2, y: cy - h / 2, w, h });
+          return;
+        }
+        if (visible.length === 2) {
+          const offset = index === 0 ? -w - 18 : 18;
+          const yShift = index === 0 ? -14 : 14;
+          boxes.push({
+            node,
+            x: cx + offset,
+            y: cy - h / 2 + yShift,
+            w,
+            h,
+          });
+          return;
+        }
+        const radius = 34 * Math.sqrt(index + 0.6);
+        const angle = index * goldenAngle;
+        const x = cx + Math.cos(angle) * radius * 1.45 - w / 2;
+        const y = cy + Math.sin(angle) * radius * 0.78 - h / 2;
+        boxes.push({ node, x, y, w, h });
+      });
+
+      for (let pass = 0; pass < 28; pass++) {
+        for (let i = 0; i < boxes.length; i++) {
+          for (let j = i + 1; j < boxes.length; j++) {
+            const a = boxes[i];
+            const b = boxes[j];
+            const ax = a.x + a.w / 2;
+            const ay = a.y + a.h / 2;
+            const bx = b.x + b.w / 2;
+            const by = b.y + b.h / 2;
+            const overlapX = (a.w + b.w) / 2 + 12 - Math.abs(ax - bx);
+            const overlapY = (a.h + b.h) / 2 + 10 - Math.abs(ay - by);
+            if (overlapX > 0 && overlapY > 0) {
+              if (overlapX < overlapY) {
+                const push = overlapX / 2;
+                const dir = ax <= bx ? -1 : 1;
+                a.x += dir * push;
+                b.x -= dir * push;
+              } else {
+                const push = overlapY / 2;
+                const dir = ay <= by ? -1 : 1;
+                a.y += dir * push;
+                b.y -= dir * push;
+              }
+            }
+          }
+        }
+      }
+
+      const pad = 14;
+      boxes.forEach((b) => {
+        const clampedX =
+          boxes.length <= 10
+            ? Math.max(pad, Math.min(width - b.w - pad, b.x))
+            : b.x;
+        const clampedY =
+          boxes.length <= 10
+            ? Math.max(pad, Math.min(height - b.h - pad, b.y))
+            : b.y;
+        placeNode(b.node, Math.round(clampedX), Math.round(clampedY));
+      });
+    };
+
+    nodes.forEach((node) => {
+      let dragging = false;
+      let moved = false;
+      let startX = 0;
+      let startY = 0;
+      let origX = 0;
+      let origY = 0;
+
+      node.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        event.stopPropagation();
+        dragging = true;
+        moved = false;
+        startX = event.clientX;
+        startY = event.clientY;
+        const pos = coords.get(node) || {
+          x: node.offsetLeft,
+          y: node.offsetTop,
+        };
+        origX = pos.x;
+        origY = pos.y;
+        node.style.zIndex = String(++topZ);
+        node.setPointerCapture(event.pointerId);
+      });
+
+      node.addEventListener('pointermove', (event) => {
+        if (!dragging) return;
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+        if (!moved && Math.hypot(dx, dy) > 5) {
+          moved = true;
+          node.dataset.dragging = 'true';
+        }
+        if (moved) {
+          placeNode(node, Math.round(origX + dx), Math.round(origY + dy));
+        }
+      });
+
+      const finish = (event: PointerEvent) => {
+        if (!dragging) return;
+        dragging = false;
+        delete node.dataset.dragging;
+        if (node.hasPointerCapture(event.pointerId)) {
+          node.releasePointerCapture(event.pointerId);
+        }
+      };
+      node.addEventListener('pointerup', finish);
+      node.addEventListener('pointercancel', finish);
+
+      node.addEventListener(
+        'click',
+        (event) => {
+          if (moved) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            moved = false;
+          }
+        },
+        true,
+      );
+    });
+
+    let stagePanning = false;
+    let panStartX = 0;
+    let panStartY = 0;
+    let basePanX = 0;
+    let basePanY = 0;
+
+    stage.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      if ((event.target as HTMLElement)?.closest('.cloud-node')) return;
+      stagePanning = true;
+      stage.dataset.panning = 'true';
+      panStartX = event.clientX;
+      panStartY = event.clientY;
+      basePanX = panX;
+      basePanY = panY;
+      stage.setPointerCapture(event.pointerId);
+    });
+
+    stage.addEventListener('pointermove', (event) => {
+      if (!stagePanning) return;
+      panX = Math.max(
+        -280,
+        Math.min(280, Math.round(basePanX + event.clientX - panStartX)),
+      );
+      panY = Math.max(
+        -180,
+        Math.min(180, Math.round(basePanY + event.clientY - panStartY)),
+      );
+      applyStagePan();
+    });
+
+    const endPan = (event: PointerEvent) => {
+      if (!stagePanning) return;
+      stagePanning = false;
+      delete stage.dataset.panning;
+      if (stage.hasPointerCapture(event.pointerId)) {
+        stage.releasePointerCapture(event.pointerId);
+      }
+    };
+    stage.addEventListener('pointerup', endPan);
+    stage.addEventListener('pointercancel', endPan);
+
+    resetBtn?.addEventListener('click', () => layoutCloud());
+    window.addEventListener('tag-cloud-relayout', () =>
+      window.requestAnimationFrame(layoutCloud),
+    );
+    new MutationObserver(drawStarfield).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'data-appearance'],
+    });
+    window
+      .matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', drawStarfield);
+
+    let resizeRaf = 0;
+    window.addEventListener(
+      'resize',
+      () => {
+        if (!resizeRaf)
+          resizeRaf = window.requestAnimationFrame(() => {
+            resizeRaf = 0;
+            layoutCloud();
+          });
+      },
+      { passive: true },
+    );
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(layoutCloud);
+    });
+  }
+</script>

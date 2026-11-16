@@ -1,0 +1,90 @@
+---
+import Icon from '../Icon.astro';
+
+interface Props {
+  name: string;
+  logo?: string;
+  logoDark?: string;
+  size?: 'sm' | 'md' | 'dir';
+}
+
+const { name, logo, logoDark, size = 'md' } = Astro.props;
+
+// Optical height calibration per brand silhouette (equalizes cap-height & visual area
+// across ultra-wide wordmarks like PoloCloud/EVOXT and tall-mark logos like Mejiro/MyHBD/ISIF).
+const opticalHeights: Record<
+  string,
+  { md: number; sm: number; dir: number; maxW: number }
+> = {
+  polocloud: { md: 17, sm: 14, dir: 15, maxW: 98 },
+  evoxt: { md: 18, sm: 14.5, dir: 15.5, maxW: 98 },
+  yxvm: { md: 17, sm: 13.5, dir: 14.5, maxW: 88 },
+  gomami: { md: 20, sm: 16, dir: 17, maxW: 96 },
+  saltyfish: { md: 22, sm: 17.5, dir: 20, maxW: 96 },
+  hncloud: { md: 22, sm: 17.5, dir: 19, maxW: 92 },
+  dmit: { md: 24, sm: 18.5, dir: 20, maxW: 92 },
+  misaka: { md: 23, sm: 18, dir: 21, maxW: 92 },
+  isif: { md: 26, sm: 20, dir: 22, maxW: 84 },
+  mejiro: { md: 28, sm: 22, dir: 26, maxW: 94 },
+  myhbd: { md: 28, sm: 22, dir: 26, maxW: 88 },
+};
+
+const stem = logo
+  ?.split('/')
+  .pop()
+  ?.replace(/-(?:light|dark)\.[^.]+$/i, '')
+  .replace(/\.[^.]+$/, '')
+  .toLowerCase();
+
+const spec = (stem ? opticalHeights[stem] : undefined) ?? {
+  md: 22,
+  sm: 17,
+  dir: 19,
+  maxW: 96,
+};
+const h = spec[size];
+const maxW = size === 'md' ? Math.round(spec.maxW * 1.12) : spec.maxW;
+---
+
+{logo ? (
+  <span
+    class:list={[
+      'brand-mark',
+      size === 'sm' && 'brand-mark-sm',
+      size === 'dir' && 'brand-mark-dir',
+    ]}
+    style={`--logo-h:${h}px;--logo-max-w:${maxW}px;`}
+    translate="no"
+  >
+    <img
+      class:list={['brand-logo', logoDark && 'brand-logo-light']}
+      src={logo}
+      alt={name}
+      decoding="async"
+    />
+    {logoDark && (
+      <img
+        class="brand-logo brand-logo-dark"
+        src={logoDark}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+      />
+    )}
+  </span>
+) : (
+  <span
+    class:list={[
+      'brand-mark',
+      'brand-mark-text',
+      size === 'sm' && 'brand-mark-sm',
+      size === 'dir' && 'brand-mark-dir',
+    ]}
+    translate="no"
+  >
+    <span class="brand-fallback-glyph" aria-hidden="true">
+      <Icon name="cloud-line" size={size === 'sm' ? 13 : 15} />
+    </span>
+    {size !== 'dir' && <strong>{name}</strong>}
+  </span>
+)}

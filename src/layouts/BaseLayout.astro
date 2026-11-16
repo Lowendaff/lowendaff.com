@@ -12,6 +12,7 @@ import '../styles/home.css';
 import '../styles/advertising.css';
 import '../styles/motion.css';
 import Icon from '../components/Icon.astro';
+import TelegramLogo from '../components/TelegramLogo.astro';
 import ThemeSwitcher from '../components/ThemeSwitcher.astro';
 import Analytics from '../components/Analytics.astro';
 import { siteIndexable } from '../lib/site';
@@ -53,6 +54,13 @@ const schema = structuredData({
   coverImage,
   breadcrumbs,
 });
+const navItems = [
+  { key: 'home', href: '/', label: '首页', icon: 'book-2-line' },
+  { key: 'exotic', href: '/exotic/', label: '奇葩小国', icon: 'planet-line' },
+  { key: 'map', href: '/map/', label: '测评地图', icon: 'earth-2-line' },
+  { key: 'tags', href: '/tags/', label: '标签云', icon: 'tag-line' },
+  { key: 'ads', href: '/ads/', label: '广告', icon: 'star-line' },
+];
 ---
 
 <!doctype html>
@@ -66,20 +74,32 @@ const schema = structuredData({
       ></script>
     )}
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/jpeg" href="/brand/lowendaff-avatar.jpg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="/brand/favicon-64.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="256x256"
+      href="/brand/favicon.png"
+    />
+    <link rel="apple-touch-icon" href="/brand/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light dark" />
     <meta
       name="theme-color"
       data-theme-color="light"
-      content="#e1e2e7"
+      content="#f6f5f4"
       media="(prefers-color-scheme: light)"
     />
     <meta
       name="theme-color"
       data-theme-color="dark"
-      content="#1a1b26"
+      content="#191919"
       media="(prefers-color-scheme: dark)"
     />
     <meta
@@ -141,7 +161,7 @@ const schema = structuredData({
         document.querySelectorAll('[data-theme-color]').forEach((meta) => {
           meta.setAttribute(
             'content',
-            appearance === 'dark' ? '#1a1b26' : '#e1e2e7',
+            appearance === 'dark' ? '#191919' : '#f6f5f4',
           );
         });
       }
@@ -153,76 +173,87 @@ const schema = structuredData({
     </a>
     <header class="site-header">
       <div class="nav-shell">
-        <a class="brand" href="/" aria-label="LowEndAFF 首页">
-          <img
-            class="brand-avatar"
-            src="/brand/lowendaff-avatar.jpg"
-            width="40"
-            height="40"
-            alt=""
-            decoding="async"
-          />
-          <span translate="no">
-            lowendaff<span class="brand-dot">.</span>
-          </span>
-        </a>
-        <nav class="desktop-nav" aria-label="主导航">
-          <a href="/" aria-current={active === 'home' ? 'page' : undefined}>
-            首页
+        <div class="nav-left">
+          <a class="brand" href="/" aria-label="LowEndAFF 首页">
+            <img
+              class="brand-avatar"
+              src="/brand/lowendaff-avatar.jpg"
+              width="28"
+              height="28"
+              alt=""
+              decoding="async"
+            />
+            <span class="brand-name" translate="no">
+              LowEndAFF
+            </span>
           </a>
-          <a href="/ads/" aria-current={active === 'ads' ? 'page' : undefined}>
-            广告
-          </a>
-          <a
-            href="/tags/"
-            aria-current={active === 'tags' ? 'page' : undefined}
-          >
-            标签云
-          </a>
-          <a href="/map/" aria-current={active === 'map' ? 'page' : undefined}>
-            测评地图
-          </a>
-        </nav>
+          <span class="nav-sep" aria-hidden="true"></span>
+          <nav class="desktop-nav" aria-label="主导航">
+            {navItems.map((item) => (
+              <a
+                href={item.href}
+                aria-current={active === item.key ? 'page' : undefined}
+              >
+                <Icon name={item.icon} size={16} />
+                <span>{item.label}</span>
+              </a>
+            ))}
+          </nav>
+        </div>
+
         <div class="nav-actions">
+          <a
+            class="icon-button nav-rss"
+            href="/rss.xml"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="订阅 RSS"
+            title="订阅 RSS"
+          >
+            <Icon name="rss-2-line" size={18} />
+          </a>
           <ThemeSwitcher />
+          <span class="nav-sep nav-cta-sep" aria-hidden="true"></span>
           <a
             class="nav-subscribe"
             href="https://t.me/lowendaff_blog"
             target="_blank"
             rel="noopener noreferrer"
           >
-            关注更新 <Icon name="external" size={15} />
+            <Icon name="telegram-line" size={16} />
+            <span>关注更新</span>
           </a>
           <details class="mobile-nav">
             <summary aria-label="打开导航">
               <span class="mobile-nav-open-icon">
-                <Icon name="menu" />
+                <Icon name="menu-line" size={20} />
               </span>
               <span class="mobile-nav-close-icon">
-                <Icon name="close" />
+                <Icon name="close-line" size={20} />
               </span>
             </summary>
             <nav aria-label="移动导航">
-              <a href="/" aria-current={active === 'home' ? 'page' : undefined}>
-                首页
+              {navItems.map((item) => (
+                <a
+                  href={item.href}
+                  aria-current={active === item.key ? 'page' : undefined}
+                >
+                  <Icon name={item.icon} size={17} />
+                  <span>{item.label}</span>
+                </a>
+              ))}
+              <div class="mobile-nav-divider"></div>
+              <a href="/rss.xml" target="_blank" rel="noopener noreferrer">
+                <Icon name="rss-2-line" size={17} />
+                <span>RSS 订阅</span>
               </a>
               <a
-                href="/ads/"
-                aria-current={active === 'ads' ? 'page' : undefined}
+                href="https://t.me/lowendaff_blog"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                广告
-              </a>
-              <a
-                href="/tags/"
-                aria-current={active === 'tags' ? 'page' : undefined}
-              >
-                标签云
-              </a>
-              <a
-                href="/map/"
-                aria-current={active === 'map' ? 'page' : undefined}
-              >
-                测评地图
+                <TelegramLogo size={17} />
+                <span>Telegram 频道</span>
               </a>
             </nav>
           </details>
@@ -238,24 +269,33 @@ const schema = structuredData({
           <img
             class="brand-avatar"
             src="/brand/lowendaff-avatar.jpg"
-            width="40"
-            height="40"
+            width="26"
+            height="26"
             alt=""
             loading="lazy"
             decoding="async"
           />
-          <span>
-            lowendaff<span class="brand-dot">.</span>
-          </span>
+          <span class="brand-name">LowEndAFF</span>
         </a>
         <p>我们评测全世界，让每一次选择都有依据。</p>
       </div>
       <div class="footer-right">
         <div>
-          <a href="/rss.xml" aria-label="订阅 RSS">
-            <Icon name="rss" size={16} /> RSS
+          <a
+            href="/rss.xml"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="订阅 RSS"
+          >
+            <Icon name="rss-2-line" size={16} /> RSS
           </a>
-          <a href="https://t.me/lowendaff_blog">Telegram ↗</a>
+          <a
+            href="https://t.me/lowendaff_blog"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <TelegramLogo size={16} /> Telegram
+          </a>
         </div>
       </div>
     </footer>

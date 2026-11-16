@@ -1,5 +1,7 @@
 ---
 name: ISIF
+brandLogo: /brand/isif-light.png
+brandLogoDark: /brand/isif-dark.png
 url: https://cloud.isif.net/
 logo: 01.svg
 enabled: true

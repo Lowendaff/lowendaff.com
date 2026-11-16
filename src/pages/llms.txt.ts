@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getPublishedPosts, postPath } from '../lib/posts';
+import { isExoticPost } from '../lib/exotic';
 import { siteIndexable } from '../lib/site';
 import { markdownText, siteIdentity } from '../lib/seo';
 import { reviewTypeLabels } from '../lib/review-types';
@@ -7,6 +8,7 @@ import { reviewTypeLabels } from '../lib/review-types';
 /** Optional discovery aid; the canonical HTML remains the source of truth. */
 export const GET: APIRoute = async ({ site }) => {
   const posts = siteIndexable ? await getPublishedPosts() : [];
+  const hasExotic = posts.some(isExoticPost);
   const url = (path: string) => new URL(path, site).href;
   const lines = [
     `# ${siteIdentity.name}`,
@@ -18,10 +20,15 @@ export const GET: APIRoute = async ({ site }) => {
           '## 站点入口',
           '',
           `- [首页](${url('/')}): VPS 与独立服务器测试记录。`,
+          ...(hasExotic
+            ? [
+                `- [奇葩小国](${url('/exotic/')}): 冷门国家、孤岛海缆与稀有自治域测试记录。`,
+              ]
+            : []),
           ...(posts.length
             ? [
-                `- [标签云](${url('/tags/')}): 按商家、国家与测评类型筛选。`,
                 `- [测评地图](${url('/map/')}): 按城市浏览已发布的测试记录。`,
+                `- [标签云](${url('/tags/')}): 按商家、国家与测评类型筛选。`,
               ]
             : []),
           `- [RSS](${url('/rss.xml')}): 已发布的测试记录。`,

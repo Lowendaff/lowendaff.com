@@ -1,10 +1,12 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
 import Icon from '../components/Icon.astro';
+import Flag from '../components/Flag.astro';
 import { reviewModel } from '../lib/review-model';
 import { reviewTypeLabels } from '../lib/review-types';
 import { postPath } from '../lib/posts';
+import { buildRecommendations } from '../lib/related-posts';
 import ArticleTopAds from '../components/ads/ArticleTopAds.astro';
 import ArticleBottomAds from '../components/ads/ArticleBottomAds.astro';
 import ArticleSidebarAds from '../components/ads/ArticleSidebarAds.astro';
@@ -21,6 +23,26 @@ const navigation = review
   : headings
       .filter((h) => h.depth === 2)
       .map((h) => ({ id: h.slug, label: h.text }));
+const cleanTitle = p.title.replace(/^(?:\p{Regional_Indicator}{2}\s*)+/u, '');
+const fullDisplayTitle = cleanTitle.endsWith('测试记录')
+  ? cleanTitle
+  : `${cleanTitle} ${reviewTypeLabels[p.reviewType]} 测试记录`;
+const currentPath = postPath(post);
+const canonicalHref = new URL(currentPath, Astro.site).href;
+
+const { articles: relatedRecords, inferredTopics } = buildRecommendations(
+  post,
+  await getCollection('posts'),
+  6,
+);
+
+const chapterIcon: Record<string, string> = {
+  purchase: 'shopping-bag-2-line',
+  hardware: 'dashboard-2-line',
+  unlock: 'unlock-line',
+  speed: 'compass-line',
+  routing: 'transfer-3-line',
+};
 ---
 
 <BaseLayout
@@ -35,7 +57,7 @@ const navigation = review
       name: `${reviewTypeLabels[p.reviewType]} 测评`,
       path: `/?type=${p.reviewType}#reviews`,
     },
-    { name: p.vendor, path: postPath(post) },
+    { name: p.vendor, path: currentPath },
   ]}
   article={{
     publishedAt: p.publishedAt,
@@ -48,84 +70,519 @@ const navigation = review
 >
   <div class="shell review-shell review-revision">
     <nav class="breadcrumb" aria-label="面包屑">
-      <a href="/">首页</a>
-      <Icon name="chevron" size={12} />
+      <a href="/">
+        <Icon name="book-2-line" size={14} />
+        <span>首页</span>
+      </a>
+      <Icon name="right-line" size={14} />
       <a href={`/?type=${p.reviewType}#reviews`}>
         {reviewTypeLabels[p.reviewType]} 测评
       </a>
-      <Icon name="chevron" size={12} />
-      <span translate="no">{p.vendor}</span>
+      <Icon name="right-line" size={14} />
+      <span class="breadcrumb-current" translate="no">
+        {p.vendor}
+      </span>
     </nav>
+
     <div class="review-grid complete-review-grid">
       <article class="review-body">
-        <header class="review-heading">
-          <span class="tag accent-tag">
-            {p.location} · {p.route}
-          </span>
-          <h1>
-            {p.title}
-            {!p.title.endsWith('测试记录') && (
-              <>
-                <br class="desktop-only" /> {reviewTypeLabels[p.reviewType]}{' '}
-                测试记录
-              </>
-            )}
-          </h1>
-          <div class="review-meta">
-            <span
-              class="review-type-label"
-              data-review-kind={p.reviewType}
-              translate="no"
-            >
-              {reviewTypeLabels[p.reviewType]}
-            </span>
-            {p.authorUrl ? (
-              <a href={p.authorUrl} rel="author">
-                {p.author}
-              </a>
-            ) : (
-              <span>{p.author}</span>
-            )}
-            <time datetime={p.publishedAt}>{p.publishedAt} 发布</time>
-            {p.updatedAt && p.updatedAt !== p.publishedAt && (
-              <time datetime={p.updatedAt}>{p.updatedAt} 更新</time>
-            )}
+        <header class="review-heading notion-doc-header">
+          <div class="notion-doc-title-row">
+            <Flag code={p.country} size={22} class="notion-doc-flag" />
+            <h1>{fullDisplayTitle}</h1>
           </div>
+          {p.description && <p class="notion-doc-lead">{p.description}</p>}
+
+          <dl class="notion-properties" aria-label="测评文档属性">
+            <div class="notion-prop-row">
+              <dt>
+                <Icon name="server-line" size={15} />
+                <span>测评类型</span>
+              </dt>
+              <dd>
+                <span
+                  class="review-type-label"
+                  data-review-kind={p.reviewType}
+                  translate="no"
+                >
+                  {reviewTypeLabels[p.reviewType]}
+                </span>
+              </dd>
+            </div>
+            <div class="notion-prop-row">
+              <dt>
+                <Icon name="location-line" size={15} />
+                <span>地区与线路</span>
+              </dt>
+              <dd>
+                <span class="notion-prop-inline">
+                  <Flag code={p.country} size={14} />
+                  <span>{p.location}</span>
+                  {p.route && (
+                    <span class="journal-route-pill" translate="no">
+                      {p.route}
+                    </span>
+                  )}
+                </span>
+              </dd>
+            </div>
+            <div class="notion-prop-row">
+              <dt>
+                <Icon name="user-3-line" size={15} />
+                <span>作者与发布</span>
+              </dt>
+              <dd>
+                <span class="notion-prop-inline">
+                  {p.authorUrl ? (
+                    <a href={p.authorUrl} rel="author">
+                      {p.author}
+                    </a>
+                  ) : (
+                    <span>{p.author}</span>
+                  )}
+                  <span class="prop-dot" aria-hidden="true">
+                    ·
+                  </span>
+                  <time datetime={p.publishedAt}>{p.publishedAt} 发布</time>
+                  {p.updatedAt && p.updatedAt !== p.publishedAt && (
+                    <>
+                      <span class="prop-dot" aria-hidden="true">
+                        ·
+                      </span>
+                      <time datetime={p.updatedAt}>{p.updatedAt} 更新</time>
+                    </>
+                  )}
+                </span>
+              </dd>
+            </div>
+            {p.testedAt && (
+              <div class="notion-prop-row">
+                <dt>
+                  <Icon name="time-line" size={15} />
+                  <span>实测采样</span>
+                </dt>
+                <dd class="review-introduction">
+                  测试时间：<strong>{p.testedAt}</strong>
+                </dd>
+              </div>
+            )}
+          </dl>
         </header>
-        <nav class="article-toc" aria-label="文章目录">
-          {navigation.map((s) => (
-            <a href={`#${s.id}`}>{s.label}</a>
+
+        <nav class="article-toc notion-view-tabs" aria-label="文章目录">
+          {navigation.map((s, idx) => (
+            <a
+              href={`#${s.id}`}
+              data-toc-id={s.id}
+              aria-current={idx === 0 ? 'true' : undefined}
+            >
+              <Icon name={chapterIcon[s.id] ?? 'document-line'} size={15} />
+              <span>{s.label}</span>
+            </a>
           ))}
         </nav>
+
         <details class="mobile-toc">
           <summary>
-            本文目录 <span>{navigation.length} 个阅读章节</span>
+            <span class="mobile-toc-title">
+              <Icon name="menu-line" size={16} />
+              本文目录
+            </span>
+            <span class="mobile-toc-count">{navigation.length} 个章节</span>
           </summary>
           <nav aria-label="移动端文章目录">
-            {navigation.map((s) => (
-              <a href={`#${s.id}`}>{s.label}</a>
+            {navigation.map((s, idx) => (
+              <a
+                href={`#${s.id}`}
+                data-toc-id={s.id}
+                aria-current={idx === 0 ? 'true' : undefined}
+              >
+                <Icon name={chapterIcon[s.id] ?? 'document-line'} size={15} />
+                <span>{s.label}</span>
+              </a>
             ))}
           </nav>
         </details>
+
         <ArticleTopAds />
-        {p.testedAt && (
-          <p class="review-introduction">
-            测试时间：<strong>{p.testedAt}</strong>
-          </p>
-        )}
+
         <slot />
-        <ArticleBottomAds />
-        <a
-          href={`/?type=${p.reviewType}#reviews`}
-          class="button secondary review-back"
+
+        <section
+          class="cc-license-card"
+          aria-labelledby="cc-license-heading"
+          data-cc-license
         >
-          返回测试记录 <Icon name="arrow" size={16} />
-        </a>
+          <div class="cc-license-head">
+            <span class="cc-license-title" id="cc-license-heading">
+              <Icon name="creative-commons-line" size={18} />
+              <span>知识共享许可协议 · CC BY 4.0</span>
+            </span>
+            <a
+              class="cc-license-badge"
+              href="https://creativecommons.org/licenses/by/4.0/deed.zh-hans"
+              target="_blank"
+              rel="license noopener noreferrer"
+            >
+              <span>CC BY 4.0 协议全文</span>
+              <Icon name="arrow-right-up-line" size={14} />
+            </a>
+          </div>
+          <dl class="cc-license-meta">
+            <div>
+              <dt>文档标题</dt>
+              <dd>{fullDisplayTitle}</dd>
+            </div>
+            <div>
+              <dt>署名作者</dt>
+              <dd>{p.author}（LowEndAFF）</dd>
+            </div>
+            <div class="cc-license-url-row">
+              <dt>本文链接</dt>
+              <dd>
+                <span class="cc-url-text mono">{decodeURI(canonicalHref)}</span>
+                <span class="cc-copy-wrap">
+                  <button
+                    type="button"
+                    class="cc-copy-btn"
+                    data-copy={decodeURI(canonicalHref)}
+                  >
+                    <Icon name="copy-2-line" size={13} />
+                    <span>复制链接</span>
+                  </button>
+                  <small
+                    class="subtle-label"
+                    data-copy-status
+                    aria-live="polite"
+                  ></small>
+                </span>
+              </dd>
+            </div>
+          </dl>
+          <p class="cc-license-note">
+            除服务商商标与基准脚本原始输出外，本文由 <strong>{p.author}</strong>{' '}
+            原创发布，采用{' '}
+            <a
+              href="https://creativecommons.org/licenses/by/4.0/deed.zh-hans"
+              target="_blank"
+              rel="license noopener noreferrer"
+            >
+              知识共享署名 4.0 国际许可协议（CC BY 4.0）
+            </a>{' '}
+            授权。转载、节选或二次整理请保留本文链接与实测采样日期并明确署名。
+          </p>
+        </section>
+
+        <ArticleBottomAds />
+
+        <section
+          class="related-reviews"
+          aria-labelledby="related-reviews-heading"
+          data-related-reviews
+        >
+          <div class="related-reviews-head">
+            <h2 id="related-reviews-heading">
+              <Icon name="book-2-line" size={18} />
+              <span>相关推荐与延伸线索</span>
+            </h2>
+            <a class="partner-board-cta" href="/tags/">
+              星云筛选 <Icon name="right-line" size={14} />
+            </a>
+          </div>
+
+          {(p.location || p.route || p.tags.length > 0) && (
+            <div class="related-signal-pills" aria-label="本文关联特征">
+              <span class="subtle-label">匹配特征：</span>
+              {p.location && (
+                <a
+                  class="tag"
+                  href={
+                    p.country
+                      ? `/tags/?country=${encodeURIComponent(p.country)}`
+                      : '/tags/'
+                  }
+                >
+                  <Flag code={p.country} size={12} />
+                  <span>{p.location}</span>
+                </a>
+              )}
+              {p.route && (
+                <a class="tag" href="/tags/">
+                  <Icon name="transfer-3-line" size={12} />
+                  <span translate="no">{p.route}</span>
+                </a>
+              )}
+              {p.tags
+                .filter(
+                  (tag) =>
+                    tag.trim().toUpperCase() !==
+                    (p.route || '').trim().toUpperCase(),
+                )
+                .map((tag) => (
+                  <a class="tag" href="/tags/">
+                    <Icon name="tag-line" size={12} />
+                    <span>{tag}</span>
+                  </a>
+                ))}
+            </div>
+          )}
+
+          {relatedRecords.length > 0 && (
+            <div class="related-reviews-grid">
+              {relatedRecords.map((item) => (
+                <a
+                  class="related-review-card"
+                  href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noopener noreferrer' : undefined}
+                >
+                  <div class="related-card-top">
+                    {item.reasons.map((reason) => (
+                      <span class="related-reason-pill">{reason}</span>
+                    ))}
+                    <span class="review-type-label" translate="no">
+                      {item.reviewTypeLabel}
+                    </span>
+                  </div>
+                  <h3>{item.title}</h3>
+                  {item.description && (
+                    <p class="related-card-excerpt">{item.description}</p>
+                  )}
+                  <div class="related-card-foot">
+                    <span class="related-foot-place">
+                      <Flag code={item.country} size={13} />
+                      <span>{item.location}</span>
+                      {item.route && item.route !== '未分类' && (
+                        <b translate="no">· {item.route}</b>
+                      )}
+                    </span>
+                    <time class="mono" datetime={item.date}>
+                      {item.date}
+                    </time>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          <div class="related-inferred-grid">
+            {inferredTopics.map((topic) => (
+              <a class="related-discovery-card" href={topic.href}>
+                <div class="related-topic-head">
+                  <span class="related-discovery-icon">
+                    {topic.countryCode ? (
+                      <Flag code={topic.countryCode} size={16} />
+                    ) : (
+                      <Icon name={topic.icon} size={17} />
+                    )}
+                  </span>
+                  <span class="related-reason-pill">{topic.badge}</span>
+                </div>
+                <div>
+                  <h3>{topic.title}</h3>
+                  <p>{topic.subtitle}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <div class="review-doc-footer">
+          <a
+            href={`/?type=${p.reviewType}#reviews`}
+            class="button secondary review-back"
+          >
+            <Icon name="arrow-left-line" size={16} />
+            返回测试记录
+          </a>
+        </div>
       </article>
+
       <aside class="review-sidebar full-sidebar">
         <Sponsors />
         <ArticleSidebarAds />
       </aside>
     </div>
   </div>
+  <script>
+    const toc = document.querySelector<HTMLElement>('.article-toc');
+    const mobileToc = document.querySelector<HTMLDetailsElement>('.mobile-toc');
+    const tocLinks = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>(
+        '.article-toc a[data-toc-id]',
+      ),
+    );
+    const mobileLinks = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>(
+        '.mobile-toc a[data-toc-id]',
+      ),
+    );
+    const sections = tocLinks
+      .map((link) => {
+        const id = link.dataset.tocId ?? '';
+        const el = id ? document.getElementById(id) : null;
+        return el ? { id, el } : null;
+      })
+      .filter((item): item is { id: string; el: HTMLElement } => item !== null);
+
+    if (sections.length > 0) {
+      let currentId = '';
+      let rafId = 0;
+      let lockedId = '';
+      let lockTargetY = 0;
+      let lockUntil = 0;
+      let pinnedId = '';
+      let pinnedScrollY = -1;
+
+      const getStickyOffset = () => {
+        const headerH =
+          document.querySelector<HTMLElement>('.site-header')?.offsetHeight ??
+          60;
+        const tocH = toc && toc.offsetParent ? toc.offsetHeight : 0;
+        return headerH + tocH + 12;
+      };
+
+      const setActive = (id: string) => {
+        if (!id || id === currentId) return;
+        currentId = id;
+        for (const link of tocLinks) {
+          if (link.dataset.tocId === id) {
+            link.setAttribute('aria-current', 'true');
+            if (toc && toc.scrollWidth > toc.clientWidth) {
+              const targetLeft =
+                link.offsetLeft - toc.clientWidth / 2 + link.offsetWidth / 2;
+              toc.scrollTo({
+                left: Math.max(0, targetLeft),
+                behavior: 'smooth',
+              });
+            }
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        }
+        for (const link of mobileLinks) {
+          if (link.dataset.tocId === id) {
+            link.setAttribute('aria-current', 'true');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        }
+      };
+
+      const scrollToSection = (id: string, pushHash: boolean) => {
+        const target = sections.find((s) => s.id === id);
+        if (!target) return;
+        if (mobileToc?.open) mobileToc.open = false;
+
+        const stickyOffset = getStickyOffset();
+        const rawTop =
+          window.scrollY + target.el.getBoundingClientRect().top - stickyOffset;
+        const maxScroll = Math.max(
+          0,
+          document.documentElement.scrollHeight - window.innerHeight,
+        );
+        const destY = Math.max(0, Math.min(Math.round(rawTop), maxScroll));
+
+        lockedId = id;
+        lockTargetY = destY;
+        lockUntil = performance.now() + 1100;
+        pinnedId = id;
+        pinnedScrollY = destY;
+        setActive(id);
+
+        if (pushHash) {
+          const next = new URL(window.location.href);
+          next.hash = id;
+          history.pushState(null, '', next);
+        }
+
+        const reduced = window.matchMedia(
+          '(prefers-reduced-motion: reduce)',
+        ).matches;
+        window.scrollTo({
+          top: destY,
+          behavior: reduced ? 'instant' : 'smooth',
+        });
+      };
+
+      const updateOnScroll = () => {
+        rafId = 0;
+        const now = performance.now();
+        if (lockedId && now < lockUntil) {
+          if (Math.abs(window.scrollY - lockTargetY) <= 3) {
+            lockedId = '';
+          } else {
+            setActive(lockedId);
+            return;
+          }
+        } else if (lockedId) {
+          lockedId = '';
+        }
+
+        if (pinnedId && Math.abs(window.scrollY - pinnedScrollY) <= 12) {
+          setActive(pinnedId);
+          return;
+        }
+        pinnedId = '';
+
+        const threshold = getStickyOffset() + 24;
+        let active = sections[0].id;
+        for (const section of sections) {
+          if (section.el.getBoundingClientRect().top <= threshold) {
+            active = section.id;
+          }
+        }
+        if (
+          window.scrollY > 40 &&
+          window.innerHeight + window.scrollY >=
+            document.documentElement.scrollHeight - 16
+        ) {
+          active = sections[sections.length - 1].id;
+        }
+        setActive(active);
+      };
+
+      const requestUpdate = () => {
+        if (!rafId) rafId = window.requestAnimationFrame(updateOnScroll);
+      };
+
+      const clearProgrammaticLock = () => {
+        lockedId = '';
+        pinnedId = '';
+      };
+
+      for (const link of [...tocLinks, ...mobileLinks]) {
+        link.addEventListener('click', (event) => {
+          const id = link.dataset.tocId;
+          if (!id) return;
+          event.preventDefault();
+          scrollToSection(id, true);
+        });
+      }
+
+      window.addEventListener('wheel', clearProgrammaticLock, {
+        passive: true,
+      });
+      window.addEventListener('touchmove', clearProgrammaticLock, {
+        passive: true,
+      });
+      window.addEventListener('scroll', requestUpdate, { passive: true });
+      window.addEventListener('resize', requestUpdate, { passive: true });
+      window.addEventListener('hashchange', () => {
+        const hashId = decodeURIComponent(window.location.hash.slice(1));
+        if (sections.some((s) => s.id === hashId)) {
+          scrollToSection(hashId, false);
+        } else {
+          requestUpdate();
+        }
+      });
+
+      const initialHash = decodeURIComponent(window.location.hash.slice(1));
+      if (sections.some((s) => s.id === initialHash)) {
+        window.requestAnimationFrame(() => scrollToSection(initialHash, false));
+      } else {
+        updateOnScroll();
+      }
+    }
+  </script>
 </BaseLayout>

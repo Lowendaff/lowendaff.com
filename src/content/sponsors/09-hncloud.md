@@ -1,5 +1,7 @@
 ---
 name: HNCloud
+brandLogo: /brand/hncloud-light.png
+brandLogoDark: /brand/hncloud-dark.png
 url: https://www.hncloud.com/activity/activity_2025final.html?p=lowendaff
 logo: 09.svg
 enabled: true

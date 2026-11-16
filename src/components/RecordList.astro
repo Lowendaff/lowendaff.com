@@ -1,19 +1,31 @@
 ---
 import Icon from './Icon.astro';
+import Flag from './Flag.astro';
 import ReviewTypeFilter from './ReviewTypeFilter.astro';
-import { getRecords, countryEmoji } from '../lib/records';
+import HomeFeedCarousel from './ads/HomeFeedCarousel.astro';
+import { getRecords } from '../lib/records';
 interface Props {
   filters?: boolean;
   showTypeFilter?: boolean;
+  prependCarousel?: boolean;
   records: ReturnType<typeof getRecords>;
 }
-const { filters = false, showTypeFilter = true, records } = Astro.props;
+const {
+  filters = false,
+  showTypeFilter = true,
+  prependCarousel = false,
+  records,
+} = Astro.props;
 const dateFormat = new Intl.DateTimeFormat('zh-CN', {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
   timeZone: 'UTC',
 });
+const cleanTitle = (raw: string) =>
+  raw
+    .replace(/^(?:\p{Regional_Indicator}{2}\s*)+/u, '')
+    .replace('（CN2）', 'CN2');
 ---
 
 <section
@@ -23,12 +35,19 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
   data-record-list
   data-filters={filters}
 >
-  <div class="section-heading">
-    <div>
-      <h2 id="reviews-title" tabindex="-1">
+  <div class="notion-view-bar">
+    {showTypeFilter && records.length > 0 ? (
+      <>
+        <h2 id="reviews-title" class="sr-only" tabindex="-1">
+          测试记录
+        </h2>
+        <ReviewTypeFilter />
+      </>
+    ) : (
+      <h2 id="reviews-title" class="view-bar-heading" tabindex="-1">
         测试记录
       </h2>
-    </div>
+    )}
     <p
       class="result-count"
       aria-live="polite"
@@ -38,11 +57,12 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
       {records.length} 条记录{records.length > 20 ? ' · 每页 20 条' : ''}
     </p>
   </div>
-  {showTypeFilter && records.length > 0 && <ReviewTypeFilter />}
-  <div class="article-list panel">
+
+  <div class="article-list">
+    {prependCarousel && <HomeFeedCarousel />}
     {records.map((post) => (
       <a
-        class="article-row"
+        class="article-row journal-card"
         href={post.href}
         target={post.external ? '_blank' : undefined}
         rel={post.external ? 'noopener noreferrer' : undefined}
@@ -52,32 +72,59 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
         data-id={post.id}
         data-type={post.reviewType}
       >
-        <div class="location-icon country-emoji" aria-hidden="true">
-          {countryEmoji(post.country)}
-        </div>
-        <div class="article-main">
-          <div class="article-meta">
-            <span class="review-type-label" translate="no">
-              {post.reviewTypeLabel}
-            </span>
+        <div class="journal-card-meta">
+          <span class="journal-location">
+            <Flag code={post.country} size={14} />
             <span>{post.location}</span>
-            <span class="meta-dot">·</span>
-            <time datetime={post.date}>
-              {dateFormat.format(new Date(`${post.date}T00:00:00Z`))}
-            </time>
-          </div>
-          <h3>
-            {post.title
-              .replace(/^(?:\p{Regional_Indicator}{2}\s*)+/u, '')
-              .replace(' VPS 测试记录', '')
-              .replace(/ VPS$/, '')
-              .replace('（CN2）', 'CN2')}
-          </h3>
+          </span>
+          {post.route && post.route !== '未分类' && (
+            <span class="journal-route-pill" translate="no">
+              {post.route}
+            </span>
+          )}
+          <span class="review-type-label" translate="no">
+            {post.reviewTypeLabel}
+          </span>
+          <time class="journal-date" datetime={post.date}>
+            <Icon name="calendar-line" size={14} />
+            {dateFormat.format(new Date(`${post.date}T00:00:00Z`))}
+          </time>
         </div>
-        <Icon name={post.external ? 'external' : 'arrow'} size={19} />
+
+        <div class="article-main">
+          <h3>{cleanTitle(post.title)}</h3>
+          {post.description && (
+            <p class="journal-excerpt">{post.description}</p>
+          )}
+          {post.verdict && (
+            <p class="journal-verdict">
+              <Icon name="book-2-line" size={14} />
+              <span>{post.verdict}</span>
+            </p>
+          )}
+        </div>
+
+        <div class="journal-card-footer">
+          <span class="journal-merchant" translate="no">
+            <Icon name="building-2-line" size={14} />
+            {post.merchant}
+          </span>
+          <span class="journal-read-more">
+            {post.external ? '查看归档' : '阅读全文'}
+            <Icon
+              name={post.external ? 'external-link-line' : 'arrow-right-line'}
+              size={16}
+            />
+          </span>
+        </div>
       </a>
     ))}
-    <div class="empty-results" id="empty-results" hidden={records.length > 0}>
+
+    <div
+      class="empty-results panel"
+      id="empty-results"
+      hidden={records.length > 0}
+    >
       <h3>{records.length ? '这个组合还没有测试记录' : '暂无测试记录'}</h3>
       {records.length > 0 && (
         <>
@@ -89,14 +136,17 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
                 : '可以清除筛选，查看全部记录。'}
           </p>
           <button class="button secondary" data-reset-filters type="button">
+            <Icon name="refresh-2-line" size={16} />
             清除筛选
           </button>
         </>
       )}
     </div>
   </div>
+
   <nav class="record-pagination" aria-label="测试记录分页" hidden>
     <button class="button secondary" type="button" data-page-prev>
+      <Icon name="left-line" size={16} />
       上一页
     </button>
     <span
@@ -106,6 +156,7 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
     ></span>
     <button class="button secondary" type="button" data-page-next>
       下一页
+      <Icon name="right-line" size={16} />
     </button>
   </nav>
   {records.length > 0 && (

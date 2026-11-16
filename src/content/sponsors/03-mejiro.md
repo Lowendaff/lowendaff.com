@@ -1,5 +1,7 @@
 ---
 name: Mejiro
+brandLogo: /brand/mejiro-light.png
+brandLogoDark: /brand/mejiro-dark.png
 url: https://billing.mejiro.io/
 logo: 03.svg
 enabled: true

@@ -1,235 +1,9 @@
-/* Revision 3: sponsor products on home; grouped evidence in reviews. */
-.home-revision .filter-bar {
-  gap: 20px;
-}
-.home-revision .search-field {
-  flex: 1;
-}
-.home-revision .filter-fields {
-  flex: 0 0 170px;
-}
-.home-revision .filter-fields select {
-  min-width: 150px;
-  font-size: 14px;
-}
-.search-status {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 10px;
-}
-.search-status:empty {
-  display: none;
-}
-.home-revision .article-main .search-snippet {
-  margin-top: 10px;
-  color: var(--accent);
-  font-size: 13px;
-  line-height: 1.8;
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
-.home-revision .article-main {
-  min-width: 0;
-}
-
-.commercial-note {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 14px;
-}
-
-.commercial-slot {
-  margin: 24px 0;
-  min-width: 0;
-}
-.commercial-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-.commercial-header select {
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 26px 4px 10px;
-  min-height: 36px;
-  font-size: 12px;
-}
-.commercial-creative {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  border-radius: 14px;
-  padding: 26px;
-  min-height: 152px;
-  color: var(--ad-text);
-  background: var(--ad-indigo);
-}
-.commercial-creative:hover {
-  color: var(--ad-text);
-  filter: brightness(1.08);
-}
-.creative-indigo {
-  background: var(--ad-indigo);
-}
-.creative-orange {
-  background: var(--ad-orange);
-}
-.creative-teal {
-  background: var(--ad-teal);
-}
-.creative-brand {
-  font-size: 24px;
-  font-weight: 750;
-  flex-shrink: 0;
-  letter-spacing: -0.5px;
-}
-.creative-brand span {
-  display: block;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  font-weight: 400;
-  opacity: 0.8;
-}
-.creative-copy {
-  flex: 1;
-  min-width: 0;
-}
-.creative-copy strong {
-  font-size: 21px;
-  font-weight: 600;
-}
-.creative-copy p {
-  font-size: 13px;
-  line-height: 1.8;
-  margin-top: 6px;
-  opacity: 0.85;
-}
-.creative-cta {
-  background: #ffffff1f;
-  border: 1px solid #ffffff40;
-  border-radius: 8px;
-  font-size: 13px;
-  padding: 10px 16px;
-  white-space: nowrap;
-}
-.commercial-footnote {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 7px;
-}
-.commercial-sidebar .commercial-creative {
-  display: block;
-  padding: 24px;
-  min-height: 230px;
-}
-.commercial-sidebar .creative-copy {
-  margin: 22px 0;
-}
-.commercial-sidebar .creative-cta {
-  display: inline-block;
-}
-.creative-image {
-  padding: 0 !important;
-  min-height: 0 !important;
-  overflow: hidden;
-}
-.creative-image img {
-  width: 100%;
-  height: auto;
-  max-height: 240px;
-  object-fit: contain;
-}
-.commercial-slides > a + a {
-  margin-top: 12px;
-}
-.commercial-slides > a[hidden] + a {
-  margin-top: 0;
-}
-.review-revision .review-heading h1 {
-  font-size: 32px;
-}
-.review-revision .review-heading h1 br {
-  display: none;
-}
-.review-revision .review-introduction {
-  font-size: 13px;
-  margin: 18px 0 28px;
-}
-.review-overview {
-  padding-top: 8px;
-  scroll-margin-top: 110px;
-}
-.review-overview .section-heading {
-  margin-bottom: 18px;
-}
-.review-overview h2 {
-  font-size: 24px;
-}
-.author-verdict .archive-prose {
-  font-size: 17px;
-  line-height: 1.9;
-}
-.key-findings {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin: 24px 0;
-}
-.key-findings a {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 18px;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.key-findings a:hover {
-  border-color: var(--accent);
-}
-.key-findings span {
-  font-size: 12px;
-  color: var(--muted);
-}
-.key-findings strong {
-  font-size: 18px;
-  font-weight: 550;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-.key-findings small {
-  font-size: 11px;
-  color: var(--muted);
-}
-.secondary-evidence {
-  border-block: 1px solid var(--border);
-  margin: 16px 0;
-}
-.secondary-evidence summary {
-  padding: 14px 0;
-  font-size: 14px;
-  min-height: 48px;
-}
-.secondary-evidence summary span {
-  float: right;
-  font-size: 12px;
-  color: var(--muted);
-}
-.secondary-evidence[open] {
-  padding-bottom: 14px;
-}
+/* Notion chapter view tabs and grouped benchmark panels. */
 .review-chapter {
-  margin: 30px 0 42px;
-  scroll-margin-top: 110px;
+  margin: 36px 0 40px;
 }
 .chapter-heading {
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 .chapter-heading > div {
   display: flex;
@@ -237,56 +11,84 @@
   align-items: center;
 }
 .chapter-heading h2 {
-  font-size: 25px;
+  font-size: 22px;
+  font-weight: 650;
 }
 .chapter-heading p {
-  font-size: 13px;
-  margin-top: 9px;
+  font-size: 13.5px;
+  margin-top: 6px;
   color: var(--muted);
 }
+
+/* Notion Database View Tabs for Review Chapters */
 .review-tablist {
   display: flex;
-  gap: 4px;
-  padding: 5px;
-  border: 1px solid var(--border);
-  background: var(--subtle);
-  border-radius: 12px;
+  align-items: stretch;
+  gap: 2px;
+  border-bottom: 0;
+  box-shadow: inset 0 -1px 0 var(--border);
   overflow-x: auto;
+  scrollbar-width: none;
+}
+.review-tablist::-webkit-scrollbar {
+  display: none;
 }
 .review-tablist button {
-  flex: 1 0 auto;
-  padding: 10px 16px;
-  border-radius: 6px;
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
-  min-height: 44px;
+  font-weight: 500;
+  min-height: var(--control-h-md);
   background: transparent;
   color: var(--muted);
   white-space: nowrap;
+  transition: var(--transition-ui);
 }
-.review-tablist button[aria-selected='true'] {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow:
-    0 1px 3px #0000000a,
-    0 2px 6px #00000008;
-  font-weight: 600;
+.review-tablist button::before {
+  content: '';
+  position: absolute;
+  inset: 5px 2px;
+  z-index: -1;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  transition: var(--transition-ui);
 }
 .review-tablist button:hover {
   color: var(--text);
 }
+.review-tablist button:hover::before {
+  background: var(--subtle);
+}
+.review-tablist button[aria-selected='true'] {
+  color: var(--text);
+  font-weight: 600;
+}
+.review-tablist button[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 0;
+  background: var(--text);
+}
+
 .review-panel {
-  padding-top: 18px;
+  padding-top: 16px;
   min-width: 0;
 }
 .source-section {
   min-width: 0;
-  scroll-margin-top: 110px;
 }
 .panel-source-title {
   font-size: 13px;
   color: var(--muted);
-  font-weight: 500;
-  margin: 0 0 12px;
+  font-weight: 600;
+  margin: 0 0 10px;
 }
 .review-panel .archive-subheading {
   font-size: 16px;
@@ -306,11 +108,11 @@
 }
 .review-panel .data-table table {
   width: 100%;
-  font-size: 14px;
+  font-size: 13.5px;
 }
 .review-panel .data-table th,
 .review-panel .data-table td {
-  padding: 10px 13px;
+  padding: 9px 14px;
 }
 [data-review-panels='hardware'] .data-table table {
   white-space: normal;
@@ -327,151 +129,23 @@
   overflow: auto;
   overscroll-behavior: contain;
 }
-.review-revision .route-context {
-  margin-bottom: 12px;
-}
-.review-revision .route-explorer .table-help {
-  margin-top: 8px;
-}
-.review-revision .inline-offer {
-  margin-top: 28px;
-}
 .review-revision .full-sidebar .commercial-slot {
-  margin-top: 24px;
-}
-.review-revision .full-review .source-note {
-  font-size: 12px;
-  line-height: 1.8;
-  padding: 16px 18px;
-}
-.review-revision .inline-offer .promo-card {
-  padding: 22px;
-}
-.review-revision .inline-offer .promo-price {
-  margin-top: 0;
-}
-@media (max-width: 1000px) {
-  .commercial-creative {
-    flex-wrap: wrap;
-  }
-  .creative-brand {
-    flex-basis: 100%;
-  }
+  margin-top: 20px;
 }
 @media (max-width: 760px) {
-  .home-revision .filter-bar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 12px;
-  }
-  .home-revision .search-field {
-    grid-column: 1/-1;
-  }
-  .home-revision .filter-fields {
-    width: auto;
-  }
-  .home-revision .filter-fields select {
-    font-size: 14px;
-    width: 100%;
-  }
-  .home-revision .filter-submit {
-    grid-column: 2;
-    width: auto;
-    padding-inline: 22px;
-  }
-
-  .review-revision .review-heading h1 {
-    font-size: 27px;
-  }
-  .review-revision .review-meta {
-    font-size: 12px;
-  }
-  .commercial-creative {
-    padding: 20px;
-    gap: 14px;
-    min-height: 0;
-    border-radius: 12px;
-  }
-  .creative-brand {
-    font-size: 22px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .creative-brand span {
-    letter-spacing: 0;
-  }
-  .creative-copy strong {
+  .chapter-heading h2 {
     font-size: 20px;
   }
-  .creative-copy p {
-    font-size: 13px;
-  }
-  .creative-cta {
-    padding: 9px 13px;
-  }
-  .commercial-header select {
-    min-height: 44px;
-    font-size: 13px;
-  }
-  .commercial-sidebar .commercial-creative {
-    min-height: 0;
-  }
-  .review-overview .section-heading {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .review-overview h2 {
-    font-size: 22px;
-  }
-  .key-findings {
-    gap: 8px;
-  }
-  .key-findings a {
-    padding: 12px 10px;
-    border-radius: 8px;
-    gap: 8px;
-  }
-  .key-findings span {
-    font-size: 11px;
-  }
-  .key-findings strong {
-    font-size: 16px;
-  }
-  .key-findings small {
-    font-size: 10px;
-  }
-  .secondary-evidence summary {
-    font-size: 14px;
-  }
-  .secondary-evidence summary span {
-    display: none;
-  }
-  .chapter-heading h2 {
-    font-size: 22px;
-  }
-  .chapter-heading p {
-    font-size: 13px;
-    line-height: 1.8;
-  }
-  .review-tablist {
-    border-radius: 10px;
-    padding: 4px;
-    gap: 0;
-  }
   .review-tablist button {
-    font-size: 14px;
-    padding: 10px 11px;
+    font-size: 13.5px;
+    padding: 8px 12px;
   }
   .review-panel {
-    padding-top: 16px;
-  }
-  .review-panel .data-table table {
-    font-size: 14px;
+    padding-top: 14px;
   }
   .review-panel .data-table th,
   .review-panel .data-table td {
-    padding: 11px;
+    padding: 9px 12px;
   }
   [data-review-panels='hardware'] .data-table th:first-child {
     min-width: 94px !important;
@@ -483,15 +157,8 @@
   .review-revision .route-explorer .data-table {
     max-height: 360px;
   }
-  .review-revision .route-tabs button {
-    font-size: 13px;
-    padding-inline: 8px;
-  }
   .review-revision .full-sidebar {
     margin-top: 24px;
-  }
-  .review-revision .inline-offer .promo-card {
-    padding: 20px;
   }
 }
 @media print {
@@ -500,8 +167,7 @@
     display: block !important;
   }
   .review-tablist,
-  .commercial-slot,
-  .key-findings {
+  .commercial-slot {
     display: none !important;
   }
   .review-revision .route-explorer .data-table {

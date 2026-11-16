@@ -1,0 +1,45 @@
+---
+import flagpack from '@iconify-json/flagpack/icons.json';
+import Icon from './Icon.astro';
+
+interface Props {
+  code?: string;
+  size?: number;
+  class?: string;
+}
+
+const { code = '', size = 18, class: className } = Astro.props;
+const normalized = code.trim().toLowerCase();
+const aliases: Record<string, string> = {
+  uk: 'gb-ukm',
+  gb: 'gb-ukm',
+};
+const key = aliases[normalized] ?? normalized;
+const flag =
+  key && key !== 'unspecified'
+    ? (flagpack.icons as Record<string, { body: string }>)[key]
+    : undefined;
+const width = Math.round(size * (4 / 3));
+const height = size;
+---
+
+{flag ? (
+  <span
+    class:list={['flag-badge', className]}
+    style={`width:${width}px;height:${height}px`}
+    aria-hidden="true"
+  >
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${flagpack.width ?? 32} ${flagpack.height ?? 24}`}
+      aria-hidden="true"
+      focusable="false"
+      set:html={flag.body}
+    />
+  </span>
+) : (
+  <span class:list={['flag-fallback', className]} aria-hidden="true">
+    <Icon name="earth-2-line" size={size} />
+  </span>
+)}

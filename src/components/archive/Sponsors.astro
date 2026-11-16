@@ -1,7 +1,10 @@
 ---
+import Icon from '../Icon.astro';
+import BrandMark from '../ads/BrandMark.astro';
 import { getSponsors } from '../../lib/commercial';
+
 const sponsors = await getSponsors('article-sidebar');
-// Owned, static SVG wordmarks. Never inline untrusted remote SVG markup.
+// Owned, static SVG wordmarks validated at build time. Never inline untrusted remote SVG markup.
 const marks = import.meta.glob('../../assets/sponsors/*.svg', {
   eager: true,
   query: '?raw',
@@ -15,25 +18,52 @@ for (const sponsor of sponsors) {
 
 {sponsors.length > 0 && (
   <section class="sponsor-wall" aria-labelledby="sponsor-title">
-    <div class="section-heading">
-      <h2 id="sponsor-title">Sponsors</h2>
-      <span>赞助商</span>
+    <div class="sponsor-wall-head">
+      <div class="sponsor-wall-title">
+        <Icon name="star-line" size={14} />
+        <h2 id="sponsor-title">赞助商名录</h2>
+        <span class="sponsor-wall-count mono">{sponsors.length}</span>
+      </div>
+      <a class="sponsor-wall-link" href="/ads/">
+        <span>赞助合作</span>
+        <Icon name="right-line" size={12} />
+      </a>
     </div>
-    <div class="sponsor-grid">
+    <div class="sponsor-grid" data-sponsor-grid>
       {sponsors.map((s) => (
         <a
           href={s.url}
           target="_blank"
           rel="sponsored nofollow noopener noreferrer"
+          data-sponsor-name={s.name}
           aria-label={`${s.name} 赞助商网站`}
         >
-          <span
-            class="sponsor-mark"
-            translate="no"
-            set:html={marks[`../../assets/sponsors/${s.logo}`]}
-          />
+          <span class="sponsor-mark" translate="no">
+            <span class="sponsor-logo-well">
+              <BrandMark
+                name={s.name}
+                logo={s.brandLogo}
+                logoDark={s.brandLogoDark}
+                size="dir"
+              />
+            </span>
+            <span class="sponsor-tile-name">{s.name}</span>
+          </span>
         </a>
       ))}
     </div>
   </section>
 )}
+<script>
+  // Shuffle sponsor directory independently on load while preserving DOM & keyboard tab order.
+  document
+    .querySelectorAll<HTMLElement>('[data-sponsor-grid]')
+    .forEach((grid) => {
+      const items = Array.from(grid.children);
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+      grid.append(...items);
+    });
+</script>

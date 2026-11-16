@@ -1,5 +1,7 @@
 ---
 name: MyHBD
+logo: /brand/myhbd-light.png
+logoDark: /brand/myhbd-dark.png
 title: 为下一项计划，选择云服务
 description: 查看可选方案、产品规格与服务详情。
 url: https://myhbd.net/zh

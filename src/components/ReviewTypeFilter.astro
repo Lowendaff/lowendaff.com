@@ -1,5 +1,11 @@
 ---
+import Icon from './Icon.astro';
 import { reviewTypes, reviewTypeLabels } from '../lib/review-types';
+const iconFor: Record<string, string> = {
+  '': 'layout-grid-line',
+  vps: 'cloud-line',
+  dedicated: 'server-2-line',
+};
 const options = [
   { value: '', label: '全部' },
   ...reviewTypes.map((value) => ({ value, label: reviewTypeLabels[value] })),
@@ -7,7 +13,7 @@ const options = [
 ---
 
 <div
-  class="review-type-filter"
+  class="review-type-filter notion-view-tabs"
   role="group"
   aria-label="测评类型"
   data-type-filter
@@ -21,7 +27,8 @@ const options = [
       aria-controls="reviews"
       translate="no"
     >
-      {label}
+      <Icon name={iconFor[value] ?? 'server-line'} size={15} />
+      <span>{label}</span>
     </button>
   ))}
 </div>

@@ -1,5 +1,7 @@
 ---
 name: PoloCloud
+brandLogo: /brand/polocloud-light.png
+brandLogoDark: /brand/polocloud-dark.png
 url: https://polocloud.net/
 logo: 06.svg
 enabled: true

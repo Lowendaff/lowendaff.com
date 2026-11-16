@@ -1,5 +1,7 @@
 ---
 name: YxVM
+brandLogo: /brand/yxvm-light.png
+brandLogoDark: /brand/yxvm-dark.png
 url: https://yxvm.com/
 logo: 00.svg
 enabled: true

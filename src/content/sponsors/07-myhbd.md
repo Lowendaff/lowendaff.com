@@ -1,5 +1,7 @@
 ---
 name: MyHBD
+brandLogo: /brand/myhbd-light.png
+brandLogoDark: /brand/myhbd-dark.png
 url: https://myhbd.net/zh
 logo: 07.svg
 enabled: true

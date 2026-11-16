@@ -1,5 +1,7 @@
 ---
 name: SaltyFish
+brandLogo: /brand/saltyfish-light.png
+brandLogoDark: /brand/saltyfish-dark.png
 url: https://portal.saltyfish.io/
 logo: 04.svg
 enabled: true

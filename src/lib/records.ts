@@ -32,11 +32,15 @@ export function getRecords(posts: CollectionEntry<'posts'>[]) {
     .map(({ id, data }) => ({
       id: data.recordId || id,
       title: data.title,
+      description: data.description || '',
+      verdict: data.verdict || '',
+      route: data.route || '',
       reviewType: data.reviewType,
       reviewTypeLabel: reviewTypeLabels[data.reviewType],
       location: data.location,
       country: data.country,
       date: data.publishedAt,
+      testedAt: data.testedAt || '',
       href:
         data.kind === 'archive-reference'
           ? data.archiveSnapshot!

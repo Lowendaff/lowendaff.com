@@ -1,626 +1,157 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-14T20:00:04.188Z",
-  "title": "Design System: LowEndAFF",
+  "generatedAt": "2026-11-16T09:10:00.000Z",
+  "title": "Design System: Notion Analysis — LowEndAFF",
   "extensions": {
     "colorMeta": {
-      "day-canvas": {
+      "canvas-soft": {
         "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-canvas",
+        "displayName": "Notion Warm Paper · canvas-soft",
         "tonalRamp": [
-          "oklch(15.00% 0.00311 277.16)",
-          "oklch(26.43% 0.00505 277.16)",
-          "oklch(37.86% 0.00635 277.16)",
-          "oklch(49.29% 0.00684 277.16)",
-          "oklch(60.71% 0.00646 277.16)",
-          "oklch(72.14% 0.00525 277.16)",
-          "oklch(83.57% 0.00338 277.16)",
-          "oklch(95.00% 0.00107 277.16)"
+          "#191919",
+          "#2f2f2f",
+          "#615d59",
+          "#a39e98",
+          "#d9d7d4",
+          "#e6e6e6",
+          "#f0efed",
+          "#f6f5f4"
         ]
       },
-      "day-surface": {
+      "surface": {
         "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-surface",
+        "displayName": "Notion Surface · surface",
         "tonalRamp": [
-          "oklch(15.00% 0.00378 271.33)",
-          "oklch(26.43% 0.00615 271.33)",
-          "oklch(37.86% 0.00773 271.33)",
-          "oklch(49.29% 0.00833 271.33)",
-          "oklch(60.71% 0.00786 271.33)",
-          "oklch(72.14% 0.00640 271.33)",
-          "oklch(83.57% 0.00411 271.33)",
-          "oklch(95.00% 0.00130 271.33)"
+          "#202020",
+          "#31302e",
+          "#615d59",
+          "#9b9a97",
+          "#d3d1cb",
+          "#e6e6e6",
+          "#f6f5f4",
+          "#ffffff"
         ]
       },
-      "day-raised": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-raised",
-        "tonalRamp": [
-          "oklch(15.00% 0.00188 271.37)",
-          "oklch(26.43% 0.00305 271.37)",
-          "oklch(37.86% 0.00384 271.37)",
-          "oklch(49.29% 0.00413 271.37)",
-          "oklch(60.71% 0.00390 271.37)",
-          "oklch(72.14% 0.00317 271.37)",
-          "oklch(83.57% 0.00204 271.37)",
-          "oklch(95.00% 0.00065 271.37)"
-        ]
-      },
-      "day-subtle": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-subtle",
-        "tonalRamp": [
-          "oklch(15.00% 0.00695 273.84)",
-          "oklch(26.43% 0.01129 273.84)",
-          "oklch(37.86% 0.01420 273.84)",
-          "oklch(49.29% 0.01530 273.84)",
-          "oklch(60.71% 0.01444 273.84)",
-          "oklch(72.14% 0.01175 273.84)",
-          "oklch(83.57% 0.00755 273.84)",
-          "oklch(95.00% 0.00239 273.84)"
-        ]
-      },
-      "day-text": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-text",
-        "tonalRamp": [
-          "oklch(15.00% 0.02328 273.18)",
-          "oklch(26.43% 0.03785 273.18)",
-          "oklch(37.86% 0.04759 273.18)",
-          "oklch(49.29% 0.05126 273.18)",
-          "oklch(60.71% 0.04840 273.18)",
-          "oklch(72.14% 0.03936 273.18)",
-          "oklch(83.57% 0.02530 273.18)",
-          "oklch(95.00% 0.00802 273.18)"
-        ]
-      },
-      "day-muted": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-muted",
-        "tonalRamp": [
-          "oklch(15.00% 0.03090 269.37)",
-          "oklch(26.43% 0.05024 269.37)",
-          "oklch(37.86% 0.06317 269.37)",
-          "oklch(49.29% 0.06805 269.37)",
-          "oklch(60.71% 0.06425 269.37)",
-          "oklch(72.14% 0.05225 269.37)",
-          "oklch(83.57% 0.03359 269.37)",
-          "oklch(95.00% 0.01065 269.37)"
-        ]
-      },
-      "day-accent": {
+      "primary": {
         "role": "primary",
-        "displayName": "日光蓝",
+        "displayName": "Notion Blue · primary",
         "tonalRamp": [
-          "oklch(15.00% 0.07031 260.23)",
-          "oklch(26.43% 0.11432 260.23)",
-          "oklch(37.86% 0.14374 260.23)",
-          "oklch(49.29% 0.15484 260.23)",
-          "oklch(60.71% 0.14619 260.23)",
-          "oklch(72.14% 0.11889 260.23)",
-          "oklch(83.57% 0.07643 260.23)",
-          "oklch(95.00% 0.02423 260.23)"
-        ]
-      },
-      "day-accent-soft": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-accent-soft",
-        "tonalRamp": [
-          "oklch(15.00% 0.01121 265.58)",
-          "oklch(26.43% 0.01823 265.58)",
-          "oklch(37.86% 0.02292 265.58)",
-          "oklch(49.29% 0.02469 265.58)",
-          "oklch(60.71% 0.02331 265.58)",
-          "oklch(72.14% 0.01896 265.58)",
-          "oklch(83.57% 0.01219 265.58)",
-          "oklch(95.00% 0.00386 265.58)"
-        ]
-      },
-      "day-on-accent": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-on-accent",
-        "tonalRamp": [
-          "oklch(15.00% 0.00188 271.37)",
-          "oklch(26.43% 0.00305 271.37)",
-          "oklch(37.86% 0.00384 271.37)",
-          "oklch(49.29% 0.00413 271.37)",
-          "oklch(60.71% 0.00390 271.37)",
-          "oklch(72.14% 0.00317 271.37)",
-          "oklch(83.57% 0.00204 271.37)",
-          "oklch(95.00% 0.00065 271.37)"
-        ]
-      },
-      "day-border": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · day-border",
-        "tonalRamp": [
-          "oklch(15.00% 0.01197 268.80)",
-          "oklch(26.43% 0.01945 268.80)",
-          "oklch(37.86% 0.02446 268.80)",
-          "oklch(49.29% 0.02635 268.80)",
-          "oklch(60.71% 0.02488 268.80)",
-          "oklch(72.14% 0.02023 268.80)",
-          "oklch(83.57% 0.01301 268.80)",
-          "oklch(95.00% 0.00412 268.80)"
-        ]
-      },
-      "day-success": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · day-success",
-        "tonalRamp": [
-          "oklch(15.00% 0.04055 131.67)",
-          "oklch(26.43% 0.06593 131.67)",
-          "oklch(37.86% 0.08289 131.67)",
-          "oklch(49.29% 0.08929 131.67)",
-          "oklch(60.71% 0.08430 131.67)",
-          "oklch(72.14% 0.06856 131.67)",
-          "oklch(83.57% 0.04408 131.67)",
-          "oklch(95.00% 0.01397 131.67)"
-        ]
-      },
-      "day-warning": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · day-warning",
-        "tonalRamp": [
-          "oklch(15.00% 0.03388 79.04)",
-          "oklch(26.43% 0.05509 79.04)",
-          "oklch(37.86% 0.06927 79.04)",
-          "oklch(49.29% 0.07462 79.04)",
-          "oklch(60.71% 0.07045 79.04)",
-          "oklch(72.14% 0.05729 79.04)",
-          "oklch(83.57% 0.03683 79.04)",
-          "oklch(95.00% 0.01168 79.04)"
-        ]
-      },
-      "day-danger": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · day-danger",
-        "tonalRamp": [
-          "oklch(15.00% 0.08114 9.59)",
-          "oklch(26.43% 0.13192 9.59)",
-          "oklch(37.86% 0.16587 9.59)",
-          "oklch(49.29% 0.17868 9.59)",
-          "oklch(60.71% 0.16869 9.59)",
-          "oklch(72.14% 0.13720 9.59)",
-          "oklch(83.57% 0.08820 9.59)",
-          "oklch(95.00% 0.02796 9.59)"
-        ]
-      },
-      "day-brand-orange": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · day-brand-orange",
-        "tonalRamp": [
-          "oklch(15.00% 0.04913 48.74)",
-          "oklch(26.43% 0.07988 48.74)",
-          "oklch(37.86% 0.10044 48.74)",
-          "oklch(49.29% 0.10819 48.74)",
-          "oklch(60.71% 0.10214 48.74)",
-          "oklch(72.14% 0.08307 48.74)",
-          "oklch(83.57% 0.05341 48.74)",
-          "oklch(95.00% 0.01693 48.74)"
-        ]
-      },
-      "day-brand-teal": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · day-brand-teal",
-        "tonalRamp": [
-          "oklch(15.00% 0.04104 224.82)",
-          "oklch(26.43% 0.06672 224.82)",
-          "oklch(37.86% 0.08389 224.82)",
-          "oklch(49.29% 0.09037 224.82)",
-          "oklch(60.71% 0.08532 224.82)",
-          "oklch(72.14% 0.06939 224.82)",
-          "oklch(83.57% 0.04461 224.82)",
-          "oklch(95.00% 0.01414 224.82)"
-        ]
-      },
-      "night-canvas": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-canvas",
-        "tonalRamp": [
-          "oklch(15.00% 0.00970 280.49)",
-          "oklch(26.43% 0.01578 280.49)",
-          "oklch(37.86% 0.01984 280.49)",
-          "oklch(49.29% 0.02137 280.49)",
-          "oklch(60.71% 0.02017 280.49)",
-          "oklch(72.14% 0.01641 280.49)",
-          "oklch(83.57% 0.01055 280.49)",
-          "oklch(95.00% 0.00334 280.49)"
-        ]
-      },
-      "night-surface": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-surface",
-        "tonalRamp": [
-          "oklch(15.00% 0.01204 278.04)",
-          "oklch(26.43% 0.01958 278.04)",
-          "oklch(37.86% 0.02462 278.04)",
-          "oklch(49.29% 0.02652 278.04)",
-          "oklch(60.71% 0.02504 278.04)",
-          "oklch(72.14% 0.02036 278.04)",
-          "oklch(83.57% 0.01309 278.04)",
-          "oklch(95.00% 0.00415 278.04)"
-        ]
-      },
-      "night-raised": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-raised",
-        "tonalRamp": [
-          "oklch(15.00% 0.01674 273.23)",
-          "oklch(26.43% 0.02721 273.23)",
-          "oklch(37.86% 0.03422 273.23)",
-          "oklch(49.29% 0.03686 273.23)",
-          "oklch(60.71% 0.03480 273.23)",
-          "oklch(72.14% 0.02830 273.23)",
-          "oklch(83.57% 0.01819 273.23)",
-          "oklch(95.00% 0.00577 273.23)"
-        ]
-      },
-      "night-subtle": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-subtle",
-        "tonalRamp": [
-          "oklch(15.00% 0.01612 274.75)",
-          "oklch(26.43% 0.02621 274.75)",
-          "oklch(37.86% 0.03296 274.75)",
-          "oklch(49.29% 0.03550 274.75)",
-          "oklch(60.71% 0.03352 274.75)",
-          "oklch(72.14% 0.02726 274.75)",
-          "oklch(83.57% 0.01752 274.75)",
-          "oklch(95.00% 0.00556 274.75)"
-        ]
-      },
-      "night-text": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-text",
-        "tonalRamp": [
-          "oklch(15.00% 0.02773 274.76)",
-          "oklch(26.43% 0.04508 274.76)",
-          "oklch(37.86% 0.05668 274.76)",
-          "oklch(49.29% 0.06105 274.76)",
-          "oklch(60.71% 0.05764 274.76)",
-          "oklch(72.14% 0.04688 274.76)",
-          "oklch(83.57% 0.03014 274.76)",
-          "oklch(95.00% 0.00955 274.76)"
-        ]
-      },
-      "night-muted": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-muted",
-        "tonalRamp": [
-          "oklch(15.00% 0.02765 273.09)",
-          "oklch(26.43% 0.04495 273.09)",
-          "oklch(37.86% 0.05652 273.09)",
-          "oklch(49.29% 0.06089 273.09)",
-          "oklch(60.71% 0.05748 273.09)",
-          "oklch(72.14% 0.04675 273.09)",
-          "oklch(83.57% 0.03006 273.09)",
-          "oklch(95.00% 0.00953 273.09)"
-        ]
-      },
-      "night-accent": {
-        "role": "primary",
-        "displayName": "月光蓝",
-        "tonalRamp": [
-          "oklch(15.00% 0.06000 264.20)",
-          "oklch(26.43% 0.09755 264.20)",
-          "oklch(37.86% 0.12266 264.20)",
-          "oklch(49.29% 0.13213 264.20)",
-          "oklch(60.71% 0.12474 264.20)",
-          "oklch(72.14% 0.10145 264.20)",
-          "oklch(83.57% 0.06522 264.20)",
-          "oklch(95.00% 0.02067 264.20)"
-        ]
-      },
-      "night-accent-soft": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-accent-soft",
-        "tonalRamp": [
-          "oklch(15.00% 0.02461 266.34)",
-          "oklch(26.43% 0.04002 266.34)",
-          "oklch(37.86% 0.05032 266.34)",
-          "oklch(49.29% 0.05420 266.34)",
-          "oklch(60.71% 0.05118 266.34)",
-          "oklch(72.14% 0.04162 266.34)",
-          "oklch(83.57% 0.02676 266.34)",
-          "oklch(95.00% 0.00848 266.34)"
-        ]
-      },
-      "night-on-accent": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-on-accent",
-        "tonalRamp": [
-          "oklch(15.00% 0.00970 280.49)",
-          "oklch(26.43% 0.01578 280.49)",
-          "oklch(37.86% 0.01984 280.49)",
-          "oklch(49.29% 0.02137 280.49)",
-          "oklch(60.71% 0.02017 280.49)",
-          "oklch(72.14% 0.01641 280.49)",
-          "oklch(83.57% 0.01055 280.49)",
-          "oklch(95.00% 0.00334 280.49)"
-        ]
-      },
-      "night-border": {
-        "role": "neutral",
-        "displayName": "暮色灰与语义色 · night-border",
-        "tonalRamp": [
-          "oklch(15.00% 0.02437 273.88)",
-          "oklch(26.43% 0.03962 273.88)",
-          "oklch(37.86% 0.04981 273.88)",
-          "oklch(49.29% 0.05366 273.88)",
-          "oklch(60.71% 0.05066 273.88)",
-          "oklch(72.14% 0.04120 273.88)",
-          "oklch(83.57% 0.02649 273.88)",
-          "oklch(95.00% 0.00840 273.88)"
-        ]
-      },
-      "night-success": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · night-success",
-        "tonalRamp": [
-          "oklch(15.00% 0.06332 130.14)",
-          "oklch(26.43% 0.10295 130.14)",
-          "oklch(37.86% 0.12945 130.14)",
-          "oklch(49.29% 0.13944 130.14)",
-          "oklch(60.71% 0.13165 130.14)",
-          "oklch(72.14% 0.10707 130.14)",
-          "oklch(83.57% 0.06883 130.14)",
-          "oklch(95.00% 0.02182 130.14)"
-        ]
-      },
-      "night-warning": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · night-warning",
-        "tonalRamp": [
-          "oklch(15.00% 0.04799 75.43)",
-          "oklch(26.43% 0.07803 75.43)",
-          "oklch(37.86% 0.09812 75.43)",
-          "oklch(49.29% 0.10569 75.43)",
-          "oklch(60.71% 0.09978 75.43)",
-          "oklch(72.14% 0.08115 75.43)",
-          "oklch(83.57% 0.05217 75.43)",
-          "oklch(95.00% 0.01654 75.43)"
-        ]
-      },
-      "night-danger": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · night-danger",
-        "tonalRamp": [
-          "oklch(15.00% 0.07214 10.28)",
-          "oklch(26.43% 0.11730 10.28)",
-          "oklch(37.86% 0.14749 10.28)",
-          "oklch(49.29% 0.15887 10.28)",
-          "oklch(60.71% 0.14999 10.28)",
-          "oklch(72.14% 0.12199 10.28)",
-          "oklch(83.57% 0.07842 10.28)",
-          "oklch(95.00% 0.02486 10.28)"
-        ]
-      },
-      "night-brand-orange": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · night-brand-orange",
-        "tonalRamp": [
-          "oklch(15.00% 0.06233 50.56)",
-          "oklch(26.43% 0.10135 50.56)",
-          "oklch(37.86% 0.12743 50.56)",
-          "oklch(49.29% 0.13727 50.56)",
-          "oklch(60.71% 0.12960 50.56)",
-          "oklch(72.14% 0.10540 50.56)",
-          "oklch(83.57% 0.06776 50.56)",
-          "oklch(95.00% 0.02148 50.56)"
-        ]
-      },
-      "night-brand-teal": {
-        "role": "secondary",
-        "displayName": "暮色灰与语义色 · night-brand-teal",
-        "tonalRamp": [
-          "oklch(15.00% 0.04520 182.49)",
-          "oklch(26.43% 0.07349 182.49)",
-          "oklch(37.86% 0.09241 182.49)",
-          "oklch(49.29% 0.09954 182.49)",
-          "oklch(60.71% 0.09398 182.49)",
-          "oklch(72.14% 0.07643 182.49)",
-          "oklch(83.57% 0.04914 182.49)",
-          "oklch(95.00% 0.01558 182.49)"
+          "#003b73",
+          "#005bab",
+          "#0075de",
+          "#3392ff",
+          "#62aef0",
+          "#a8d4fb",
+          "#d8ecfe",
+          "#ebf5fe"
         ]
       }
     },
     "typographyMeta": {
-      "display": {
-        "displayName": "首页主标题",
-        "purpose": "首页流体字号；手机覆盖见 DESIGN.md。"
-      },
-      "headline": {
-        "displayName": "测评标题",
-        "purpose": "文章标题；不覆盖标签页或地图自己的尺度。"
+      "heading-1": {
+        "displayName": "页面与文章主标题",
+        "purpose": "Notion 紧凑负字距高权重标题。"
       },
       "reading": {
-        "displayName": "长文正文",
-        "purpose": "70ch 阅读容器。"
+        "displayName": "中英文混排长文正文",
+        "purpose": "68ch 阅读容器，16.5px / 1.85 行高。"
       },
       "data": {
-        "displayName": "测试数据",
-        "purpose": "左对齐、等宽数字。"
-      },
-      "page-title": {
-        "displayName": "页面标题",
-        "purpose": "标签云、广告、地图与组件展示使用 30–40px 流体字号。"
+        "displayName": "测试数据与终端",
+        "purpose": "左对齐、JetBrains Mono 等宽数字。"
       }
     },
     "shadows": [
       {
-        "name": "surface-day",
-        "value": "0 2px 4px rgb(52 59 88 / 4%), 0 12px 36px rgb(52 59 88 / 6%)",
-        "purpose": "浅色面板与选中类型。"
+        "name": "shadow-sm",
+        "value": "0 1px 2px rgb(0 0 0 / 3%), 0 4px 12px rgb(0 0 0 / 4%)",
+        "purpose": "微浮起控件与选中滑块，交互态保持恒定不跳变。"
       },
       {
-        "name": "surface-night",
-        "value": "0 2px 4px rgb(0 0 0 / 14%), 0 12px 36px rgb(0 0 0 / 18%)",
-        "purpose": "深色对应表面。"
-      },
-      {
-        "name": "route-menu",
-        "value": "0 2px 5px #0000000a, 0 14px 32px #0000001a",
-        "purpose": "路由选择器浮层。"
-      },
-      {
-        "name": "tooltip",
-        "value": "0 2px 4px #0000000a, 0 10px 28px #00000014",
-        "purpose": "标题提示浮层。"
+        "name": "shadow-md",
+        "value": "0 4px 12px rgb(0 0 0 / 6%), 0 16px 36px rgb(0 0 0 / 8%)",
+        "purpose": "下拉菜单、Tooltip 与地图城市弹窗。"
       }
     ],
     "motion": [
       {
-        "name": "quick",
-        "value": "140ms",
-        "purpose": "图标轻量反馈。"
-      },
-      {
-        "name": "panel",
-        "value": "200ms",
-        "purpose": "主题与手机菜单入场。"
-      },
-      {
-        "name": "arrive",
-        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "短促进入并柔和停下。"
-      },
-      {
-        "name": "carousel-transition",
-        "value": "650ms cubic-bezier(0.22, 1, 0.36, 1)",
-        "purpose": "首页广告连续切换；计时与暂停条件由 HomeAds.astro 提供。"
+        "name": "transition-base",
+        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "颜色、边框、背景与透明度的温和过渡，禁止元素位移与阴影突变。"
       }
     ],
     "breakpoints": [
-      {
-        "name": "shell-inset",
-        "value": "1279px"
-      },
-      {
-        "name": "friends-two-columns",
-        "value": "1000px"
-      },
-      {
-        "name": "article-single-column",
-        "value": "900px"
-      },
-      {
-        "name": "mobile-navigation",
-        "value": "760px"
-      },
-      {
-        "name": "map-bottom-sheet",
-        "value": "700px"
-      },
-      {
-        "name": "friends-one-column",
-        "value": "520px"
-      }
+      { "name": "shell-inset", "value": "1279px" },
+      { "name": "friends-two-columns", "value": "1000px" },
+      { "name": "article-single-column", "value": "900px" },
+      { "name": "mobile-navigation", "value": "760px" },
+      { "name": "map-bottom-sheet", "value": "700px" },
+      { "name": "friends-one-column", "value": "520px" }
     ]
   },
   "components": [
     {
-      "name": "主按钮",
+      "name": "主按钮 (md)",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "广告页合作入口等主要动作；默认尺寸。",
+      "description": "标准 md 尺寸（min-height: 44px, radius: 8px），背景与边框平滑过渡，无位移。",
       "html": "<button class=\"ds-primary\" type=\"button\">联系合作</button>",
-      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:11px 18px;font-family:'Inter Variable', 'Noto Sans SC Variable', sans-serif;font-size:12px;font-weight:600;line-height:1.6;border-radius:12px;text-decoration:none;cursor:pointer;transition:transform 150ms,background 150ms;border:0;background:var(--accent, #295fba);color:var(--on-accent, #f4f5f8)}.ds-primary:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--accent, #295fba),#000 10%)}.ds-primary:focus-visible{outline:3px solid var(--accent, #295fba);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}}"
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;font-family:'Inter Variable','Noto Sans SC Variable',sans-serif;font-size:14px;font-weight:500;line-height:1.5;border-radius:8px;cursor:pointer;transition:background-color 180ms cubic-bezier(.16,1,.3,1),color 180ms cubic-bezier(.16,1,.3,1);border:1px solid transparent;background:var(--accent,#0075de);color:var(--on-accent,#ffffff)}.ds-primary:hover{background:var(--accent-active,#005bab)}.ds-primary:focus-visible{outline:2px solid var(--accent,#0075de);outline-offset:2px}"
     },
     {
-      "name": "次按钮",
+      "name": "次按钮 (md)",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "次级动作的表面与边框。",
+      "description": "标准 md 尺寸次级按钮，1px Hairline 边框与 8px 圆角，悬停切换同色系中性灰背景与中性深灰边框。",
       "html": "<button class=\"ds-secondary\" type=\"button\">返回首页</button>",
-      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:11px 18px;font-family:'Inter Variable', 'Noto Sans SC Variable', sans-serif;font-size:12px;font-weight:600;line-height:1.6;border-radius:12px;text-decoration:none;cursor:pointer;transition:transform 150ms,background 150ms;border:1px solid var(--border, #bec5d7);background:var(--surface, #ebedf3);color:var(--text, #343b58)}.ds-secondary:hover{transform:translateY(-1px)}.ds-secondary:focus-visible{outline:3px solid var(--accent, #295fba);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}}"
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;font-family:'Inter Variable','Noto Sans SC Variable',sans-serif;font-size:14px;font-weight:500;line-height:1.5;border-radius:8px;cursor:pointer;transition:background-color 180ms cubic-bezier(.16,1,.3,1),border-color 180ms cubic-bezier(.16,1,.3,1),color 180ms cubic-bezier(.16,1,.3,1);border:1px solid var(--border,#e6e6e6);background:var(--surface,#ffffff);color:var(--text,#191918)}.ds-secondary:hover{background:var(--subtle,#f0efed);border-color:var(--border-strong,#d3d1cb)}.ds-secondary:focus-visible{outline:2px solid var(--accent,#0075de);outline-offset:2px}"
     },
     {
-      "name": "图标按钮",
-      "kind": "button",
-      "refersTo": "button-icon",
-      "description": "保留点击面积及可读标签。",
-      "html": "<button class=\"ds-icon\" type=\"button\" aria-label=\"打开链接\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" aria-hidden=\"true\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></button>",
-      "css": ".ds-icon{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:var(--text, #343b58);cursor:pointer}.ds-icon:hover{background:var(--subtle, #dcdfea)}.ds-icon:focus-visible{outline:3px solid var(--accent, #295fba);outline-offset:5px;}"
-    },
-    {
-      "name": "桌面导航",
-      "kind": "nav",
-      "refersTo": "navigation-link",
-      "description": "现有四个入口；移动菜单行为由生产组件提供。",
-      "html": "<nav class=\"ds-nav\" aria-label=\"站点导航\"><a href=\"/\" aria-current=\"page\">首页</a><a href=\"/ads/\">广告</a><a href=\"/tags/\">标签云</a><a href=\"/map/\">测评地图</a></nav>",
-      "css": ".ds-nav{display:flex;align-items:center;gap:30px;flex-wrap:wrap;font-family:'Inter Variable', 'Noto Sans SC Variable', sans-serif;font-size:13px;line-height:1.75}.ds-nav a{position:relative;padding:14px 0;color:var(--muted, #53618a);text-decoration:none}.ds-nav a[aria-current]{color:var(--text, #343b58);font-weight:650}.ds-nav a:hover{color:var(--accent, #295fba)}.ds-nav a:focus-visible{outline:3px solid var(--accent, #295fba);outline-offset:5px;}@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){.ds-nav a:after{content:'';position:absolute;inset:auto 0 5px;height:1px;background:var(--accent, #295fba);transform:scaleX(0);transform-origin:left;transition:transform 180ms cubic-bezier(.16,1,.3,1)}.ds-nav a:hover:after,.ds-nav a:focus-visible:after{transform:scaleX(1)}}"
-    },
-    {
-      "name": "标签筛选",
+      "name": "标签筛选 (md)",
       "kind": "chip",
       "refersTo": "tag-filter",
-      "description": "展示未选与选中状态，按钮保持文字标签。",
+      "description": "统一 8px 圆角与 44px 高度，悬停为中性灰，选中态采用纯色 Notion Blue。",
       "html": "<div class=\"ds-chips\"><button type=\"button\" aria-pressed=\"false\">国家</button><button type=\"button\" aria-pressed=\"true\">商家</button></div>",
-      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:10px}.ds-chips button{font-family:'Inter Variable', 'Noto Sans SC Variable', sans-serif;font-size:14px;line-height:1.75;display:inline-flex;align-items:center;gap:10px;min-height:44px;max-width:100%;padding:9px 14px;border:1px solid var(--border, #bec5d7);border-radius:9px;background:var(--surface, #ebedf3);color:var(--text, #343b58);cursor:pointer}.ds-chips button:hover{background:var(--subtle, #dcdfea);border-color:var(--accent, #295fba)}.ds-chips button[aria-pressed=true]{background:var(--accent-soft, #dce4f5);color:var(--accent, #295fba);border-color:var(--accent, #295fba);box-shadow:inset 0 0 0 1px var(--accent, #295fba)}.ds-chips button:focus-visible{outline:3px solid var(--accent, #295fba);outline-offset:5px;}"
-    },
-    {
-      "name": "友情链接行",
-      "kind": "custom",
-      "refersTo": "friend-link",
-      "description": "自然链接网格中的整行点击区，保持外链提示、触摸高度与键盘焦点。",
-      "html": "<a class=\"ds-friend\" href=\"#friend-preview\"><span class=\"ds-friend-name\">朋友的博客</span><span class=\"ds-friend-arrow\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" aria-hidden=\"true\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></span></a>",
-      "css": ".ds-friend{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;min-height:48px;padding:10px 0;box-sizing:border-box;color:var(--text,#343b58);font-family:'Inter Variable','Noto Sans SC Variable',sans-serif;font-size:15px;line-height:1.75;text-decoration:none}.ds-friend-name{min-width:0;overflow-wrap:anywhere}.ds-friend-arrow{display:inline-flex;flex-shrink:0;color:var(--muted,#53618a)}.ds-friend:hover,.ds-friend:focus-visible{color:var(--accent,#295fba)}.ds-friend:hover .ds-friend-name,.ds-friend:focus-visible .ds-friend-name{text-decoration:underline;text-underline-offset:4px}.ds-friend:hover .ds-friend-arrow,.ds-friend:focus-visible .ds-friend-arrow{color:var(--accent,#295fba)}.ds-friend:focus-visible{outline:3px solid var(--accent,#295fba);outline-offset:5px}@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){.ds-friend-arrow svg{transition:transform 140ms cubic-bezier(.16,1,.3,1)}.ds-friend:hover svg,.ds-friend:focus-visible svg{transform:translate(2px,-2px)}}"
-    },
-    {
-      "name": "测评类型筛选",
-      "kind": "custom",
-      "refersTo": "review-type-filter",
-      "description": "三等分单选外观，筛选逻辑复用生产组件。",
-      "html": "<div class=\"ds-types\" role=\"group\" aria-label=\"测评类型\"><button type=\"button\" aria-pressed=\"true\">全部</button><button type=\"button\" aria-pressed=\"false\">VPS</button><button type=\"button\" aria-pressed=\"false\">独立服务器</button></div>",
-      "css": ".ds-types{box-sizing:border-box;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,360px);gap:4px;padding:4px;margin-bottom:16px;border:1px solid var(--border, #bec5d7);border-radius:12px;background:var(--subtle, #dcdfea)}.ds-types button{min-width:0;min-height:44px;padding:8px;border:0;border-radius:8px;background:transparent;color:var(--muted, #53618a);font-family:'Inter Variable', 'Noto Sans SC Variable', sans-serif;font-size:14px;font-weight:500;line-height:1.4;cursor:pointer}.ds-types button:hover{color:var(--text, #343b58)}.ds-types button[aria-pressed=true]{background:var(--surface, #ebedf3);color:var(--text, #343b58);font-weight:650;box-shadow:var(--shadow,0 2px 4px rgb(52 59 88 / 4%), 0 12px 36px rgb(52 59 88 / 6%))}.ds-types button:focus-visible{outline:3px solid var(--accent, #295fba);outline-offset:5px;}"
-    },
-    {
-      "name": "路由选择器",
-      "kind": "custom",
-      "refersTo": "route-picker",
-      "description": "仅呈现触发器默认与焦点外观；实际 combobox 的键盘、弹出和选择逻辑在 RouteSelect.astro。",
-      "html": "<button type=\"button\" class=\"ds-route\" aria-label=\"选择运营商与城市\"><span>运营商 · 城市</span><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></button>",
-      "css": ".ds-route{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:50px;padding:13px 16px;font-family:'Inter Variable', 'Noto Sans SC Variable', sans-serif;font-size:14px;line-height:1.5;color:var(--text, #343b58);background:var(--surface, #ebedf3);border:1px solid var(--border, #bec5d7);border-radius:12px;text-align:left;box-shadow:0 1px 2px #00000004;cursor:pointer}.ds-route span{min-width:0;overflow-wrap:anywhere}.ds-route svg{flex-shrink:0;color:var(--muted, #53618a)}.ds-route:hover{border-color:var(--accent, #295fba)}.ds-route:focus-visible{outline:3px solid var(--accent, #295fba);outline-offset:5px;}@media(max-width:760px){.ds-route{padding:12px 14px}}"
+      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:8px}.ds-chips button{font-family:'Inter Variable','Noto Sans SC Variable',sans-serif;font-size:14px;font-weight:500;line-height:1.5;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid var(--border,#e6e6e6);border-radius:8px;background:var(--surface,#ffffff);color:var(--text,#191918);cursor:pointer;transition:background-color 180ms cubic-bezier(.16,1,.3,1),border-color 180ms cubic-bezier(.16,1,.3,1),color 180ms cubic-bezier(.16,1,.3,1)}.ds-chips button:hover{background:var(--subtle,#f0efed);border-color:var(--border-strong,#d3d1cb)}.ds-chips button[aria-pressed=true]{background:var(--accent,#0075de);color:var(--on-accent,#ffffff);border-color:var(--accent,#0075de)}.ds-chips button:focus-visible{outline:2px solid var(--accent,#0075de);outline-offset:2px}"
     }
   ],
   "narrative": {
-    "northStar": "全球服务器测试手记",
-    "overview": "像翻阅熟悉博主的测试手记：语气轻松、亲近，测试证据保持清楚、严谨。头像、国旗和友情链接保留个人博客的温度；页面让读者顺手找到记录，再按需查看数据。\n\n平整、安静的阅读背景是主调。Tokyo 的日光蓝与月光蓝标记链接和选中状态，暮色灰构成表面层级；现有阴影辅助区分卡片与浮层，不把每块内容做成悬浮控件。",
+    "northStar": "Notion Warm Paper 全球服务器测试手记",
+    "overview": "基于 Notion 的暖纸灰白（#f6f5f4）与墨灰深色（#191919）构建平静、清晰的服务器测评文档界面。以 1px Hairline 与柔和表层对比组织内容，保留唯一 Notion Blue（#0075de）作为结构强调色，贴纸色系仅作状态与商家品牌点缀。",
     "keyCharacteristics": [
-      "轻松、亲近的博客气质，真实记录优先。",
-      "浅深主题共用语义角色，表面明度逐层变化。",
-      "信息紧凑，正文、表格和手机布局各自保持可读。",
-      "按钮与筛选温和、清楚、顺手；反馈不打断阅读。"
+      "暖纸白与纯白卡片形成温和的文档层级。",
+      "全站统一 sm / md / lg 尺寸与 6px / 8px / 12px / full 圆角规范。",
+      "hover 与 focus 仅做色彩/边框/透明度平滑过渡，零位移、零阴影突变。",
+      "中英文混排精调行高与断行，测评配图内置 Notion Media Well 画框。"
     ],
     "rules": [
       {
-        "name": "Semantic Theme",
-        "body": "组件读取语义 CSS 变量；不把浅色值写死进生产组件，深色也不做机械反色。",
-        "section": "colors"
+        "name": "Unified Sizing & Radii",
+        "body": "所有交互与容器组件严格使用 sm / md / lg 尺寸及 6px / 8px / 12px / 9999px 圆角令牌。",
+        "section": "shapes"
       },
       {
-        "name": "Evidence Alignment",
-        "body": "价格、容量、分数、延迟启用等宽数字；文章表头与内容均左对齐。",
-        "section": "typography"
-      },
-      {
-        "name": "Quiet Reading",
-        "body": "以表面色差和边框组织内容；列表、标签筛选和说明区保持平整，阴影用于确有层级需求的内容面与浮层。",
+        "name": "Zero Displacement Motion",
+        "body": "禁止在 hover / focus / active 时触发 translate 或 scale 位移，禁止动态改变 box-shadow。",
         "section": "elevation"
+      },
+      {
+        "name": "Solid-Surface First-Screen Partner Cards",
+        "body": "广告位全部采用纯色表面与统一 1px 细边框（严禁渐变色背景与左侧加粗强调边），首页采用首屏非轮播赞助商卡片组，与博客阅读流协调共存。",
+        "section": "components"
       }
     ],
     "dos": [
-      "Do 使用现有语义色和三档主题切换，切换后保留阅读位置。",
-      "Do 让手机内容自然换行，宽表局部滚动，目录按需展开。",
-      "Do 保留国旗、真实日期、必要的缺图和空状态，以及清楚的赞助披露。",
-      "Do 复用可见焦点、键盘操作和组件的减少动效行为。"
+      "Do 保持三档主题切换与阅读位置不跳动。",
+      "Do 使用统一圆角（6px/8px/12px/9999px）与标准控件尺寸（sm/md/lg）。",
+      "Do 让 hover 与 focus 过渡平滑，不产生元素位移或阴影变化。",
+      "Do 为中英文混排正文与技术图表提供舒适的行宽、行高与画框对比。"
     ],
     "donts": [
-      "Don’t 因“轻松亲近”添加虚构测试、夸张结论或无意义的小字。",
-      "Don’t 恢复搜索、展开全部、常驻地图测评侧栏或黑底写实地球。",
-      "Don’t 用缩小正文或删除证据的方法压缩手机布局。",
-      "Don’t 将首页广告、文章广告和 Sponsors 的不同视觉角色合并成一种展示。"
+      "Don't 在交互状态使用 transform: translateY/translateX 或动态改变阴影。",
+      "Don't 使用非标圆角（如 7px、9px、10px、14px、18px、24px）。",
+      "Don't 在浅色页面中使用大面积刺眼深色背景块作为广告卡片。",
+      "Don't 破坏已有的 URL、测试数据、集合驱动渲染与无障碍契约。"
     ]
   }
 }
