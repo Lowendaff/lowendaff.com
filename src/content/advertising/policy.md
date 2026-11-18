@@ -33,8 +33,6 @@ benefits:
     description: 推广文章在首页或列表页置顶展示。
   - title: Telegram 频道置顶
     description: 优惠信息在频道置顶；如无档期冲突，按约定持续保留。
-  - title: Sponsors 展示
-    description: 所有赞助商均可在文章侧栏 Sponsors 区域展示品牌。
 policies:
   - title: 随机排序
     description: 常规广告位按随机顺序展示，让各品牌获得展示机会。

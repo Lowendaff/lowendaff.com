@@ -19,15 +19,9 @@ for (const sponsor of sponsors) {
 {sponsors.length > 0 && (
   <section class="sponsor-wall" aria-labelledby="sponsor-title">
     <div class="sponsor-wall-head">
-      <div class="sponsor-wall-title">
-        <Icon name="star-line" size={14} />
-        <h2 id="sponsor-title">赞助商名录</h2>
-        <span class="sponsor-wall-count mono">{sponsors.length}</span>
-      </div>
-      <a class="sponsor-wall-link" href="/ads/">
-        <span>赞助合作</span>
-        <Icon name="right-line" size={12} />
-      </a>
+      <Icon name="star-line" size={14} />
+      <h2 id="sponsor-title">基础设施赞助名录</h2>
+      <span class="sponsor-wall-count mono">{sponsors.length}</span>
     </div>
     <div class="sponsor-grid" data-sponsor-grid>
       {sponsors.map((s) => (

@@ -6,8 +6,9 @@ import { parse, stringify } from 'yaml';
 const root = new URL('../', import.meta.url);
 const originals = new Map();
 const created = [];
-const postFixtures = [];
+const temporaryContent = [];
 const articlePath = 'src/content/posts/markdown-verification.mdx';
+const sponsorPath = 'src/content/sponsors/markdown-fixture.md';
 const results = [];
 const file = (path) => new URL(path, root);
 const read = (path) => readFile(file(path), 'utf8');
@@ -105,7 +106,7 @@ Synthetic fixture; never published.
   await writeFile(file(articlePath), pack({ data: metadata, body }), {
     flag: 'wx',
   });
-  postFixtures.push(file(articlePath));
+  temporaryContent.push(file(articlePath));
   const reference = file('src/content/posts/markdown-reference.mdx');
   await writeFile(
     reference,
@@ -125,7 +126,23 @@ Synthetic fixture; never published.
     }),
     { flag: 'wx' },
   );
-  postFixtures.push(reference);
+  temporaryContent.push(reference);
+  await writeFile(
+    file(sponsorPath),
+    pack({
+      data: {
+        name: 'MARKDOWN_NEW_SPONSOR',
+        url: 'https://example.com/markdown-sponsor',
+        logo: '00.svg',
+        enabled: true,
+        order: 0,
+        placements: ['article-sidebar'],
+        source: 'Verification fixture',
+      },
+    }),
+    { flag: 'wx' },
+  );
+  temporaryContent.push(file(sponsorPath));
   await reject(
     'src/content/ads/home/dmit.md',
     (data) => {
@@ -141,7 +158,7 @@ Synthetic fixture; never published.
     'HTTP(S)',
   );
   await reject(
-    'src/content/sponsors/00-yxvm.md',
+    sponsorPath,
     (data) => {
       data.logo = 'missing-test.svg';
     },
@@ -202,9 +219,6 @@ Synthetic fixture; never published.
   await edit('src/content/ads/home/gomami.md', (data) => {
     data.enabled = false;
   });
-  await edit('src/content/sponsors/00-yxvm.md', (data) => {
-    data.enabled = false;
-  });
   await edit('src/content/advertising/policy.md', (data) => {
     data.placements[0].price = 321;
     data.contactLabel = '@markdown-test';
@@ -242,23 +256,6 @@ Synthetic fixture; never published.
     { flag: 'wx' },
   );
   created.push(newAd);
-  const newSponsor = file('src/content/sponsors/markdown-fixture.md');
-  await writeFile(
-    newSponsor,
-    pack({
-      data: {
-        name: 'MARKDOWN_NEW_SPONSOR',
-        url: 'https://example.com/markdown-sponsor',
-        logo: '00.svg',
-        enabled: true,
-        order: 0,
-        placements: ['article-sidebar'],
-        source: 'Verification fixture',
-      },
-    }),
-    { flag: 'wx' },
-  );
-  created.push(newSponsor);
   build();
   const home = await read('dist/index.html'),
     article = await read(
@@ -298,10 +295,7 @@ Synthetic fixture; never published.
   assert(!slot(article, 'article-top').includes('data-ad-brand="GoMami"'));
   assert(slot(article, 'article-bottom').includes('data-ad-brand="GoMami"'));
   assert(slot(article, 'sidebar').includes('data-ad-brand="GoMami"'));
-  assert(
-    article.includes('MARKDOWN_NEW_SPONSOR 赞助商网站') &&
-      !article.includes('YxVM 赞助商网站'),
-  );
+  assert(article.includes('MARKDOWN_NEW_SPONSOR 赞助商网站'));
   assert(policy.includes('321') && policy.includes('@markdown-test'));
   assert(!(await read('dist/rss.xml')).includes('markdown-reference'));
   await assert.rejects(read('dist/reviews/markdown-reference/index.html'), {
@@ -316,6 +310,9 @@ Synthetic fixture; never published.
   for (const path of created.splice(0)) await rm(path);
   await restore();
 
+  await edit(sponsorPath, (data) => {
+    data.enabled = false;
+  });
   for (const name of await readdir(file('src/content/ads/home/')))
     if (name.endsWith('.md'))
       await edit(`src/content/ads/home/${name}`, (data) => {
@@ -326,6 +323,11 @@ Synthetic fixture; never published.
     ((await read('dist/index.html')).match(/data-product-brand=/g) || [])
       .length,
     1,
+  );
+  assert(
+    !(
+      await read('dist/reviews/markdown-verification-20261108/index.html')
+    ).includes('MARKDOWN_NEW_SPONSOR 赞助商网站'),
   );
   await scenario('one');
   await edit('src/content/ads/home/dmit.md', (data) => {
@@ -359,7 +361,7 @@ Synthetic fixture; never published.
 } finally {
   for (const path of created) await rm(path);
   await restore();
-  for (const path of postFixtures) await rm(path);
+  for (const path of temporaryContent) await rm(path);
   build();
 }
 await cp(file('dist/_astro'), '/tmp/lowendaff-content-scenarios/_astro', {
