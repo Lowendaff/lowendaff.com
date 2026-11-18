@@ -25,37 +25,6 @@ const MACRO_REGIONS: Record<string, string> = {
   FR: '欧洲骨干枢纽',
 };
 
-const ROUTE_FAMILIES = [
-  'CN2 GIA',
-  'CN2',
-  '9929',
-  'CMIN2',
-  'CMI',
-  'IIJ',
-  'SoftBank',
-  '软银',
-  'BGP',
-  'RETN',
-  'COGENT',
-  'HE',
-  '163',
-  '4837',
-];
-
-function extractRouteTokens(
-  route: string,
-  tags: string[],
-  title: string,
-): string[] {
-  const hay = `${route} ${tags.join(' ')} ${title}`.toUpperCase();
-  const found = ROUTE_FAMILIES.filter((token) =>
-    hay.includes(token.toUpperCase()),
-  );
-  if (found.length) return found;
-  const trimmed = route.trim();
-  return trimmed && trimmed !== '未分类' ? [trimmed] : [];
-}
-
 export interface RelatedArticleItem {
   id: string;
   href: string;
@@ -65,7 +34,6 @@ export interface RelatedArticleItem {
   merchant: string;
   country: string;
   location: string;
-  route: string;
   reviewTypeLabel: string;
   date: string;
   reasons: string[];
@@ -89,9 +57,6 @@ export function buildRecommendations(
   const p = current.data;
   const currentHref = postPath(current);
   const currentId = p.recordId || current.id;
-  const currentRoutes = new Set(
-    extractRouteTokens(p.route || '', p.tags || [], p.title),
-  );
   const currentTags = new Set(
     [...(p.tags || []), ...(p.categories || [])]
       .map((t) => t.trim())
@@ -117,17 +82,6 @@ export function buildRecommendations(
       if (d.vendor === p.vendor) {
         score += 6;
         reasons.push(`同商家 · ${d.vendor}`);
-      }
-
-      const candidateRoutes = extractRouteTokens(
-        d.route || '',
-        d.tags || [],
-        d.title,
-      );
-      const sharedRoute = candidateRoutes.find((r) => currentRoutes.has(r));
-      if (sharedRoute) {
-        score += 5;
-        reasons.push(`同线路 · ${sharedRoute}`);
       }
 
       if (p.country && d.country === p.country) {
@@ -177,7 +131,6 @@ export function buildRecommendations(
         merchant: d.vendor,
         country: d.country,
         location: d.location,
-        route: d.route || '',
         reviewTypeLabel: reviewTypeLabels[d.reviewType],
         date: d.publishedAt,
         reasons: reasons.slice(0, 2),
@@ -187,7 +140,7 @@ export function buildRecommendations(
     .sort((a, b) => b.score - a.score || b.date.localeCompare(a.date))
     .slice(0, limit);
 
-  // Build inferred topic channels from current article's region, route, vendor & tags
+  // Build inferred topic channels from the article's region, vendor and tags.
   const inferredTopics: InferredTopicChannel[] = [];
   if (p.country) {
     const regionText = countryLabel(p.country);
@@ -206,9 +159,9 @@ export function buildRecommendations(
       .toLowerCase()
       .replace(/\s+/g, '-')}`;
     inferredTopics.push({
-      badge: `空间邻近节点${p.route ? ` · ${p.route}` : ''}`,
-      title: `在 3D 地图定位 ${p.geo.city} 与周边线路`,
-      subtitle: `联动查看当地及跨洋回程节点的地理分布`,
+      badge: '空间邻近节点',
+      title: `在 3D 地图定位 ${p.geo.city}`,
+      subtitle: '查看当地及周边城市的测评记录',
       href: `/map/?place=${encodeURIComponent(placeId)}`,
       icon: 'earth-2-line',
     });
@@ -219,7 +172,7 @@ export function buildRecommendations(
     subtitle:
       p.tags.length > 0
         ? `关联标签：${p.tags.slice(0, 3).join(' / ')}`
-        : `在星云索引中交叉对比不同服务商与线路`,
+        : '查看这家服务商的其他测评',
     href: `/tags/?merchant=${encodeURIComponent(p.vendor)}`,
     icon: 'building-2-line',
   });

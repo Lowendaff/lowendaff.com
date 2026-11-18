@@ -45,7 +45,7 @@ const records = getRecords(await getCollection('posts'));
 
     <div class="home-workspace">
       <div class="home-reading-column">
-        <RecordList records={records} prependCarousel />
+        <RecordList records={records} prependCarousel showVerdict={false} />
       </div>
 
       <aside class="home-partner-rail" aria-label="赞助商与订阅动态">

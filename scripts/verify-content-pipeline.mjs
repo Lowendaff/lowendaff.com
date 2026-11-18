@@ -21,7 +21,6 @@ geo: { city: Fixture, latitude: 34.05, longitude: -118.24 }
 publishedAt: '2026-11-01'
 updatedAt: '2026-11-09'
 testedAt: '2026-11-01'
-route: 'Fixture'
 draft: ${draft}
 ---
 import VpsSpecCard from '../../components/mdx/VpsSpecCard.astro';

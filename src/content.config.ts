@@ -161,7 +161,6 @@ const posts = defineCollection({
       publishedAt: z.iso.date(),
       updatedAt: z.iso.date().optional(),
       testedAt: z.string().optional(),
-      route: z.string(),
       price: z.string().optional(),
       purchaseUrl: httpUrl.optional(),
       affiliate: z.boolean().default(false),

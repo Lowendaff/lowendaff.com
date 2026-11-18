@@ -666,10 +666,6 @@
   gap: 5px;
   min-width: 0;
 }
-.related-foot-place b {
-  font-weight: 500;
-  color: var(--text-secondary);
-}
 .related-review-card,
 .related-discovery-card {
   display: flex;

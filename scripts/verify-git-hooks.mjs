@@ -29,7 +29,6 @@ vendor: Fixture
 country: US
 location: Test location
 geo: { city: Fixture, latitude: 34.05, longitude: -118.24 }
-route: Test route
 publishedAt: '2026-11-09'
 testedAt: '2026-11-09'
 affiliate: false

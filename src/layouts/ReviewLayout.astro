@@ -112,17 +112,12 @@ const chapterIcon: Record<string, string> = {
             <div class="notion-prop-row">
               <dt>
                 <Icon name="location-line" size={15} />
-                <span>地区与线路</span>
+                <span>地区</span>
               </dt>
               <dd>
                 <span class="notion-prop-inline">
                   <Flag code={p.country} size={14} />
                   <span>{p.location}</span>
-                  {p.route && (
-                    <span class="journal-route-pill" translate="no">
-                      {p.route}
-                    </span>
-                  )}
                 </span>
               </dd>
             </div>
@@ -290,7 +285,7 @@ const chapterIcon: Record<string, string> = {
             </a>
           </div>
 
-          {(p.location || p.route || p.tags.length > 0) && (
+          {(p.location || p.tags.length > 0) && (
             <div class="related-signal-pills" aria-label="本文关联特征">
               <span class="subtle-label">匹配特征：</span>
               {p.location && (
@@ -306,24 +301,12 @@ const chapterIcon: Record<string, string> = {
                   <span>{p.location}</span>
                 </a>
               )}
-              {p.route && (
+              {p.tags.map((tag) => (
                 <a class="tag" href="/tags/">
-                  <Icon name="transfer-3-line" size={12} />
-                  <span translate="no">{p.route}</span>
+                  <Icon name="tag-line" size={12} />
+                  <span>{tag}</span>
                 </a>
-              )}
-              {p.tags
-                .filter(
-                  (tag) =>
-                    tag.trim().toUpperCase() !==
-                    (p.route || '').trim().toUpperCase(),
-                )
-                .map((tag) => (
-                  <a class="tag" href="/tags/">
-                    <Icon name="tag-line" size={12} />
-                    <span>{tag}</span>
-                  </a>
-                ))}
+              ))}
             </div>
           )}
 
@@ -352,9 +335,6 @@ const chapterIcon: Record<string, string> = {
                     <span class="related-foot-place">
                       <Flag code={item.country} size={13} />
                       <span>{item.location}</span>
-                      {item.route && item.route !== '未分类' && (
-                        <b translate="no">· {item.route}</b>
-                      )}
                     </span>
                     <time class="mono" datetime={item.date}>
                       {item.date}

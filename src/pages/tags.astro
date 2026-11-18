@@ -170,7 +170,12 @@ const maxCount = Math.max(
         </section>
       </>
     )}
-    <RecordList filters showTypeFilter={false} records={records} />
+    <RecordList
+      filters
+      showTypeFilter={false}
+      showVerdict={false}
+      records={records}
+    />
   </div>
 </BaseLayout>
 <script>

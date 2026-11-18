@@ -34,7 +34,6 @@ export function getRecords(posts: CollectionEntry<'posts'>[]) {
       title: data.title,
       description: data.description || '',
       verdict: data.verdict || '',
-      route: data.route || '',
       reviewType: data.reviewType,
       reviewTypeLabel: reviewTypeLabels[data.reviewType],
       location: data.location,

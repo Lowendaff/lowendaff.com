@@ -65,19 +65,6 @@
   font-weight: 500;
   color: var(--text-secondary);
 }
-.journal-route-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 22px;
-  padding: 2px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--subtle);
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-}
 .journal-date {
   display: inline-flex;
   align-items: center;

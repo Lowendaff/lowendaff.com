@@ -66,7 +66,6 @@ try {
     location: 'Fixture',
     geo: { city: 'Fixture', latitude: 34.05, longitude: -118.24 },
     publishedAt: '2026-11-08',
-    route: 'Fixture',
     specs: [{ label: 'Fixture CPU', value: '1 vCPU' }],
     compatibility: {
       tables: { '路由追踪 / 中国境内目标 / 北京电信 (IPv4)': 'fixture-route' },
@@ -120,7 +119,6 @@ Synthetic fixture; never published.
         location: 'Fixture',
         geo: { city: 'Fixture', latitude: 34.05, longitude: -118.24 },
         publishedAt: '2026-11-08',
-        route: 'Fixture',
         archiveSnapshot: 'https://example.com/archive-fixture',
       },
     }),

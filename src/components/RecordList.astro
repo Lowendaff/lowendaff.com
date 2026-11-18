@@ -7,12 +7,14 @@ import { getRecords } from '../lib/records';
 interface Props {
   filters?: boolean;
   showTypeFilter?: boolean;
+  showVerdict?: boolean;
   prependCarousel?: boolean;
   records: ReturnType<typeof getRecords>;
 }
 const {
   filters = false,
   showTypeFilter = true,
+  showVerdict = true,
   prependCarousel = false,
   records,
 } = Astro.props;
@@ -77,11 +79,6 @@ const cleanTitle = (raw: string) =>
             <Flag code={post.country} size={14} />
             <span>{post.location}</span>
           </span>
-          {post.route && post.route !== '未分类' && (
-            <span class="journal-route-pill" translate="no">
-              {post.route}
-            </span>
-          )}
           <span class="review-type-label" translate="no">
             {post.reviewTypeLabel}
           </span>
@@ -96,7 +93,7 @@ const cleanTitle = (raw: string) =>
           {post.description && (
             <p class="journal-excerpt">{post.description}</p>
           )}
-          {post.verdict && (
+          {showVerdict && post.verdict && (
             <p class="journal-verdict">
               <Icon name="book-2-line" size={14} />
               <span>{post.verdict}</span>

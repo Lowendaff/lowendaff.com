@@ -89,7 +89,6 @@ country: US
 location: 美国
 publishedAt: '2026-11-07'
 testedAt: '2026-11-07'
-route: 未分类
 draft: false
 specs:
   - label: 实测核心

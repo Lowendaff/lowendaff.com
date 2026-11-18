@@ -25,7 +25,6 @@ country: '${country}'
 location: '验证机房'
 geo: { city: Fixture, latitude: 34.05, longitude: -118.24 }
 publishedAt: '2026-11-08'
-route: '未分类'
 draft: ${draft}
 ---
 
