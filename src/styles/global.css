@@ -672,6 +672,15 @@ table,
   color: var(--muted);
   margin-top: 6px;
 }
+.footer-designer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+}
+.footer-designer img {
+  border-radius: 50%;
+}
 .footer-right {
   text-align: right;
 }
