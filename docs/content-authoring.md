@@ -2,7 +2,7 @@
 
 ## 数据归属
 
-所有真实测评数据放在 `src/content/posts/*.mdx`。广告按位置放在 `src/content/ads/` 的四个子目录，Sponsors 放在 `src/content/sponsors/*.md`；页面和组件只读取集合、排版和处理交互。不要修改测试夹具或仓库外归档的旧 JSON 来更新页面。
+所有真实测评数据放在 `src/content/posts/*.mdx`。广告按位置放在 `src/content/ads/`，Sponsors 放在 `src/content/sponsors/*.md`；页面和组件只读取集合、排版和处理交互。不要修改测试夹具或仓库外归档的旧 JSON 来更新页面。
 
 Astro 在开发时监听内容，在构建时生成静态页面。Markdown 改动不是线上实时更新；部署后需重新运行构建并发布。无需修改 `.astro` 商家名单、数量或分组。
 
@@ -20,11 +20,12 @@ Astro 在开发时监听内容，在构建时生成静态页面。Markdown 改�
 
 ## 广告
 
-四个位置分别维护，目录决定投放位置：
+五个位置分别维护，目录决定投放位置：
 
 | 位置 | Markdown 目录 | 集合 / 组件 |
 | --- | --- | --- |
-| 首页 | `src/content/ads/home/` | `homeAds` / `HomeAds.astro` |
+| 首页测试记录轮播 | `src/content/ads/home/*.md` | `homeAds` / `HomeFeedCarousel.astro` |
+| 首页「赞助商精选」 | `src/content/ads/home/featured/*.md` | `homeFeaturedAds` / `HomeAds.astro` |
 | 文章头 | `src/content/ads/article-top/` | `articleTopAds` / `ArticleTopAds.astro` |
 | 文章尾 | `src/content/ads/article-bottom/` | `articleBottomAds` / `ArticleBottomAds.astro` |
 | 文章侧边栏 | `src/content/ads/article-sidebar/` | `articleSidebarAds` / `ArticleSidebarAds.astro` |
@@ -34,10 +35,10 @@ Astro 在开发时监听内容，在构建时生成静态页面。Markdown 改�
 ```yaml
 ---
 name: Example Cloud
-title: 探索云服务器方案
-description: 查看地区、规格与产品信息。
+title: Example Cloud 东京云服务器
+description: 东京系列走国际线路，适合主要面向日本本地用户的网站。
 url: https://example.com/products
-tags: [云服务器, 多地区]
+tags: [东京, 国际线路]
 theme: indigo
 enabled: true
 order: 10
@@ -50,7 +51,9 @@ source: 商家素材来源或核验记录
 - `enabled: false` 或删除文件只移除该位置的广告，其他位置不受影响。
 - `theme` 可选 `indigo`、`orange`、`teal`、`slate`，对应现有主题样式。
 - `order` 只控制无 JavaScript 时的基础顺序，不提供优先曝光。每个文章位置独立随机排列；首页先随机，再连续循环。
-- 首页零家时不渲染该区；一家时显示静态卡片；多家时显示两侧按钮并自动轮播。减少动态效果模式不自动播放。
+- 首页轮播和精选分别判断是否有广告。轮播仅有一家时静态展示，多家时可以自动或手动切换；精选卡片全部列出。两个位置互不补位。
+- 所有广告先介绍商家和产品线。标题写「商家名 + 系列或服务」，正文说明适合谁，以及地区、线路、接入方式等有助于选择的区别。描述服务对象时统一称为「用户」。同一商家投放多处时，每处选不同的产品线或地区。
+- 标题、正文和标签都不列具体套餐、处理器型号、核数、内存、磁盘、端口速率、流量配额或促销价。CN2、IPv6 等线路与协议名称可以保留；KVM、重装系统等通用功能不单独当卖点。推广链接保留在 `url`，商家产品页或官方公告写入 `source`。
 - 商家、标题、简介、链接与标签均来自 Frontmatter；Markdown 正文可写维护备注，目前不向页面展示。
 
 ## Sponsors

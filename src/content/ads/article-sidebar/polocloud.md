@@ -2,12 +2,14 @@
 name: PoloCloud
 logo: /brand/polocloud-light.png
 logoDark: /brand/polocloud-dark.png
-title: 为下一项计划，选择云服务
-description: 查看可选方案、产品规格与服务详情。
+title: PoloCloud 澳门 CTM 云服务器
+description: 澳门 VDS 走澳门电讯线路，采用共享动态 IPv4。需要对外开放服务时，可以自行选择映射端口。
 url: https://polocloud.net/
-tags: []
+tags:
+  - 澳门 CTM
+  - 端口映射
 theme: slate
 enabled: true
 order: 3
-source: https://s41.ax1x.com/2025/12/28/pZY6esg.webp
+source: https://polocloud.net/index.php?rp=/store/ctm-vds
 ---

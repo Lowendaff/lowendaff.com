@@ -2,15 +2,14 @@
 name: GoMami
 logo: /brand/gomami-light.png
 logoDark: /brand/gomami-dark.png
-title: 亚太高性能 VPS
-description: 香港、日本、新加坡节点，兼顾线路选择与 DDoS 防护。
+title: GoMami 日本 Pulse 云服务器
+description: 想把博客或应用放在日本，又有不少用户在中国大陆，可以选 Pulse。它提供面向电信、联通和移动的优化线路。
 url: https://gomami.io/aff.php?aff=192
 tags:
-  - AMD EPYC 9575F
-  - CN2 / 9929 / CMIN2
-  - 600G 防护
+  - 日本
+  - 三网优化
 theme: orange
 enabled: true
 order: 1
-source: gomami-ad.html
+source: https://gomami.io/store/jpn-pulse
 ---

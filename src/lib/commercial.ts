@@ -1,6 +1,10 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 export type AdCollection =
-  'homeAds' | 'articleTopAds' | 'articleBottomAds' | 'articleSidebarAds';
+  | 'homeAds'
+  | 'homeFeaturedAds'
+  | 'articleTopAds'
+  | 'articleBottomAds'
+  | 'articleSidebarAds';
 export type Ad = CollectionEntry<AdCollection>['data'] & { id: string };
 export async function getAds(collection: AdCollection): Promise<Ad[]> {
   return (await getCollection(collection, ({ data }) => data.enabled))

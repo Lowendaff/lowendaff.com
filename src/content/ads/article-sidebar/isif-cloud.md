@@ -2,14 +2,14 @@
 name: ISIF Cloud
 logo: /brand/isif-light.png
 logoDark: /brand/isif-dark.png
-title: 探索云服务器方案
-description: 前往 ISIF Cloud，了解可选地区、实例规格与产品方案。
+title: ISIF Cloud 机房互联专线
+description: 这条点对点以太网专线可以把两个机房接入同一个 VLAN，适合需要跨机房内网互通的团队。
 url: https://cloud.isif.net/login?affiliation_code=lowendaff
 tags:
-  - 云服务器
-  - 方案与配置
+  - 机房互联
+  - 二层以太网
 theme: teal
 enabled: true
 order: 2
-source: Original sponsor link; no unverified specifications
+source: https://cloud.isif.net/transit
 ---

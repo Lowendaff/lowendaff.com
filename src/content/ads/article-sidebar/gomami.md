@@ -2,15 +2,14 @@
 name: GoMami
 logo: /brand/gomami-light.png
 logoDark: /brand/gomami-dark.png
-title: 亚太高性能 VPS
-description: 香港、日本、新加坡节点，兼顾线路选择与 DDoS 防护。
+title: GoMami 法兰克福 Pulse 云服务器
+description: 法兰克福是 Pulse 在欧洲的节点，为需要把服务放在德国、同时照顾大陆访问的团队提供优化线路。
 url: https://gomami.io/aff.php?aff=192
 tags:
-  - AMD EPYC 9575F
-  - CN2 / 9929 / CMIN2
-  - 600G 防护
+  - 法兰克福
+  - 大陆优化
 theme: orange
 enabled: true
 order: 1
-source: gomami-ad.html
+source: https://gomami.io/store/fra-pulse
 ---

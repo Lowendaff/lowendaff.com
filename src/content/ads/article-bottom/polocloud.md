@@ -2,12 +2,14 @@
 name: PoloCloud
 logo: /brand/polocloud-light.png
 logoDark: /brand/polocloud-dark.png
-title: 为下一项计划，选择云服务
-description: 查看可选方案、产品规格与服务详情。
+title: PoloCloud 独立服务器
+description: 租用整机时可以继续用自己的 IP 段，请 PoloCloud 代为广播；想自己管理路由，也可付费接入 BGP。
 url: https://polocloud.net/
-tags: []
+tags:
+  - 独立服务器
+  - IP 代播
 theme: slate
 enabled: true
 order: 3
-source: https://s41.ax1x.com/2025/12/28/pZY6esg.webp
+source: https://polocloud.net/index.php?rp=/store/dedicated-server
 ---

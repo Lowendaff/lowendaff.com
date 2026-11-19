@@ -214,7 +214,10 @@ Synthetic fixture; never published.
   await edit('src/content/ads/home/dmit.md', (data) => {
     data.enabled = false;
   });
-  await edit('src/content/ads/home/gomami.md', (data) => {
+  await edit('src/content/ads/home/featured/dmit.md', (data) => {
+    data.title = 'FEATURED_ONLY_TITLE';
+  });
+  await edit('src/content/ads/home/featured/gomami.md', (data) => {
     data.enabled = false;
   });
   await edit('src/content/advertising/policy.md', (data) => {
@@ -269,10 +272,20 @@ Synthetic fixture; never published.
     home.includes('MARKDOWN_NEW_AD') && !article.includes('MARKDOWN_NEW_AD'),
   );
   assert(
-    !home.includes('data-product-brand="DMIT"') &&
+    !home.includes('data-feed-brand="DMIT"') &&
+      home.includes('data-product-brand="DMIT"') &&
       article.includes('data-ad-brand="DMIT"'),
   );
+  assert(home.includes('data-feed-brand="GoMami"'));
   assert(!home.includes('data-product-brand="GoMami"'));
+  assert(home.includes('data-feed-brand="MARKDOWN_NEW_AD"'));
+  assert(!home.includes('data-product-brand="MARKDOWN_NEW_AD"'));
+  const carousel = home.match(
+    /<article[^>]*data-feed-carousel[^>]*>[\s\S]*?<\/article>/,
+  )?.[0];
+  assert(carousel?.includes('MARKDOWN_AD_TITLE'));
+  assert(!carousel.includes('FEATURED_ONLY_TITLE'));
+  assert(home.includes('FEATURED_ONLY_TITLE'));
   const slot = (html, name) =>
     html.match(
       new RegExp(`<aside[^>]*data-ad-slot="${name}"[^>]*>[\\s\\S]*?</aside>`),
@@ -311,11 +324,12 @@ Synthetic fixture; never published.
   await edit(sponsorPath, (data) => {
     data.enabled = false;
   });
-  for (const name of await readdir(file('src/content/ads/home/')))
-    if (name.endsWith('.md'))
-      await edit(`src/content/ads/home/${name}`, (data) => {
-        data.enabled = name === 'dmit.md';
-      });
+  for (const directory of ['home', 'home/featured'])
+    for (const name of await readdir(file(`src/content/ads/${directory}/`)))
+      if (name.endsWith('.md'))
+        await edit(`src/content/ads/${directory}/${name}`, (data) => {
+          data.enabled = name === 'dmit.md';
+        });
   build();
   assert.equal(
     ((await read('dist/index.html')).match(/data-product-brand=/g) || [])
@@ -331,7 +345,12 @@ Synthetic fixture; never published.
   await edit('src/content/ads/home/dmit.md', (data) => {
     data.enabled = false;
   });
-  for (const directory of ['article-top', 'article-bottom', 'article-sidebar'])
+  for (const directory of [
+    'home/featured',
+    'article-top',
+    'article-bottom',
+    'article-sidebar',
+  ])
     for (const name of await readdir(file(`src/content/ads/${directory}/`)))
       if (name.endsWith('.md'))
         await edit(`src/content/ads/${directory}/${name}`, (data) => {
@@ -344,6 +363,11 @@ Synthetic fixture; never published.
       });
   build();
   assert(!(await read('dist/index.html')).includes('class="sponsor-products"'));
+  assert(
+    !/<article\b[^>]*\bdata-feed-carousel\b/.test(
+      await read('dist/index.html'),
+    ),
+  );
   const emptyArticle = await read(
     'dist/reviews/markdown-verification-20261108/index.html',
   );

@@ -257,6 +257,10 @@ const homeAds = defineCollection({
   loader: glob({ base: './src/content/ads/home', pattern: '*.md' }),
   schema: adSchema,
 });
+const homeFeaturedAds = defineCollection({
+  loader: glob({ base: './src/content/ads/home/featured', pattern: '*.md' }),
+  schema: adSchema,
+});
 const articleTopAds = defineCollection({
   loader: glob({ base: './src/content/ads/article-top', pattern: '*.md' }),
   schema: adSchema,
@@ -317,6 +321,7 @@ const advertising = defineCollection({
 export const collections = {
   posts,
   homeAds,
+  homeFeaturedAds,
   articleTopAds,
   articleBottomAds,
   articleSidebarAds,

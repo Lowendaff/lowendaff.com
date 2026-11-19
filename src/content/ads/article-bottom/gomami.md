@@ -2,15 +2,14 @@
 name: GoMami
 logo: /brand/gomami-light.png
 logoDark: /brand/gomami-dark.png
-title: 亚太高性能 VPS
-description: 香港、日本、新加坡节点，兼顾线路选择与 DDoS 防护。
+title: GoMami DDoS 防护
+description: 云服务器自带基础防护。经常遭遇流量攻击的站点，可以另行选购高级清洗服务。
 url: https://gomami.io/aff.php?aff=192
 tags:
-  - AMD EPYC 9575F
-  - CN2 / 9929 / CMIN2
-  - 600G 防护
+  - 流量清洗
+  - 可选服务
 theme: orange
 enabled: true
 order: 1
-source: gomami-ad.html
+source: https://docs.gomami.io/faq/network/
 ---

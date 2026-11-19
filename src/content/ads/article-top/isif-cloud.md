@@ -2,14 +2,14 @@
 name: ISIF Cloud
 logo: /brand/isif-light.png
 logoDark: /brand/isif-dark.png
-title: 探索云服务器方案
-description: 前往 ISIF Cloud，了解可选地区、实例规格与产品方案。
+title: ISIF Cloud IP Transit
+description: 已有 ASN 的网络可以通过 BGP 接入 ISIF 上游；没有 ASN，也可以选择静态路由接入。
 url: https://cloud.isif.net/login?affiliation_code=lowendaff
 tags:
-  - 云服务器
-  - 方案与配置
+  - IP Transit
+  - BGP
 theme: teal
 enabled: true
 order: 2
-source: Original sponsor link; no unverified specifications
+source: https://cloud.isif.net/transit
 ---

@@ -2,14 +2,14 @@
 name: Evoxt
 logo: /brand/evoxt-light.png
 logoDark: /brand/evoxt-dark.png
-title: 高频 CPU 云服务器
-description: 亚太、欧洲与美洲多地可选，探索适合业务的实例配置。
+title: Evoxt 高频云服务器
+description: Evoxt 的云服务器侧重单核性能。想把应用放在香港或大阪，可以选 Premium Network 系列。
 tags:
-  - 高频 CPU
-  - 多地区
+  - 高频 VPS
+  - 异地备份
 theme: slate
 url: https://console.evoxt.com/aff.php?aff=160
-source: tests/fixtures/wordpress/home.html:1969 (carousel) and :186 (sponsor affiliate URL)
+source: https://evoxt.com/pricing/
 enabled: true
 order: 7
 ---

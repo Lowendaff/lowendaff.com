@@ -22,6 +22,7 @@ npm run dev
 | --- | --- |
 | 测评、目录元数据、跑分、路由 | `src/content/posts/*.mdx` |
 | 首页轮播广告 | `src/content/ads/home/*.md` |
+| 首页「赞助商精选」卡片 | `src/content/ads/home/featured/*.md` |
 | 文章头部广告 | `src/content/ads/article-top/*.md` |
 | 文章尾部广告 | `src/content/ads/article-bottom/*.md` |
 | 文章侧边栏广告 | `src/content/ads/article-sidebar/*.md` |
@@ -79,7 +80,7 @@ npm run verify:templates
 - `src/layouts/`：站点外壳与文章布局。
 - `src/components/mdx/`：参数卡、终端、表格与优惠组件。
 - `src/components/archive/`：归档正文、路由选择器、BGP 与 Sponsors。
-- `src/components/ads/`：四个独立广告入口及共享文章卡片渲染器。
+- `src/components/ads/`：首页轮播、首页精选及三个文章广告位的组件。
 - `src/lib/`：集合查询和通用视图转换，不保存商家或测评数据。
 - `src/styles/`：Tokyo Night Day / Tokyo Night 语义主题；跟随系统及手动切换。
 - `public/`：站点头像；Sponsors SVG 在 `src/assets/sponsors/`。

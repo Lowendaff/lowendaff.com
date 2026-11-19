@@ -2,7 +2,7 @@
 import { getAds } from '../../lib/commercial';
 import BrandMark from './BrandMark.astro';
 import Icon from '../Icon.astro';
-const products = await getAds('homeAds');
+const products = await getAds('homeFeaturedAds');
 ---
 
 {products.length > 0 && (

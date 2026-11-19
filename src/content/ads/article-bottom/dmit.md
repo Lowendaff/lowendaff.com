@@ -2,15 +2,14 @@
 name: DMIT
 logo: /brand/dmit.png
 logoDark: /brand/dmit-dark.png
-title: 面向全球的云计算
-description: EPYC 9005 处理器与 NVMe CEPH 存储，连接全球业务。
+title: DMIT 服务器托管
+description: 已有自己的服务器，可以把设备寄到 DMIT 机房，由现场工程师上架。单机和整柜都能托管。
 url: https://www.dmit.io/aff.php?aff=2679
 tags:
-  - EPYC 9005
-  - NVMe CEPH
-  - 全球连接
+  - 单机托管
+  - 整柜托管
 theme: indigo
 enabled: true
 order: 0
-source: DMIT_AD_588x150.png
+source: https://www.dmit.io/pages/colocation
 ---

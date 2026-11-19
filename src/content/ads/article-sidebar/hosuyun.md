@@ -1,11 +1,15 @@
 ---
-name: 弘速运
-title: 为下一项计划，选择云服务
-description: 查看可选方案、产品规格与服务详情。
+name: 弘速云
+logo: /brand/hosuyun-light.png
+logoDark: /brand/hosuyun-dark.png
+title: 弘速云洛杉矶云服务器
+description: 弘速云按回国线路划分产品：以大陆电信用户为主，可看 CN2 GIA 系列；偏重联通访问，则有 9929 系列。
 url: https://www.hosuyun.cn/
-tags: []
+tags:
+  - 电信 CN2 GIA
+  - 联通 9929
 theme: teal
 enabled: true
 order: 6
-source: https://lowendaff.com/wp-content/uploads/2026/08/弘速云-01-scaled.png
+source: https://www.hosuyun.cn/client/products?fid=16&gid=408
 ---

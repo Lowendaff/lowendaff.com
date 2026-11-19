@@ -2,15 +2,14 @@
 name: GoMami
 logo: /brand/gomami-light.png
 logoDark: /brand/gomami-dark.png
-title: 亚太高性能 VPS
-description: 香港、日本、新加坡节点，兼顾线路选择与 DDoS 防护。
+title: GoMami 香港 Turin 云服务器
+description: Turin 为大陆三家运营商分别选了回程线路：电信走 CN2，联通走 9929，移动走 CMIN2。
 url: https://gomami.io/aff.php?aff=192
 tags:
-  - AMD EPYC 9575F
-  - CN2 / 9929 / CMIN2
-  - 600G 防护
+  - 香港
+  - 三网回程
 theme: orange
 enabled: true
 order: 1
-source: gomami-ad.html
+source: https://gomami.io/store/hkg-turin
 ---
