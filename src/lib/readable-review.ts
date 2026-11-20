@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
 import { toString } from 'mdast-util-to-string';
+import { bilibiliUrls } from './bilibili.ts';
 import type { Root, RootContent, Paragraph } from 'mdast';
 import type { Root as HtmlRoot, Element } from 'hast';
 
@@ -33,6 +34,7 @@ const optionsSchema = z.object({
   images: reviewImagesSchema.optional(),
 });
 type Block =
+  | { type: 'bilibili'; src: string; text?: string; line: number }
   | { type: 'heading'; level: number; text: string; line: number }
   | { type: 'paragraph' | 'quote'; html: string; line: number }
   | {
@@ -228,6 +230,24 @@ export function parseReadableReview(
       });
     } else if (node.type === 'paragraph') {
       checkInline(node);
+      const only = node.children.length === 1 ? node.children[0] : undefined;
+      const source =
+        only?.type === 'link'
+          ? only.url
+          : only?.type === 'text'
+            ? only.value.trim()
+            : undefined;
+      const video = source && bilibiliUrls(source);
+      if (video) {
+        const label = only?.type === 'link' ? toString(only).trim() : '';
+        section.blocks.push({
+          type: 'bilibili',
+          src: video.page,
+          text: label && label !== source ? label : undefined,
+          line,
+        });
+        continue;
+      }
       section.blocks.push({ type: 'paragraph', html: inlineHtml(node), line });
     } else if (
       node.type === 'blockquote' &&

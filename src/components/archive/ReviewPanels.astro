@@ -42,6 +42,12 @@ const { id, label, panels } = Astro.props;
           class="source-section"
           data-source-section={section.title}
         >
+          {(panel.route || section.title === 'BGP 透视') &&
+            section.blocks
+              .filter((block) => block.type === 'bilibili')
+              .map((block) => (
+                <ArchiveBlock block={block} sectionTitle={section.title} />
+              ))}
           {panel.route ? (
             <RouteExplorer
               blocks={section.blocks}

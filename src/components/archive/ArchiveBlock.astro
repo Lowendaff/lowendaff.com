@@ -1,6 +1,7 @@
 ---
 import BenchmarkResultsTable from '../mdx/BenchmarkResultsTable.astro';
 import BenchmarkTerminal from '../mdx/BenchmarkTerminal.astro';
+import BilibiliVideo from '../mdx/BilibiliVideo.astro';
 import Icon from '../Icon.astro';
 import type { ReviewBlock } from '../../lib/review-model';
 interface Props {
@@ -14,6 +15,9 @@ const local =
   (block.src?.startsWith('/archive-assets/') ? block.src : undefined);
 ---
 
+{block.type === 'bilibili' && block.src && (
+  <BilibiliVideo src={block.src} title={block.text} />
+)}
 {block.type === 'table' && (
   <div data-source-table={block.id}>
     <BenchmarkResultsTable

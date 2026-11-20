@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { postsLoader } from './loaders/posts';
+import { bilibiliUrls } from './lib/bilibili';
 import { reviewTypes } from './lib/review-types';
 import { isReviewPermalink } from './lib/review-url';
 import { reviewGeoSchema } from './lib/review-map';
@@ -22,6 +23,17 @@ const table = z
   );
 const origin = { line: z.number().int().nonnegative() };
 const block = z.discriminatedUnion('type', [
+  z.object({
+    ...origin,
+    type: z.literal('bilibili'),
+    src: z
+      .string()
+      .refine(
+        (value) => Boolean(bilibiliUrls(value)),
+        'Expected a Bilibili video',
+      ),
+    text: z.string().optional(),
+  }),
   table.extend({
     ...origin,
     type: z.literal('table'),

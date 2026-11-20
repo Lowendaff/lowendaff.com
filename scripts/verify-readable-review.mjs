@@ -111,3 +111,46 @@ test('new reviews need no invented archive source and keep local image paths', (
     '/archive-assets/example/topology.png',
   );
 });
+
+test('standalone Bilibili links and BV IDs become videos, preserving parts and author labels', () => {
+  const bvid = 'BV1P3411W7dj';
+  const direct = 'https://www.bilibili.com/video/' + bvid + '/';
+  const { blocks } = convert(
+    '## 评\n\n' +
+      direct +
+      '?p=2&spm_id_from=333\n\n[线路实录](https://m.bilibili.com/video/' +
+      bvid +
+      ')\n\n' +
+      bvid,
+  ).sections[0];
+  assert.deepEqual(
+    blocks.map(({ type, src, text }) => [type, src, text]),
+    [
+      ['bilibili', direct + '?p=2', undefined],
+      ['bilibili', direct, '线路实录'],
+      ['bilibili', direct, undefined],
+    ],
+  );
+});
+
+test('prose, code, short links and lookalike URLs never become embeds', () => {
+  const path = '/video/BV1P3411W7dj/';
+  const full = 'https://www.bilibili.com' + path;
+  for (const prose of [
+    '另见 [视频](' + full + ')。',
+    '`' + full + '`',
+    'https://b23.tv/test',
+    'https://www.bilibili.com.example.org' + path,
+    'https://www.bilibili.com@other.example' + path,
+    'https://other@www.bilibili.com' + path,
+    full + '?p=0',
+    full + '?p=1&p=2',
+    full.replace('BV1P3411W7dj', 'invalid'),
+    full.replace('https:', 'http:'),
+  ])
+    assert.equal(
+      convert('## 评\n\n' + prose).sections[0].blocks[0].type,
+      'paragraph',
+      prose,
+    );
+});

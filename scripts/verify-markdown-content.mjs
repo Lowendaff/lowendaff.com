@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile, readdir, mkdir, rm, cp } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { parse, stringify } from 'yaml';
+import { parse as parseHtml } from 'parse5';
 
 const root = new URL('../', import.meta.url);
 const originals = new Map();
@@ -207,6 +208,10 @@ Synthetic fixture; never published.
     (body) => {
       assert(body.includes('888.77') && body.includes('151.11 ms'));
       return body
+        .replace(
+          'Synthetic fixture; never published.',
+          '[Fixture video](https://www.bilibili.com/video/BV1P3411W7dj/)',
+        )
         .replace('888.77', 'MDX_PIPELINE_BENCHMARK')
         .replace('151.11 ms', '987.65 ms');
     },
@@ -267,6 +272,29 @@ Synthetic fixture; never published.
   for (const html of [home, article])
     assert(html.includes('MDX_PIPELINE_TITLE'));
   assert(article.includes('MDX_PIPELINE_BENCHMARK'));
+  // A video must be an immediate reading surface even without client JS.
+  // Template contents deliberately aren't part of this rendered node traversal.
+  const descendants = (node) => [
+    node,
+    ...(node.childNodes ?? []).flatMap(descendants),
+  ];
+  const attr = (node, name) =>
+    node.attrs?.find((item) => item.name === name)?.value;
+  const players = descendants(parseHtml(article)).filter(
+    (node) =>
+      node.tagName === 'iframe' && attr(node, 'title') === 'Fixture video',
+  );
+  assert.equal(players.length, 1);
+  assert.equal(
+    new URL(attr(players[0], 'src')).searchParams.get('autoplay'),
+    '0',
+  );
+  for (let node = players[0]; node; node = node.parentNode) {
+    assert(
+      !['details', 'a'].includes(node.tagName) &&
+        attr(node, 'hidden') === undefined,
+    );
+  }
   for (const html of [article, kit]) assert(html.includes('987.65 ms'));
   assert(
     home.includes('MARKDOWN_NEW_AD') && !article.includes('MARKDOWN_NEW_AD'),
@@ -342,6 +370,11 @@ Synthetic fixture; never published.
     ).includes('MARKDOWN_NEW_SPONSOR 赞助商网站'),
   );
   await scenario('one');
+  assert(
+    !(
+      await read('dist/reviews/markdown-verification-20261108/index.html')
+    ).includes('data-bili-video'),
+  );
   await edit('src/content/ads/home/dmit.md', (data) => {
     data.enabled = false;
   });

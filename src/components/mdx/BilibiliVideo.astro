@@ -1,0 +1,106 @@
+---
+import Icon from '../Icon.astro';
+import { bilibiliUrls } from '../../lib/bilibili';
+interface Props {
+  src: string;
+  title?: string;
+}
+const { src, title } = Astro.props;
+const video = bilibiliUrls(src);
+if (!video)
+  throw new Error(
+    'BilibiliVideo: use a BV ID or a full HTTPS Bilibili video URL',
+  );
+const label = title?.trim() || '哔哩哔哩视频';
+---
+
+<figure class="bili-video" data-bili-video>
+  <figcaption class="bili-bar">
+    <span class="bili-name">
+      <Icon name="bilibili-line" size={23} />
+      <span>
+        {label}
+        {video.part > 1 && <small> · 第 {video.part} P</small>}
+      </span>
+    </span>
+    <a href={video.page} target="_blank" rel="noopener noreferrer">
+      去 B 站看 <Icon name="external-link-line" size={14} />
+    </a>
+  </figcaption>
+  <iframe
+    src={video.player}
+    title={label}
+    loading="lazy"
+    sandbox="allow-scripts allow-same-origin allow-presentation"
+    allow="fullscreen; picture-in-picture"
+    allowfullscreen
+    referrerpolicy="strict-origin-when-cross-origin"
+  ></iframe>
+</figure>
+
+<style>
+  .bili-video {
+    margin: 1.1em 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .bili-bar,
+  .bili-name,
+  .bili-bar a {
+    display: flex;
+    align-items: center;
+  }
+  .bili-bar {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    column-gap: 1rem;
+    padding: 3px 14px;
+  }
+  .bili-name {
+    min-width: 0;
+    gap: 9px;
+    padding-block: 5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .bili-bar :global(svg) {
+    flex: none;
+  }
+  .bili-name :global(svg),
+  .bili-name small,
+  .bili-bar a {
+    color: var(--muted);
+  }
+  .bili-name small {
+    font-size: 0.85em;
+    font-weight: 400;
+  }
+  .bili-bar a {
+    min-height: 44px;
+    gap: 4px;
+    white-space: nowrap;
+    font-size: 14px;
+    text-decoration: none;
+  }
+  .bili-bar a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .bili-bar a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-radius: 3px;
+  }
+  .bili-video iframe {
+    display: block;
+    border: 0;
+    border-top: 1px solid var(--border);
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--subtle);
+  }
+</style>
