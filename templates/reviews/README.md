@@ -1,13 +1,49 @@
-# 测评 MDX 模板
+# 测评生成与 MDX 模板指南
 
-两份模板沿用本站「套餐与购买 → 配置与性能 → 服务解锁 → 网络检测 → 路由追踪」的分组界面，正文使用普通 Markdown，无需 import、JSX、表格 ID 或嵌套 YAML 数据。
+本站测评页面统一沿用「套餐与购买 → 配置与性能 → 服务解锁 → 网络检测 → 路由追踪」结构化阅读视图，正文采用易读 Markdown（`format: review-markdown`），无需手写 import、JSX、表格 ID 或嵌套 YAML。
 
-## 选择与使用
+## 标准生产路径：从 `lowendaff-bench` JSON 一键导入（推荐）
 
-| 模板 | 适用内容 | 特有内容 |
-| --- | --- | --- |
-| `vps.mdx` | VPS / 云服务器测评 | vCPU、虚拟化、资源限制、虚拟磁盘 |
-| `dedicated-server.mdx` | 独立服务器 / 裸金属测评 | CPU 颗数/物理核心/线程、NUMA、内存条、拓扑、SMART、RAID、dmidecode |
+拿到 `lowendaff-bench`（`v0.1.2+`）生成的 JSON 报告后，优先通过官方导入命令生成标准草稿与脱敏 BGP SVG，不手工抄表：
+
+```sh
+npm run review:import -- \
+  --report /path/to/report.json \
+  --meta /path/to/editorial.json \
+  --out src/content/posts/vendor-hk-vps.mdx
+```
+
+`editorial.json` 只填写报告之外的社论与地理信息（也可直接通过 `--vendor`、`--city`、`--lat`、`--lon` 等命令行参数传入）：
+
+```json
+{
+  "vendor": "GoMami",
+  "country": "HK",
+  "location": "香港",
+  "geo": { "city": "香港", "latitude": 22.27832, "longitude": 114.17469 },
+  "publishedAt": "2026-11-25",
+  "testedAt": "2026-11-25 18:06 CST",
+  "tags": ["EPYC", "三网优化"],
+  "affiliate": false
+}
+```
+
+导入器会自动完成：
+
+- 按 `system.platform.kind` 识别 `vps` 或 `dedicated`，生成规范化 `permalink` 并校验全站唯一；
+- 校验并输出脱敏后的 `/archive-assets/<slug>/bgp-ipv4.svg`（及 `bgp-ipv6.svg`），即使输入报告误开 `show_ip: true` 也会自动抹除本机公网地址与前缀；
+- 生成 `%st` / `%si` 交互折线图（`vm-cpu-telemetry` 代码块）、系统运行时间与负载、CPU 八项基准（含 `7-Zip` / `y-cruncher` CPU 利用率）、拆分 `路由宣告 ASN` 与 `RIR 网段登记标识（org）` 的 `IP 质量检测`、拆分的 Cloudflare / Apple CDN 吞吐与延迟表、6 列标准路由表与 `TCP 大包回程路由`；
+- 若未来 `lowendaff-bench` 新增未适配的测试插件或 CPU 子项，导入器会直接报错提醒升级映射，绝不静默漏项；
+- 自动格式化为符合 Prettier 规范的 `.mdx`（默认 `draft: true`），作者只需补充可选的 `## 买` 与 `## 评`，确认无误后将 `draft` 改为 `false`。字段映射细则见 [v0.1.2 报告对照说明](../../docs/changes/bench-report-v0.1.2.md)。
+
+## 手工模板选择与使用
+
+无自动采集报告、需手工整理的测评可从以下模板起步：
+
+| 模板                   | 适用内容                | 标准章节契约（`benchVersion: '0.1.2'`）                                                                                |
+| ---------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `vps.mdx`              | VPS / 云服务器测评      | 系统信息（含 `vm-cpu-telemetry`）、CPU、磁盘、网络信息、IP 质量检测、服务解锁、网络带宽、路由追踪、TCP 大包回程路由    |
+| `dedicated-server.mdx` | 独立服务器 / 裸金属测评 | 系统信息（含硬件/DIMM/NUMA/dmidecode）、CPU、磁盘（含 SMART/fio）、网络信息、IP 质量检测、服务解锁、网络带宽、路由追踪 |
 
 ```sh
 cp templates/reviews/vps.mdx src/content/posts/vendor-location-vps.mdx
@@ -15,157 +51,66 @@ cp templates/reviews/vps.mdx src/content/posts/vendor-location-vps.mdx
 cp templates/reviews/dedicated-server.mdx src/content/posts/vendor-location-dedicated.mdx
 ```
 
-模板放在内容集合之外，不会生成文章。复制后默认 `draft: true`，草稿不会生成可访问的文章页面。替换全部「待填写」、示例链接和日期，删除不适用的段落/测试，运行 `npm run urls:fill -- src/content/posts/你的文件.mdx` 写入地址，再改为 `draft: false` 本地预览；发布前运行 `npm run urls:check && npm run check && npm run build`。不要将占位模板当成真实测评发布。
+模板放在内容集合之外，不会生成文章。复制后默认 `draft: true`。若某台机器客观缺少某标准章节（例如 LXC 容器无 `vm-cpu-telemetry`、目标机未开启 `TCP 大包回程路由`），删除空章节并在 Frontmatter 的 `omittedSections` 显式列出，如 `omittedSections: ['vm-cpu-telemetry']`。`draft: false` 正式发布时，构建门禁会自动拦截残留的 `待填写`、`example.com/replace-` 占位符以及缺失的 `/archive-assets/` 本地配图。
 
 ## 自动生成 URL
 
-URL 规则为 `/reviews/{规范化标题}-{YYYYMMDD}/`，保留中文与末尾 `/`；国旗/Emoji 和标点不进入地址，英文小写、空格变连字符。日期取 `testedAt` 开头的真实测试日期，不能用发布日期或构建时间代替。`testedAt` 例如 `'2026-11-10 23:43 CST'`，也允许只有 `'2026-11-10'`。
+URL 规则为 `/reviews/{规范化标题}-{YYYYMMDD}/`，保留中文与末尾 `/`；国旗/Emoji 和标点不进入地址，英文小写、空格变连字符。日期取 `testedAt` 开头的真实测试日期，不能用发布日期或构建时间代替。`testedAt` 例如 `'2026-11-25 18:06 CST'`，也允许只有 `'2026-11-25'`。
 
 ```sh
 npm run urls:fill -- --dry-run  # 预览所有缺失地址
-npm run urls:fill              # 补全所有缺失地址，写回 Frontmatter
-npm run urls:check             # 只检查，不改文件
+npm run urls:fill               # 补全所有缺失地址，写回 Frontmatter
+npm run urls:check              # 只检查，不改文件
 ```
 
-生成的 `permalink` 是唯一地址来源，文件名仍可使用简短英文名称。重复执行不会改写已有地址。尚未发布的草稿修改标题/日期后，可以删除其 `permalink` 再补全；已发布文章改标题或纠正日期必须保留地址。同日同标题撞名时命令报错、不写文件、不自动添加序号；请用有意义的标题区分两份独立测试。
-
-CI 对新文章检查标题/测试日期与地址一致，对基线中非草稿文章检查地址不可变；草稿也必须有合法、唯一的地址。站点不兼容旧地址，不提供别名或 301；`redirectFrom`、`originalUrl` 会被 CI 和构建拒绝。
+生成的 `permalink` 是唯一地址来源，文件名仍可使用简短英文名称。已发布文章改标题或纠正日期必须保留原地址。站点不兼容旧地址，不提供别名或 301；`redirectFrom`、`originalUrl` 会被 CI 和构建拒绝。
 
 ## 地球地图坐标（必填）
 
-每篇文章（包括草稿）必须填写 `geo.city`、`geo.latitude` 和 `geo.longitude`。模板中的 `null` 必须替换成真实数字，不能直接提交占位模板：
+每篇文章（包括草稿）必须填写 `geo.city`、`geo.latitude` 和 `geo.longitude`。模板中的 `null` 必须替换成真实数字：
 
 ```yaml
 geo:
-  city: 洛杉矶
-  latitude: 34.05
-  longitude: -118.24
+  city: 香港
+  latitude: 22.27832
+  longitude: 114.17469
 ```
 
-纬度范围 `-90..90`，北纬为正；经度范围 `-180..180`，东经为正。不要把经纬度写反或写成字符串，也不要用 `0, 0` 代替未知位置。使用被测机器所在城市的参考坐标，不使用测试端所在地、商家总部或 IP 数据库推测结果；地图不宣称机房精确位置。
-
-`/map/` 根据文章集合自动生成城市标记和测评列表，同国家/地区与同城市的多次测评合并显示；草稿不显示，但缺少坐标同样会使开发构建、提交 Hook 与 CI 失败。每个城市保持一致的名称和参考坐标。
-
-## 元数据
-
-- `reviewType`：`vps` 或 `dedicated`，驱动首页/标签云类型筛选、列表标签、文章头部类型和返回列表链接，也控制标题缺少测评后缀时的类型。新文章明确填写；省略时兼容为 `vps`，其他值会构建报错。不要根据商家名或标题猜产品类型。
-- `title`：建议写完整标题，如「商家 地区 独立服务器测试记录」。页面不会再重复追加 VPS 字样。
-- `country`：两位地区码，如 `US`、`SG`、`HK`、`TW`，未知用 `''`。`location` 写实际机房，GeoIP 误差在正文说明。
-- `publishedAt` 使用引号包裹的 `YYYY-MM-DD`；`testedAt` 可写日期、时段、时区；模板日期必须替换。
-- `updatedAt` 可选，同样使用 `YYYY-MM-DD`，只在正文或测试结论实质更新时填写，不得早于 `publishedAt`。页面更新日期、文章结构化数据和 sitemap 的 `lastmod` 共用此字段；不填写时沿用发布日期，不用构建时间冒充更新。
-- `description` 必填，以一两句话交代产品、测试范围、主要发现或限制，避免泛泛口号；用于搜索摘要、分享卡片和 `llms.txt` 索引。不能填写正文没有支持的结论。
-- `author` 填实际作者；可选 `authorUrl` 指向真实作者介绍页，不虚构资历。可选 `coverImage` 使用站点内 PNG/JPEG/WebP/AVIF 路径或 HTTP(S) 图片地址，`coverAlt` 描述配图内容；只用于分享及文章元数据，不增加正文头图。无实测相关配图时省略，分享卡使用站点头像。
-- `categories`、`tags` 自由填写；商家和国家筛选仍分别读取 `vendor`、`country`。
-- 新文章不用填 `archiveSnapshot`、`evidence`、`compatibility`、`showcase`。这些是历史迁移或展示页选样信息。
-- 有 Affiliate 时设 `affiliate: true`、填写真实 `purchaseUrl`，正文明确披露返佣关系；正文购买链接与 `purchaseUrl` 保持一致。优惠和价格以具体测试/活动日期为准。
-- 广告和 Sponsors 继续在各自 Markdown 集合维护，不塞进文章模板。
+纬度范围 `-90..90`，北纬为正；经度范围 `-180..180`，东经为正。使用被测机器所在城市的参考坐标，不使用测试端所在地、商家总部或 IP 数据库推测结果。
 
 ## 章节与页面映射
 
-二级标题是机器可识别的章节名称；三级、四级标题可以细分工具、设备、测试类别。没有测试可以**整节删除**，页面和目录不生成对应空栏目，不必填 N/A 凑齐模板。保留原始结果中的 N/A、busy、超时、空值，不能代换为零。
+二级标题是机器可识别的章节名称；三级、四级标题细分工具、设备与测试类别：
 
-| Markdown 二级标题 | 页面位置 / 写法 |
-| --- | --- |
-| `买`、`评` | 套餐与购买、作者评价和附件，直接显示 |
-| `系统信息` | 配置与性能 → 系统；独服拓扑、NUMA、dmidecode、内存性能放三级标题下 |
-| `CPU 性能测试` | 配置与性能 → CPU；不同工具/版本用三级标题分开 |
-| `磁盘性能测试` | 配置与性能 → 磁盘；清单、RAID、SMART、fio 分组 |
-| `网络信息`、`BGP 透视` | 配置与性能 → 网络与 IP |
-| `服务解锁测试` | 三级写 IPv4 / IPv6，四级写 AIGC / Multination / 地区类别，自动按检测类别合并 |
-| `网络带宽测试` | 网络检测 → 地区节点 |
-| `Cloudflare Speedtest`、`Apple CDN Speedtest` | 可选工具页签，页面不重复显示这些冗长章节标题 |
-| `路由追踪` | 回程，三级写中国境内目标 / 主要公共服务 / 主要国际网络运营商，四级写节点及协议 |
-| `去程路由追踪` | 去程，三级写来源运营商，四级写来源城市、目标及协议 |
+| Markdown 二级标题                             | 页面位置 / 写法                                                                                                      |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `买`、`评`                                    | 套餐与购买、作者评价和附件，直接显示                                                                                 |
+| `系统信息`                                    | 配置与性能 → 系统；包含实测平台、`vm-cpu-telemetry` 折线图、内存读写/带宽/延迟、NUMA、拓扑图、dmidecode              |
+| `CPU 性能测试`                                | 配置与性能 → CPU；Geekbench、sysbench、UnixBench、7-Zip、PassMark、HPL、y-cruncher、Prime95 按三级标题分组           |
+| `磁盘性能测试`                                | 配置与性能 → 磁盘；磁盘与文件系统、SMART 与健康状态、fio 分组                                                        |
+| `网络信息`、`BGP 透视`                        | 配置与性能 → 网络与 IP                                                                                               |
+| `IP 质量检测`                                 | 配置与性能 → IP 质量；区分 `路由宣告 ASN` 与 `RIR 网段登记标识（org）`，记录多源评分、风险维度、DNSBL 与 25 端口状态 |
+| `服务解锁测试`                                | 三级写 IPv4 / IPv6，四级写 Multination / 地区类别，自动按检测类别合并                                                |
+| `网络带宽测试`                                | 网络检测 → 地区节点（iperf3 国际节点与泰尔国内运营商测速）                                                           |
+| `Cloudflare Speedtest`、`Apple CDN Speedtest` | 网络检测 → 独立工具页签；吞吐/流量与空载/负载延迟拆表展示，保证桌面端零横向溢出                                      |
+| `路由追踪`                                    | 路由追踪 → 回程路由（ICMP）；三级写中国境内目标 / 主要公共服务 / 主要国际网络运营商                                  |
+| `TCP 大包回程路由`                            | 路由追踪 → TCP 大包回程；对照大小包是否走不同回程路径及分片 MTU 限制                                                 |
+| `去程路由追踪`                                | 路由追踪 → 去程路由；无独立外部探针证据时省略                                                                        |
 
-不要新增 `## SMART` 或 `## Geekbench` 这样的顶层章节；分别写成 `磁盘性能测试` 下的 `### SMART`、`CPU 性能测试` 下的 `### Geekbench 6`，避免脱离现有布局。未知二级标题会报错，不会悄悄丢掉正文。一级标题也被当作章节，建议统一使用二级，文章大标题来自 Frontmatter。
+### 标准 6 列路由表契约
 
-## 独服内容取舍
-
-模板参考了 Taipei101、YxVM、MEJIRO 和 Megalayer 的历史独服文章。独服需要把**套餐承诺、实际硬件、健康信息、性能数据**分开：
-
-- CPU 分别记录颗数、物理核心、线程，不能直接把工具报告的逻辑 CPU 数写成物理核数。
-- 内存记录类型、ECC、条数和实际运行频率；硬件拓扑图与 dmidecode 可按实测补充。
-- 多盘 SMART 按设备分别写；NVMe、SATA SSD、HDD 保留各自实际指标，不套用不存在的字段。不凭不明厂商属性推算剩余寿命。
-- 单盘与 RAID 测试区分目标、缓存、文件系统和参数；原始输出可直接用代码围栏，原文不应为迎合表格而丢失。
-- VPS 不要求填写宿主机 SMART、物理插槽或真实磁盘型号；只报告虚拟机可观察和已核验的信息。
-
-## BGP 与硬件图片
-
-把实际文件放入 `public/archive-assets/文章名/`，正文引用站点根路径。图片独占一段；BGP alt 必须包含对应的 IPv4 / IPv6。没有图片就删除对应段或整节，模板不附带虚构配图。
+声明 `benchVersion` 的测评中，`路由追踪`、`TCP 大包回程路由` 与 `去程路由追踪` 下的所有表格必须使用统一 6 列表头（顺序与列名由 Schema 强校验）：
 
 ```markdown
-## BGP 透视
-
-### IPv4
-
-![IPv4 BGP 透视](/archive-assets/vendor-location/bgp-ipv4.png)
-
-### IPv6
-
-![IPv6 BGP 透视](/archive-assets/vendor-location/bgp-ipv6.png)
+| 跳数 | 应答地址（脱敏） | ASN | 运营商 | 位置 | 最小 RTT（ms） |
 ```
 
-拓扑图放到 `## 系统信息` 下：
+- 整跳无应答时在地址格写 `\*`，其余格填 `—` 或留空；连续无应答跳由前端自动合并显示为范围（如 `8–11　*`）。
+- Netflix 等公共服务节点命中 IX 交换中心时，在 `运营商` 列追加 `[Equinix Hong Kong]` 等交换点标注。
 
-```markdown
-### 硬件拓扑
+## BGP 图片、原始输出与哔哩哔哩视频
 
-![CPU、NUMA 与内存拓扑](/archive-assets/vendor-location/topology.png)
-```
-
-历史外部图仍可配合 `images` 字段指定本地副本；只有外链、没有本地副本时，保留现有缺图提示和查看链接。发布前确认本地图片确实存在。
-
-## 原始输出与可选网络工具
-
-支持 `text` 等代码围栏，内容作为文本原样显示，不执行命令，不把里面的 HTML 当页面代码。可放在 CPU、SMART、系统等分组中；路由代码围栏沿用同样的三级、四级分组规则，也可通过运营商和节点选择器查看。
-
-````markdown
-### SMART 原始输出
-
-```text
-在这里粘贴实际 smartctl 输出，不需要转成 YAML 或逐行加引号。
-```
-````
-
-需要 Cloudflare 或 Apple CDN 时，复制下方结构，将二级标题换成对应名称。速度和延迟分别列出，不混成一个成绩；没有执行这项工具就不添加。
-
-```markdown
-## Cloudflare Speedtest
-
-### 速度测试
-
-| 项目 | 结果 |
-| --- | --- |
-| 下载 | 待填写 Mbps |
-| 上传 | 待填写 Mbps |
-
-### 延迟测试
-
-| 项目 | 结果 |
-| --- | --- |
-| 空载延迟 | 待填写 ms |
-| 下载负载延迟 | 待填写 ms |
-| 上传负载延迟 | 待填写 ms |
-```
-
-## 写作边界
-
-为搜索与 AI 引用保留证据：在「评」章节先给简短结论，再写测试条件、适用场景与局限；VPS 的可观察资源与独服的物理硬件分开描述。数值保留单位、工具版本、时间、IPv4/IPv6 与节点地区。官方规格、Looking Glass 或报告链接放在相关段落附近，商家承诺不能写成实测事实。不重复关键词，不为了 SEO 增设空章节或未经测试的 FAQ。
-
-正文支持段落、加粗、行内代码、显式链接、单段引用、表格、独立图片和代码围栏。不支持列表、多段引用、引用式链接或 JSX；复杂原始输出放代码块。表格单元格用纯文本，链接单独放段落，避免链接目标在表格转换中丢失。
-
-表头与每行列数一致；单元格字面竖线写 `\|`，字面星号写 `\*`。保留工具版本、单位、测试条件和时间；多个测试节点用不同四级标题。无关的硬件序列号、UUID、管理地址或口令不要发布。
-
-不加入 IP 质量分析、Generated at、展开全部、对照快照按钮或底部重复优惠。模板不是采集脚本，也不自动恢复文章。
-
-## 在正文插入哔哩哔哩视频（可选）
-
-没有视频时无需填写任何字段，页面不会预留视频位置。VPS、独立服务器模板的写法相同。在已有章节（例如 `## 评`）中单独放一段视频链接，前后留空行。推荐用 Markdown 链接文字说明视频内容：
-
-```markdown
-[海底光缆是如何铺设的？](https://www.bilibili.com/video/BV1P3411W7dj/)
-```
-
-也可只粘贴完整视频 URL 或 BV 号。多分 P 视频保留链接中的 `?p=2` 即可指定分集。放在句子里的链接仍是普通链接；手机分享的 `b23.tv` 短链请先打开，复制跳转后的完整地址。播放器在正文中直接显示，不折叠、不自动播放。播放时点画面即暂停，播放进度保留。桌面可用播放器左下角的播放键开始或继续；「去 B 站看」是独立的外链。
-
-对于手写的原生 MDX（`format: mdx`），可从 `../../components/mdx/BilibiliVideo.astro` 导入 `BilibiliVideo`，然后写 `<BilibiliVideo src="BV1P3411W7dj" title="海底光缆是如何铺设的？" />`。
+- **BGP 与硬件图片**：放入 `public/archive-assets/文章名/`，正文独立一段写 `![IPv4 BGP 透视](/archive-assets/vendor-location/bgp-ipv4.svg)`。
+- **虚拟化遥测图表**：在 `## 系统信息` 下使用 `vm-cpu-telemetry` 代码围栏嵌入 JSON，页面自动通过按需裁剪的 ECharts 渲染支持时间轴拖拽缩放、峰值标注与深浅色实时切换的 `%st` / `%si` 折线图。
+- **原始输出**：支持 `text` 代码围栏原样展示 `dmidecode`、`smartctl` 等终端文本，不执行脚本。
+- **行内哔哩哔哩视频（可选）**：在 `## 评` 等章节独立一行写 `[视频说明](https://www.bilibili.com/video/BV1P3411W7dj/)` 即可渲染播放器。

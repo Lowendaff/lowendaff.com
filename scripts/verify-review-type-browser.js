@@ -93,6 +93,24 @@ async function verifyReviewTypes(page) {
     await p.locator('[data-clear-tags]').click();
     assert((await visible()) === 20, 'Clear all filters');
     assert(await p.locator('[data-clear-tags]').isDisabled(), 'Clear disabled');
+    await choose('vps');
+    assert(
+      !(await p
+        .locator('[data-tag-kind="merchant"][data-tag-value="Fixture Beta"]')
+        .isVisible()),
+      'VPS view hides dedicated-only merchant chip',
+    );
+    assert(
+      !(await p
+        .locator('[data-tag-kind="country"][data-tag-value="JP"]')
+        .isVisible()),
+      'VPS view hides dedicated-only country chip',
+    );
+    assert(
+      (await p.locator('[data-tag-tab-count="merchant"]').textContent()) ===
+        '1',
+      'Merchant tab count reflects active type',
+    );
 
     for (const type of ['vps', 'dedicated']) {
       await p.goto(`${base}/reviews/type-verification-${type}-1-20261108/`);

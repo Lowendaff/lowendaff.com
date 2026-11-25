@@ -3,6 +3,7 @@ from pathlib import Path
 import archive_html as m
 import json
 import argparse
+import re
 import subprocess
 
 arguments = argparse.ArgumentParser()
@@ -19,10 +20,38 @@ def parse(path):
 def rows(table):
     return [[m.compact(cell.text()) for cell in row.children if isinstance(cell, m.Node) and cell.tag in {'th', 'td'}] for row in table.walk() if row.tag == 'tr']
 
+def archive_rows(table):
+    """Expand displayed timeout ranges back to the archive's exact hop cells."""
+    actual = []
+    for tr, cells in zip((n for n in table.walk() if n.tag == 'tr'), rows(table)):
+        if 'data-no-reply' not in tr.attrs:
+            actual.append(cells)
+            continue
+        assert actual[0][0] == '跳数' and len(cells) == len(actual[0])
+        assert cells[1] == '*' and all(value == '—' for value in cells[2:])
+        match = re.fullmatch(r'([1-9]\d*)(?:–([1-9]\d*))?', cells[0])
+        assert match, cells
+        start, end = int(match[1]), int(match[2] or match[1])
+        assert 1 <= start <= end <= 255
+        assert all('colspan' not in n.attrs for n in tr.walk() if n.tag in {'th', 'td'})
+        actual.extend([[str(hop)] + ['–'] * (len(actual[0])-1) for hop in range(start, end+1)])
+    return actual
+
+REMOVED_PATHS = {
+    '100tb': [
+        'dist/reviews/100tb-cn2/index.html',
+        'dist/reviews/100tb-美国洛杉矶-cn2-vps-测试记录-20261007/index.html',
+    ],
+    'panstarcloud': [
+        'dist/reviews/panstarcloud-singapore/index.html',
+    ],
+}
+
 report = {}
 for key, slug in [('100tb', '100tb-cn2'), ('panstarcloud', 'panstarcloud-singapore')]:
     if not (ROOT / f'src/content/posts/{slug}.mdx').exists():
-        assert not (ROOT / f'dist/reviews/{slug}/index.html').exists(), f'{slug}: removed article still built'
+        for rel in REMOVED_PATHS[key]:
+            assert not (ROOT / rel).exists(), f'{slug}: removed article still built at {rel}'
         report[key] = {'status': 'not-applicable', 'reason': 'Historical post removed', 'removedPageAbsent': True}
         continue
     source = parse(ROOT / f'tests/fixtures/wordpress/{key}.html')
@@ -46,7 +75,7 @@ for key, slug in [('100tb', '100tb-cn2'), ('panstarcloud', 'panstarcloud-singapo
         if f'{key}-table-{i}' == excluded_id:
             continue
         expected = rows(table)
-        actual = rows(table_map[f'{key}-table-{i}'])
+        actual = archive_rows(table_map[f'{key}-table-{i}'])
         assert actual == expected, f'{key} table {i} differs'
         cells += sum(len(row) for row in actual)
     prose = [m.compact(n.text()) for n in content.children if isinstance(n, m.Node) and n.tag in {'p', 'blockquote'} and m.compact(n.text())]

@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
@@ -6,7 +8,13 @@ import { bilibiliUrls } from './lib/bilibili';
 import { reviewTypes } from './lib/review-types';
 import { isReviewPermalink } from './lib/review-url';
 import { reviewGeoSchema } from './lib/review-map';
-import { compatibilitySchema, reviewImagesSchema } from './lib/readable-review';
+import {
+  compatibilitySchema,
+  reviewImagesSchema,
+  STANDARD_DEDICATED_SECTIONS,
+  STANDARD_ROUTE_HEADERS,
+  STANDARD_VPS_SECTIONS,
+} from './lib/readable-review';
 
 const httpUrl = z
   .url()
@@ -39,6 +47,15 @@ const block = z.discriminatedUnion('type', [
     type: z.literal('table'),
     id: identifier,
     headings: z.array(z.string()),
+    links: z
+      .record(
+        z.string(),
+        z.object({
+          href: z.string(),
+          sponsored: z.boolean().optional(),
+        }),
+      )
+      .optional(),
   }),
   z.object({ ...origin, type: z.literal('paragraph'), html: z.string() }),
   z.object({ ...origin, type: z.literal('quote'), html: z.string() }),
@@ -107,6 +124,7 @@ const review = z
       '系统信息',
       '网络信息',
       'BGP 透视',
+      'IP 质量检测',
       '服务解锁测试',
       'CPU 性能测试',
       '磁盘性能测试',
@@ -114,6 +132,7 @@ const review = z
       'Cloudflare Speedtest',
       'Apple CDN Speedtest',
       '路由追踪',
+      'TCP 大包回程路由',
       '去程路由追踪',
     ];
     for (const section of value.sections) {
@@ -135,6 +154,8 @@ const posts = defineCollection({
     .object({
       kind: z.enum(['review', 'archive-reference']).default('review'),
       format: z.enum(['mdx', 'review-markdown']).default('mdx'),
+      benchVersion: z.string().trim().min(1).optional(),
+      omittedSections: z.array(z.string().trim().min(1)).default([]),
       reviewType: z.enum(reviewTypes).default('vps'),
       compatibility: compatibilitySchema.optional(),
       images: reviewImagesSchema.optional(),
@@ -246,6 +267,130 @@ const posts = defineCollection({
           code: 'custom',
           message: 'Promo showcases require a price and purchase URL',
         });
+      if (
+        data.format === 'review-markdown' &&
+        data.benchVersion &&
+        data.review
+      ) {
+        const requiredSections =
+          data.reviewType === 'dedicated'
+            ? STANDARD_DEDICATED_SECTIONS
+            : STANDARD_VPS_SECTIONS;
+        const presentSections = new Set(
+          data.review.sections.map((section) => section.title),
+        );
+        const omittedSet = new Set(data.omittedSections);
+        for (const reqTitle of requiredSections) {
+          if (!presentSections.has(reqTitle) && !omittedSet.has(reqTitle)) {
+            ctx.addIssue({
+              code: 'custom',
+              path: ['review'],
+              message: `Missing standard ${data.reviewType} review section "${reqTitle}" (benchVersion ${data.benchVersion}); include the measurement or declare "${reqTitle}" in omittedSections`,
+            });
+          }
+        }
+        const sysSection = data.review.sections.find(
+          (section) => section.title === '系统信息',
+        );
+        const hasVmTelemetry = Boolean(
+          sysSection?.blocks.some(
+            (b) => b.type === 'code' && b.language === 'vm-cpu-telemetry',
+          ),
+        );
+        if (
+          data.reviewType === 'vps' &&
+          sysSection &&
+          !hasVmTelemetry &&
+          !omittedSet.has('vm-cpu-telemetry')
+        ) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['review'],
+            message: `VPS review (benchVersion ${data.benchVersion}) must include a vm-cpu-telemetry chart block in 系统信息, or declare "vm-cpu-telemetry" in omittedSections`,
+          });
+        }
+        for (const item of omittedSet) {
+          if (
+            presentSections.has(item) ||
+            (item === 'vm-cpu-telemetry' && hasVmTelemetry)
+          ) {
+            ctx.addIssue({
+              code: 'custom',
+              path: ['omittedSections'],
+              message: `omittedSections lists "${item}" which is actually present in the review`,
+            });
+          }
+        }
+        const routeSections = new Set([
+          '路由追踪',
+          'TCP 大包回程路由',
+          '去程路由追踪',
+        ]);
+        for (const section of data.review.sections) {
+          if (!routeSections.has(section.title)) continue;
+          for (const b of section.blocks) {
+            if (b.type !== 'table') continue;
+            const matches =
+              b.headers.length === STANDARD_ROUTE_HEADERS.length &&
+              b.headers.every((h, idx) => h === STANDARD_ROUTE_HEADERS[idx]);
+            if (!matches) {
+              ctx.addIssue({
+                code: 'custom',
+                path: ['review'],
+                message: `Route table at line ${b.line} in "${section.title}" must use standard 6-column headers: ${STANDARD_ROUTE_HEADERS.join(' | ')}`,
+              });
+            }
+          }
+        }
+      }
+      if (
+        data.kind === 'review' &&
+        !data.draft &&
+        !data.permalink?.startsWith('/reviews/template-check-')
+      ) {
+        const textPool = [
+          data.title,
+          data.description,
+          data.vendor,
+          data.location,
+          data.geo.city,
+          data.testedAt ?? '',
+          data.purchaseUrl ?? '',
+          JSON.stringify(data.review ?? {}),
+        ].join('\n');
+        if (
+          textPool.includes('待填写') ||
+          textPool.includes('example.com/replace-')
+        ) {
+          ctx.addIssue({
+            code: 'custom',
+            message:
+              'Published review (draft: false) must not contain template placeholders ("待填写" or "example.com/replace-")',
+          });
+        }
+        for (const section of data.review?.sections ?? []) {
+          for (const b of section.blocks) {
+            if (b.type !== 'image') continue;
+            const localPath = b.src.startsWith('/archive-assets/')
+              ? b.src
+              : b.asset?.local;
+            if (localPath?.startsWith('/archive-assets/')) {
+              const diskPath = resolve(
+                process.cwd(),
+                'public',
+                localPath.replace(/^\/+/, ''),
+              );
+              if (!existsSync(diskPath)) {
+                ctx.addIssue({
+                  code: 'custom',
+                  path: ['review'],
+                  message: `Published review references missing local asset "${localPath}"`,
+                });
+              }
+            }
+          }
+        }
+      }
     }),
 });
 // Each placement owns its Markdown files; creatives are never shared implicitly.
@@ -259,7 +404,7 @@ const adSchema = z
     logo: adLogoPath.optional(),
     logoDark: adLogoPath.optional(),
     tags: z.array(z.string()).default([]),
-    theme: z.enum(['indigo', 'orange', 'teal', 'slate']),
+    theme: z.enum(['indigo', 'orange', 'teal', 'slate']).default('slate'),
     enabled: z.boolean().default(true),
     order: z.number().int().default(0),
     source: z.string(),

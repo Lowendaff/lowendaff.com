@@ -24,6 +24,7 @@ if (root) {
   let merchant = '';
   let country = '';
   let page = 1;
+  let cloudSignature = '';
   const valid = (kind: string, value: string) =>
     chips.some(
       (chip) =>
@@ -68,14 +69,6 @@ if (root) {
       .forEach((panel) => {
         panel.hidden = panel.dataset.tagPanel !== category;
       });
-    chips.forEach((chip) => {
-      if (!tabs.length) return;
-      chip.hidden = category !== 'all' && chip.dataset.tagKind !== category;
-    });
-    if (prevCategory !== category) {
-      root.dataset.activeCategory = category;
-      window.dispatchEvent(new CustomEvent('tag-cloud-relayout'));
-    }
     const resultLink = document.querySelector('[data-tag-results]');
     const matches = rows.filter(
       (row) =>
@@ -92,14 +85,31 @@ if (root) {
     rows.forEach((row) => {
       row.hidden = !visible.has(row);
     });
+    let activeMerchantNodes = 0;
+    let activeCountryNodes = 0;
     chips.forEach((chip) => {
-      const selected =
-        chip.dataset.tagValue ===
-        (chip.dataset.tagKind === 'merchant' ? merchant : country);
-      chip.setAttribute('aria-pressed', String(selected));
-      const count = chip.querySelector('[data-tag-count]');
       const kind = chip.dataset.tagKind;
       const value = chip.dataset.tagValue || '';
+      const selected =
+        value === (kind === 'merchant' ? merchant : country) && Boolean(value);
+      chip.setAttribute('aria-pressed', String(selected));
+      const typeMatches = rows.filter(
+        (row) =>
+          (!reviewType || row.dataset.type === reviewType) &&
+          (kind === 'merchant'
+            ? row.dataset.merchant === value
+            : row.dataset.region === value),
+      ).length;
+      if (typeMatches > 0) {
+        if (kind === 'merchant') activeMerchantNodes++;
+        else activeCountryNodes++;
+      }
+      if (tabs.length) {
+        chip.hidden =
+          (category !== 'all' && kind !== category) ||
+          (!selected && typeMatches === 0);
+      }
+      const count = chip.querySelector('[data-tag-count]');
       if (count)
         count.textContent = String(
           rows.filter(
@@ -113,6 +123,33 @@ if (root) {
           ).length,
         );
     });
+    const tabCounts: Record<string, number> = {
+      all: activeMerchantNodes + activeCountryNodes,
+      merchant: activeMerchantNodes,
+      country: activeCountryNodes,
+    };
+    document
+      .querySelectorAll<HTMLElement>('[data-tag-tab-count]')
+      .forEach((badge) => {
+        const key = badge.dataset.tagTabCount ?? '';
+        if (key in tabCounts) badge.textContent = String(tabCounts[key]);
+      });
+    const visibleChips = chips.filter((chip) => !chip.hidden);
+    const cloudEmpty =
+      document.querySelector<HTMLElement>('[data-cloud-empty]');
+    if (cloudEmpty) cloudEmpty.hidden = visibleChips.length > 0;
+    const nextSignature = visibleChips
+      .map((chip) => `${chip.dataset.tagKind}:${chip.dataset.tagValue}`)
+      .join('|');
+    if (prevCategory !== category || cloudSignature !== nextSignature) {
+      root.dataset.activeCategory = category;
+      cloudSignature = nextSignature;
+      window.dispatchEvent(new CustomEvent('tag-cloud-relayout'));
+    }
+    const feedCarousel = root.querySelector<HTMLElement>(
+      '[data-feed-carousel]',
+    );
+    if (feedCarousel) feedCarousel.hidden = matches.length === 0;
     const count = root.querySelector('#result-count');
     if (count)
       count.textContent = `${matches.length} 条记录${pages > 1 ? ` · 每页 ${PAGE_SIZE} 条` : ''}`;

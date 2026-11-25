@@ -55,7 +55,10 @@ const maxCount = Math.max(
                 aria-controls="interactive-tag-stage"
               >
                 <Icon name="sparkles-line" size={15} />
-                星云全景 <span>{merchants.length + countries.length}</span>
+                星云全景{' '}
+                <span data-tag-tab-count="all">
+                  {merchants.length + countries.length}
+                </span>
               </button>
               <button
                 type="button"
@@ -67,7 +70,8 @@ const maxCount = Math.max(
                 tabindex="-1"
               >
                 <Icon name="building-2-line" size={15} />
-                商家 <span>{merchants.length}</span>
+                商家{' '}
+                <span data-tag-tab-count="merchant">{merchants.length}</span>
               </button>
               <button
                 type="button"
@@ -79,7 +83,8 @@ const maxCount = Math.max(
                 tabindex="-1"
               >
                 <Icon name="earth-2-line" size={15} />
-                国家 <span>{countries.length}</span>
+                国家{' '}
+                <span data-tag-tab-count="country">{countries.length}</span>
               </button>
             </div>
 
@@ -151,6 +156,9 @@ const maxCount = Math.max(
                 </button>
               ))}
             </div>
+            <p class="tag-cloud-empty" data-cloud-empty hidden>
+              当前类型下暂无可选标签。
+            </p>
           </div>
 
           <div class="tag-selection">

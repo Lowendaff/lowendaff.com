@@ -6,6 +6,12 @@ interface Props {
   article: MapArticle;
 }
 const { article } = Astro.props;
+const dateFormat = new Intl.DateTimeFormat('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'UTC',
+});
 ---
 
 <li
@@ -20,7 +26,9 @@ const { article } = Astro.props;
     </div>
     <h3>{article.title.replace(/^(?:\p{Regional_Indicator}{2}\s*)+/u, '')}</h3>
     <div class="atlas-article-bottom">
-      <time datetime={article.date}>{article.date}</time>
+      <time datetime={article.date}>
+        {dateFormat.format(new Date(`${article.date}T00:00:00Z`))}
+      </time>
       <span>
         阅读测评 <Icon name="arrow" size={16} />
       </span>

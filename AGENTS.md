@@ -6,7 +6,7 @@ LowEndAFF 从 WordPress 迁移至 Astro、Content Collections、MDX 与 Tailwind
 
 ## Commands & Style
 
-使用 Node >=22.12 与锁文件：`npm ci`、`npm run dev`、`npm run build`。提交前执行 `npm run format:check`、`npm run check`、构建、`npm run verify:content`、`npm run verify:release`、`npm run verify:readable`、`npm run verify:seo`。集合变更另执行 `verify:pipeline` 和 `verify:markdown`；夹具测试与其他构建、格式检查、内容编辑必须串行。浏览器验证入口见 `docs/verification.md`。
+使用 Node >=22.12 与锁文件：`npm ci`、`npm run dev`、`npm run build`。提交前执行 `npm run format:check`、`npm run check`、构建、`npm run verify:content`、`npm run verify:release`、`npm run verify:readable`、`npm run verify:bench`、`npm run verify:seo`。集合变更另执行 `verify:pipeline` 和 `verify:markdown`；夹具测试与其他构建、格式检查、内容编辑必须串行。浏览器验证入口见 `docs/verification.md`。
 
 GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、Schema 与正式构建，并运行解析器和模板正反例回归；草稿同样校验，空集合合法。工作流使用 Node 24，检查名 `Article format and build`。main 成功构建上传静态产物，独立 `Deploy static site` 工作流通过签名 Webhook 通知服务器发布；PR 不部署。修改 CI 或模板校验时运行 `verify:templates`；部署修改另执行 `python3 -m unittest discover -s tests/deployment -v`，说明见 `docs/deployment.md`。
 
@@ -16,15 +16,15 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 
 - 测评地址使用 `/reviews/{规范化中文标题}-{测试日期YYYYMMDD}/`，保留末尾 `/`，Frontmatter `permalink` 与文件名/后续标题解耦。`npm run urls:fill` 仅补缺；`urls:check` + `verify:urls` 纳入 CI。已提交非草稿地址冻结，草稿也检查唯一性；全新站点不兼容旧地址，不使用 `redirectFrom` / `originalUrl` 生成跳转；旧地址返回 404，CI 拒绝这些字段与静态跳转页。指南 `templates/reviews/README.md`，归档 `docs/changes/review-urls.md`。
 
-- 真实测评只存 `src/content/posts/*.mdx`，经 Zod 和 `getCollection()` 渲染，不在 Astro/TS 硬编码。2026-11-09 用户授权恢复 `100tb-cn2.mdx`，当前只有这一篇正式测评；其余已撤下文章不能自动恢复，模板占位内容不能发布。
-- 新文章模板在 `templates/reviews/`：VPS 与独服分别使用 `reviewType: vps | dedicated`，均可用易读 Markdown；不把模板占位内容导入集合。章节可按实测省略，SMART/RAID 放磁盘、拓扑/dmidecode 放系统子标题；原始输出用代码围栏。验证用 `npm run verify:templates`。
-- 100TB 从 Git 历史恢复，保留 2026-10-08 发布日期及 2026-10-07 测试时间；PanstarCloud 仍撤下。历史快照仅用于内容来源核对，不承担旧网址兼容。新增文章从模板创建，验证使用临时合成夹具，结束后清理。
-- 广告分别由 `src/content/ads/{home,article-top,article-bottom,article-sidebar}/` 的 Markdown 控制；Sponsors 独立集合与 SVG。不得恢复共享广告 placements 或按商家名写死展示。
-- 导航：首页、广告、标签云、测评地图；不恢复搜索。首页每页 20 条，无价格/配置/历史原文标签；友链仅首页显示。
-- 测评类型只读 Frontmatter `reviewType: vps | dedicated`（缺省 VPS）。首页与标签云提供「全部 / VPS / 独立服务器」，列表和文章头部显示文字标签；类型与商家/国家组合筛选，URL 保留状态，切换类型重置页码。此项不包含置顶排序。回归：`verify:types` 及 `scripts/verify-review-type-browser.js`。
-- 首页广告随机起序，单商家连续自动循环，左右箭头居中且不激活广告链接；尊重减少动效。文章广告纵排独立随机，Sponsors 仅文章侧栏。
-- 文章表头与内容左对齐，数字等宽；套餐直接展示，BGP 不折叠。保留分组及自定义路由选择器，不提供展开全部、测评概览、IP 质量分析、Generated at、底部方案与优惠或对照原始快照入口。
-- Tokyo Night Day / Tokyo Night，默认跟随系统，保留手动三档切换。恢复主题按钮焦点须 `focus({ preventScroll: true })`，不可改变阅读位置。
+- 真实测评只存 `src/content/posts/*.mdx`，经 Zod 和 `getCollection()` 渲染，不在 Astro/TS 硬编码。2026-11-25 用户授权发布 `gomami-hkg-turin-vps.mdx`（`draft: false`）、保留 `mejiro-hk-arm.mdx`（`draft: true` 草稿）并删除 `100tb-cn2.mdx`；已撤下历史文章不能自动恢复，模板占位内容不能发布。
+- 新文章优先从 `lowendaff-bench`（`v0.1.2+`）JSON 经 `npm run review:import`（`src/lib/bench-report-import.ts` + `scripts/import-bench-report.mjs`）生成标准草稿与脱敏 BGP SVG；手工模板在 `templates/reviews/`（`reviewType: vps | dedicated`），不把模板占位内容导入集合。声明 `benchVersion` 的文章由 Schema 强校验标准章节完整性（VPS 含 `vm-cpu-telemetry` ECharts 折线图与 `TCP 大包回程路由`；客观缺测须在 `omittedSections` 显式声明）、6 列路由表头（`跳数 | 应答地址（脱敏） | ASN | 运营商 | 位置 | 最小 RTT（ms）`）及 `draft: false` 占位符/本地配图完整性。回归用 `npm run verify:bench` 与 `npm run verify:templates`，对照说明见 `docs/changes/bench-report-v0.1.2.md`。
+- 100TB 从 Git 历史恢复，保留 2026-10-08 发布日期及 2026-10-07 测试时间；PanstarCloud 仍撤下。历史快照仅用于内容来源核对，不承担旧网址兼容。新增文章从导入器或模板创建，验证使用临时合成夹具，结束后清理。
+- 广告分别由 `src/content/ads/{home,home/featured,article-top,article-bottom,article-sidebar}/` 的 Markdown 控制；Sponsors 独立集合与品牌标识。不得恢复共享广告 placements 或按商家名写死展示。
+- 导航：首页、奇葩小国、测评地图、标签云、广告；不恢复搜索。首页每页 20 条，无价格/配置/历史原文标签；友链仅首页显示。
+- 测评类型只读 Frontmatter `reviewType: vps | dedicated`（缺省 VPS）。首页、标签云与测评地图提供「全部 / VPS / 独立服务器」，列表和文章头部显示文字标签；切换类型严格隔离对应视角的地图标记、地区列表与未选中星云标签，URL 保留状态，切换类型重置页码。此项不包含置顶排序。回归：`verify:types`、`verify:map` 及 `scripts/verify-review-type-browser.js`。
+- 首页广告拆分为列表首位原生轮播（`home`，随机起序、自动循环、尊重减少动效，筛选 0 结果时随列表隐藏）与首屏右侧精选（`home/featured`，随机排布）；文章广告纵排独立随机，Sponsors 仅文章侧栏。
+- 文章表头与内容左对齐，数字等宽，桌面端常规表格按适宽拆表避免横向溢出；套餐直接展示，BGP 不折叠。支持 `vm-cpu-telemetry` ECharts `%st/%si` 时间轴缩放折线图、结构化 `IP 质量检测`（拆分路由宣告 ASN 与 RIR `org`）、`路由追踪` 与 `TCP 大包回程路由` 选择器及可选行内哔哩哔哩视频；不恢复旧站未脱敏 `IPv4 质量分析` 原始块、展开全部、测评概览、Generated at、底部方案与优惠或对照原始快照入口。
+- Notion 暖纸 / 深墨视觉系统（详见 `DESIGN.md`，取代早期 Tokyo Night 与国旗 Emoji 方案，国家标识统一使用 `@iconify-json/flagpack` 矢量 SVG，图标统一使用 `@iconify-json/mingcute`），默认跟随系统，保留手动三档切换。恢复主题按钮焦点须 `focus({ preventScroll: true })`，不可改变阅读位置。
 - 不恢复调试、设计预览和迁移说明。保留真实测试/活动日期、Affiliate 披露、简短缺图与空状态；不通过删减内容或缩小字体压缩手机布局。
 
 ## Design Skills & Delivery
@@ -35,14 +35,14 @@ GitHub `Content validation` 在 push / PR / 手工触发时校验文章排版、
 
 目标 Figma：https://www.figma.com/design/vZ3h8djsL9yAt0WIlhyCSm/lowendaff?node-id=0-1 。修订 13 已确认；后续文字和滚动修复未再同步画布。设计变更按下列本机挂载加载，来源与恢复见 `docs/project-context-index.md`：
 
-| Skill 本地路径 | 调用时机 |
-| --- | --- |
-| `.agents/skills/apple-design-skill/SKILL.md` | 配色、层级、材质、动效与可访问性审查 |
-| `.agents/skills/web-design-guidelines/SKILL.md` | 排版、等宽数字、嵌套圆角与 Web 审查 |
-| `.agents/skills/figma-implement-design/SKILL.md` | Figma 与集合驱动页面的高保真映射 |
-| `.agents/skills/taste-skill-source/skills/taste-skill/SKILL.md` | 用户指定的视觉层级与交互细节审查；不以营销整屏规则覆盖既有阅读布局 |
-| `.agents/skills/impeccable/SKILL.md` | 新版 Codex 入口；既有界面的 polish / Read / Operate 审查，修复实际问题，检查器警告需结合产品判断 |
-| `.agents/skills/unslop/SKILL.md` | 先审查实际画面、判断精修范围，再逐层处理间距、色彩、排版与交互；不得为变化而变化 |
+| Skill 本地路径                                                  | 调用时机                                                                                         |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `.agents/skills/apple-design-skill/SKILL.md`                    | 配色、层级、材质、动效与可访问性审查                                                             |
+| `.agents/skills/web-design-guidelines/SKILL.md`                 | 排版、等宽数字、嵌套圆角与 Web 审查                                                              |
+| `.agents/skills/figma-implement-design/SKILL.md`                | Figma 与集合驱动页面的高保真映射                                                                 |
+| `.agents/skills/taste-skill-source/skills/taste-skill/SKILL.md` | 用户指定的视觉层级与交互细节审查；不以营销整屏规则覆盖既有阅读布局                               |
+| `.agents/skills/impeccable/SKILL.md`                            | 新版 Codex 入口；既有界面的 polish / Read / Operate 审查，修复实际问题，检查器警告需结合产品判断 |
+| `.agents/skills/unslop/SKILL.md`                                | 先审查实际画面、判断精修范围，再逐层处理间距、色彩、排版与交互；不得为变化而变化                 |
 
 Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、`figma-design-to-code`；不把截图称为原生设计或映射表称为 Code Connect。语义表面层级、65–75ch 正文、锚点留距、图标标签、同心圆角及 reduced-motion 要求继续有效。
 
@@ -64,6 +64,8 @@ Figma 操作同时按工具要求读取 `figma-use`、`figma-generate-design`、
 VPS / 独服类型区分已完成：`docs/changes/review-types.md`；OpenViking：`viking://resources/projects/lowendaff-ui/review-types.md`，全文回读一致。Git 同步回执见 `test-results/review-types/git-push-receipt.json`；本次未同步 Figma。
 
 ## Git & Agent Workflow
+
+2026-11-25：完成全站数据联动与契约对齐（基于 `5d7aa62`～`9e4012b` Notion 编辑风改版与奇葩小国上线后的现行基线；下方早期 Tokyo Night、首页海缆图与地图弹窗记录仅作历史存档，不再覆盖当前源码与 `DESIGN.md`）。`/map/`（无弹窗右侧常驻地区+文章双面板）与 `/tags/`（星云画板）均按 `reviewType` 严格隔离城市标记、地区项、未选中标签及统计徽标，切换类型自动转向目标视角城市并清理冲突选中状态；统一城市 ID 归一化（`reviewPlaceId`）、跨页筛选参数传递与文章卡片发布日期（`publishedAt`）。`deploy/deploy.py` 补齐空集合 `map/index.html` 的 `noindex` 豁免，`llms.txt` 固定收录 `/exotic/` 并清理已下线首页线路图说明与 `global-network.json`；`/ads/` 合作政策对齐现行纯色品牌卡与五处独立广告位，移除未实现的文章置顶承诺；`tsconfig.json` 排除 `test-results/`。
 
 2026-11-15 提交授权更新：用户要求「提交」，本次将已完成的首页与全站 Impeccable 优化纳入本地 Git 提交；下方「未提交」记录为此前验证阶段状态。本次不推送、部署或同步 Figma。提交前检查及提交回执保存在 `test-results/impeccable-commit/`。
 
@@ -112,5 +114,6 @@ CI 文章校验归档：`docs/changes/content-ci.md`；OpenViking：`viking://re
 仓库 `git@github.com:Lowendaff/lowendaff.com.git`，主分支 `main`；初始提交仅含忽略模板，尚无足够历史可归纳惯例。提交使用简洁祈使句，PR 说明目的、验证与相关问题；视觉变更附截图。不提交依赖、构建目录、原始日志、凭据或本机工具配置；保留锁文件和 `.env.example`。历史资料已在仓库外备份，见 `docs/changes/git-preparation.md`。
 
 <!-- codebase-memory-mcp:start -->
+
 For structural codebase exploration, use the installed `codebase-memory` skill. Verify coverage and inspect uncovered source before drawing conclusions.
 <!-- codebase-memory-mcp:end -->

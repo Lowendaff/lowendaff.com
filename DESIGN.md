@@ -327,12 +327,12 @@ Every component in the project uses one of four radius tokens:
 ## Advertising & Media Wells
 
 ### Notion Solid-Surface Advertising Slots
-1. **Pure Solid Surface & Uniform 1px Hairline**: Homepage (`HomeAds`), article top/bottom (`ArticleTopAds` / `ArticleBottomAds`), and article sidebar (`ArticleSidebarAds`) cards sit on solid `--surface` (`#ffffff` in light mode, `#202020` in dark mode) with a uniform `1px solid var(--border)` hairline frame and `--radius-lg` (`12px`). **Gradients and thick left side borders are strictly forbidden.**
+1. **Pure Solid Surface & Uniform 1px Hairline**: Homepage (`HomeFeedCarousel` / `HomeAds`), article top/bottom (`ArticleTopAds` / `ArticleBottomAds`), and article sidebar (`ArticleSidebarAds`) cards sit on solid `--surface` (`#ffffff` in light mode, `#202020` in dark mode) with a uniform `1px solid var(--border)` hairline frame and `--radius-lg` (`12px`). **Gradients and thick left side borders are strictly forbidden.**
 2. **Coherent Notion Sticker Brand Badges**:
    - Merchant brand identity uses Notion's sticker palette (`#0075de` blue, `#dd5b00` orange, `#2a9d99` teal, `#31302e` charcoal) strictly as a compact solid badge pill or dot inside the card.
    - Hovering over a secondary button or card darkens the neutral surface and neutral border (`--subtle` / `--border-strong`), never mixing a grey fill with a blue border.
    - All UI icons across the project use Iconify `@iconify-json/mingcute` (`*-line` icons) exclusively, all country flags use `@iconify-json/flagpack` SVG vectors, and custom-authored SVG illustrations are prohibited.
-3. **First-Screen Partner Bento Stack**: Homepage sponsors (`HomeAds`) render as a non-carousel solid-surface partner stack visible above the fold alongside the primary blog reading stream.
+3. **Dual Homepage Placements**: Homepage sponsors split into a native first-item feed carousel (`HomeFeedCarousel`) and a solid-surface partner stack (`HomeAds`) visible above the fold alongside the primary blog reading stream.
 
 ### Image & BGP Media Wells
 - Benchmark screenshots and BGP topology images (`.archive-image`) sit inside a dedicated Notion media well (`background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px;`), ensuring crisp contrast in both light and dark modes, paired with a clean caption bar.

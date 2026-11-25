@@ -54,6 +54,8 @@ jobs:
         run: npm run verify:release
       - name: Test Markdown parser rules
         run: npm run verify:readable
+      - name: Test benchmark report importer and v0.1.2 contracts
+        run: npm run verify:bench
       - name: Test structured metadata and safe serialization
         run: npm run verify:seo
       - name: Test analytics configuration and production gates

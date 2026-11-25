@@ -173,7 +173,7 @@ def verify_site(directory, payload):
         expected = 'index,follow' if indexable else 'noindex,nofollow'
         if relative == 'components/index.html':
             expected = 'noindex,nofollow'
-        if relative == 'tags/index.html' and policy.robots == ['noindex,nofollow']:
+        if relative in ('tags/index.html', 'map/index.html') and policy.robots == ['noindex,nofollow']:
             expected = 'noindex,nofollow'  # Empty collections are not search landing pages.
         if policy.robots != [expected]:
             raise DeployError('page indexing policy mismatch')

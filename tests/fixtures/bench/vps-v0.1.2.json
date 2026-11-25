@@ -1,0 +1,1079 @@
+{
+  "version": "0.1.2",
+  "environment": "KVM 虚拟机",
+  "show_ip": true,
+  "system": {
+    "platform": { "kind": "vm", "hypervisor": "kvm", "container": null },
+    "arch": "x86_64",
+    "libc": { "kind": "glibc", "version": "2.39" },
+    "hardware": null,
+    "cpu": {
+      "state": "done",
+      "data": {
+        "model": "AMD EPYC 9575F 64-Core Processor",
+        "logical": 2,
+        "usable": 2,
+        "quota": null,
+        "sockets": 1,
+        "cores": 2,
+        "mhz": 3295.058,
+        "caches": [
+          { "name": "L1d", "size_bytes": 65536 },
+          { "name": "L1i", "size_bytes": 65536 },
+          { "name": "L2", "size_bytes": 2097152 },
+          { "name": "L3", "size_bytes": 67108864 }
+        ],
+        "aes": true,
+        "virtualization": "amd_v"
+      }
+    },
+    "memory": {
+      "state": "done",
+      "data": {
+        "total_bytes": 2069889024,
+        "used_bytes": 321388544,
+        "used_estimated": false,
+        "swap_total_bytes": 0,
+        "swap_used_bytes": 0
+      }
+    },
+    "storage": {
+      "state": "done",
+      "data": {
+        "raid": null,
+        "disks": [
+          {
+            "name": "vda",
+            "interface": "virtio",
+            "size_bytes": 21474836480,
+            "rotational": false,
+            "model": "Virtio Block Device",
+            "uses": ["/"]
+          }
+        ],
+        "filesystems": [
+          {
+            "mount_point": "/",
+            "fs_type": "ext4",
+            "zfs_pool": null,
+            "disks": ["vda"],
+            "test_directory": true,
+            "total_bytes": 20982005760,
+            "used_bytes": 2362232012,
+            "available_bytes": 17525909504
+          }
+        ]
+      }
+    },
+    "os": {
+      "state": "done",
+      "data": {
+        "distribution": "Debian GNU/Linux 13 (trixie)",
+        "kernel": "6.12.22-amd64",
+        "uptime_seconds": 12143940,
+        "uptime_from_host": false,
+        "load": [0.02, 0.01, 0.0],
+        "load_from_host": false,
+        "congestion_control": "bbr",
+        "qdisc": "fq"
+      }
+    },
+    "cards": {
+      "state": "done",
+      "data": [
+        {
+          "interface": "eth0",
+          "bus": "pci",
+          "model": "Virtio network device",
+          "driver": "virtio_net",
+          "link_up": true,
+          "speed_mbps": null,
+          "duplex": null,
+          "mtu": 1500,
+          "pcie_degraded": false,
+          "virtual_functions": 0,
+          "master": null,
+          "master_kind": null,
+          "default_ipv4": true,
+          "default_ipv6": false
+        }
+      ]
+    },
+    "network": {
+      "ipv4": {
+        "reachable": true,
+        "public_address": "198.51.100.42",
+        "source": "probe",
+        "text": "198.51.100.42"
+      },
+      "ipv6": {
+        "reachable": false,
+        "public_address": null,
+        "source": null,
+        "text": "unavailable"
+      }
+    }
+  },
+  "vm_cpu_telemetry": {
+    "interval_seconds": 5,
+    "sample_count": 3,
+    "si_pct": {
+      "avg": 1.85,
+      "p95": 5.59,
+      "max": 5.59,
+      "peak_elapsed_seconds": 10,
+      "peak_item": "network.iperf3",
+      "peak_title": "iperf3 国际测速"
+    },
+    "st_pct": {
+      "avg": 0.42,
+      "p95": 1.16,
+      "max": 1.16,
+      "peak_elapsed_seconds": 5,
+      "peak_item": "cpu.bench",
+      "peak_title": "CPU 性能测试"
+    },
+    "samples": [
+      {
+        "elapsed_seconds": 0,
+        "time": "00:00",
+        "item": null,
+        "title": "环境初始化",
+        "si_pct": 0.0,
+        "st_pct": 0.1
+      },
+      {
+        "elapsed_seconds": 5,
+        "time": "00:05",
+        "item": "cpu.bench",
+        "title": "CPU 性能测试",
+        "si_pct": 0.4,
+        "st_pct": 1.16
+      },
+      {
+        "elapsed_seconds": 10,
+        "time": "00:10",
+        "item": "network.iperf3",
+        "title": "iperf3 国际测速",
+        "si_pct": 5.59,
+        "st_pct": 0.0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "id": "memory.sysbench",
+      "group": "memory",
+      "title": "sysbench 内存读写",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 1.0,
+      "elapsed_seconds": 4.2,
+      "output": {
+        "version": "1.0.20",
+        "single": 1048576,
+        "per_thread": 1048576,
+        "threads": 2,
+        "small": null,
+        "cache_unknown": false,
+        "runs": [
+          {
+            "operation": "Read",
+            "threads": 1,
+            "rate": { "text": "62410.50", "value": 62410.5 },
+            "retries": []
+          },
+          {
+            "operation": "Write",
+            "threads": 1,
+            "rate": { "text": "44120.12", "value": 44120.12 },
+            "retries": []
+          },
+          {
+            "operation": "Read",
+            "threads": 2,
+            "rate": { "text": "110820.30", "value": 110820.3 },
+            "retries": []
+          },
+          {
+            "operation": "Write",
+            "threads": 2,
+            "rate": { "text": "79310.45", "value": 79310.45 },
+            "retries": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "memory.stream",
+      "group": "memory",
+      "title": "STREAM 内存带宽",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 5.2,
+      "elapsed_seconds": 3.1,
+      "output": {
+        "version": "5.10",
+        "millions": 10,
+        "threads": 2,
+        "below_rule": true,
+        "cache_unknown": false,
+        "runs": [
+          {
+            "threads": 2,
+            "rates": [
+              { "text": "148200.4", "value": 148200.4 },
+              { "text": "102340.1", "value": 102340.1 },
+              { "text": "112500.8", "value": 112500.8 },
+              { "text": "114980.2", "value": 114980.2 }
+            ],
+            "retries": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "memory.latency",
+      "group": "memory",
+      "title": "缓存与主存延迟",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 8.3,
+      "elapsed_seconds": 2.4,
+      "output": {
+        "rows": [
+          {
+            "level": "L1",
+            "buffer": 32768,
+            "latency": { "text": "0.92", "value": 0.92 },
+            "retries": []
+          },
+          {
+            "level": "L2",
+            "buffer": 524288,
+            "latency": { "text": "2.65", "value": 2.65 },
+            "retries": []
+          },
+          {
+            "level": "L3",
+            "buffer": 16777216,
+            "latency": { "text": "10.80", "value": 10.8 },
+            "retries": []
+          },
+          {
+            "level": "Memory",
+            "buffer": 134217728,
+            "latency": { "text": "84.30", "value": 84.3 },
+            "retries": []
+          }
+        ],
+        "missing": [],
+        "small": null,
+        "cache_unknown": false
+      }
+    },
+    {
+      "id": "cpu.bench",
+      "group": "cpu",
+      "title": "CPU 性能测试",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 10.7,
+      "elapsed_seconds": 120.0,
+      "output": {
+        "suites": [
+          "geekbench",
+          "sysbench",
+          "unixbench",
+          "7zip",
+          "passmark",
+          "hpl",
+          "ycruncher",
+          "prime95"
+        ],
+        "geekbench": {
+          "status": "done",
+          "output": {
+            "memory": {
+              "Swapped": {
+                "need": 4294967296,
+                "available": 1700000000,
+                "gib": 3
+              }
+            },
+            "first_to_go": "Done",
+            "scores": {
+              "version": "7.1.0",
+              "single": 2082,
+              "multi": 3827,
+              "url": "https://browser.geekbench.com/v6/cpu/9999999"
+            },
+            "uploads": [],
+            "swap_left": null
+          }
+        },
+        "sysbench": {
+          "status": "done",
+          "output": {
+            "version": "1.0.20",
+            "single": {
+              "threads": 1,
+              "rate": { "text": "4920.15", "value": 4920.15 },
+              "retries": []
+            },
+            "multi": {
+              "threads": 2,
+              "rate": { "text": "9780.42", "value": 9780.42 },
+              "retries": []
+            }
+          }
+        },
+        "unixbench": {
+          "status": "done",
+          "output": {
+            "version": "5.1.3",
+            "single": {
+              "copies": 1,
+              "index": 2450.6,
+              "items": [
+                {
+                  "id": "Dhrystone 2 using register variables",
+                  "rate": 98500000.0,
+                  "unit": "lps",
+                  "baseline": 116700.0,
+                  "index": 8440.4
+                }
+              ]
+            },
+            "multi": {
+              "copies": 2,
+              "index": 4610.2,
+              "items": [
+                {
+                  "id": "Dhrystone 2 using register variables",
+                  "rate": 195100000.0,
+                  "unit": "lps",
+                  "baseline": 116700.0,
+                  "index": 16718.1
+                }
+              ]
+            }
+          }
+        },
+        "seven_zip": {
+          "status": "done",
+          "output": {
+            "version": "24.08",
+            "single": {
+              "threads": 1,
+              "compress_kib_s": 98500,
+              "compress_mips": 9980,
+              "decompress_kib_s": 1352000,
+              "decompress_mips": 11200,
+              "usage_pct": 99,
+              "ru_mips": 10690,
+              "total_mips": 10590,
+              "retries": []
+            },
+            "multi": {
+              "threads": 2,
+              "compress_kib_s": 182400,
+              "compress_mips": 18510,
+              "decompress_kib_s": 2610000,
+              "decompress_mips": 21640,
+              "usage_pct": 188,
+              "ru_mips": 10678,
+              "total_mips": 20075,
+              "retries": []
+            }
+          }
+        },
+        "passmark": {
+          "status": "done",
+          "output": {
+            "version": "11.0",
+            "cpu_mark": 7820.4,
+            "single_thread": 4210.8,
+            "integer_math": 28410.0,
+            "floating_math": 19820.5,
+            "prime": 32.4,
+            "sorting": 9120.0,
+            "encryption": 4810.2,
+            "compression": 95400.0,
+            "physics": 612.5,
+            "extended_instructions": 5420.1
+          }
+        },
+        "hpl": {
+          "status": "done",
+          "output": {
+            "version": "2.3",
+            "threads": 2,
+            "n": 12288,
+            "nb": 192,
+            "seconds": 9.84,
+            "gflops": 125.6,
+            "residual": 0.0021
+          }
+        },
+        "ycruncher": {
+          "status": "done",
+          "output": {
+            "version": "0.8.7.9547",
+            "digits": 500000000,
+            "computation_secs": 11.428,
+            "wall_secs": 12.06,
+            "cpu_utilization_pct": 193.72,
+            "multicore_efficiency_pct": 96.86,
+            "tuning": "24-ZN5 ~ Komari"
+          }
+        },
+        "prime95": {
+          "status": "done",
+          "output": {
+            "version": "30.19b20",
+            "workers": 2,
+            "duration_secs": 60,
+            "fft_desc": "Smallest FFTs",
+            "tests_completed": 14,
+            "errors": 0,
+            "warnings": 0,
+            "passed": true
+          }
+        }
+      }
+    },
+    {
+      "id": "disk.fio",
+      "group": "disk",
+      "title": "fio 磁盘读写",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 130.7,
+      "elapsed_seconds": 25.0,
+      "output": {
+        "version": "3.38",
+        "size": 1073741824,
+        "zfs_needed": null,
+        "tests": [
+          {
+            "block_size": "4k",
+            "outcome": {
+              "Done": {
+                "read_kib": 185400,
+                "read_iops": 46350,
+                "write_kib": 185800,
+                "write_iops": 46450
+              }
+            }
+          },
+          {
+            "block_size": "64k",
+            "outcome": {
+              "Done": {
+                "read_kib": 982100,
+                "read_iops": 15345,
+                "write_kib": 984500,
+                "write_iops": 15382
+              }
+            }
+          },
+          {
+            "block_size": "512k",
+            "outcome": {
+              "Done": {
+                "read_kib": 1620400,
+                "read_iops": 3164,
+                "write_kib": 1706200,
+                "write_iops": 3332
+              }
+            }
+          },
+          {
+            "block_size": "1m",
+            "outcome": {
+              "Done": {
+                "read_kib": 1954000,
+                "read_iops": 1908,
+                "write_kib": 2084000,
+                "write_iops": 2035
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "network.bgp",
+      "group": "network",
+      "title": "BGP 路径观测",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 155.7,
+      "elapsed_seconds": 3.2,
+      "output": {
+        "settings": { "custom_endpoints": false, "upload": false },
+        "ipv4_reachable": true,
+        "ipv6_reachable": false,
+        "ipv4": {
+          "address": "198.51.100.42",
+          "announced": true,
+          "prefix": "198.51.100.0/24",
+          "prefix_len": 24,
+          "origin_asn": 36002,
+          "origins": [{ "asn": 36002, "peers": 312 }],
+          "rpki": "valid",
+          "total_peers": 312,
+          "distinct_paths": 84,
+          "upstreams": [
+            { "asn": 9269, "peers": 180 },
+            { "asn": 4635, "peers": 42 }
+          ],
+          "paths": [],
+          "asn_names": {
+            "36002": "GOMAMI-NET",
+            "9269": "HKBN",
+            "4635": "HKIX"
+          },
+          "svg": "<svg viewBox=\"0 0 320 120\" width=\"320\" height=\"120\"><rect x=\"0\" y=\"0\" width=\"320\" height=\"120\" fill=\"#ffffff\"/><g><text x=\"16\" y=\"36\" font-family=\"monospace\" font-size=\"12\" fill=\"#111111\">198.51.100.0/24 (198.51.100.42) -&gt; AS36002</text><line x1=\"16\" y1=\"56\" x2=\"280\" y2=\"56\" stroke=\"#0075de\" stroke-width=\"2\"/></g></svg>"
+        },
+        "ipv6": null,
+        "notes": []
+      }
+    },
+    {
+      "id": "ip.quality",
+      "group": "ip",
+      "title": "IP 质量检测",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 158.9,
+      "elapsed_seconds": 6.5,
+      "output": {
+        "settings": { "dnsbl": true, "mail": true, "custom_endpoints": false },
+        "ipv4_reachable": true,
+        "ipv6_reachable": false,
+        "ipv4": {
+          "address": "198.51.100.42",
+          "asn": 36002,
+          "org": "Hong-Kong-Broadband-Network-Limited",
+          "hostname": null,
+          "rir": "APNIC",
+          "registered_country": "HK",
+          "geo_country": "HK",
+          "geo_votes": [{ "country": "HK", "count": 6 }],
+          "geo_total": 6,
+          "origin": { "Native": { "country": "HK" } },
+          "usage": "Residential",
+          "scores": [
+            [
+              "Scamalytics",
+              { "Numeric": { "score": 0, "max": 100, "level": "Low" } }
+            ],
+            ["IPQualityScore", { "Ratio": { "text": "12%", "level": "Low" } }],
+            [
+              "GreyNoise",
+              {
+                "GreyNoise": {
+                  "riot": false,
+                  "noise": false,
+                  "classification": "NotObserved"
+                }
+              }
+            ],
+            [
+              "Shodan",
+              { "Shodan": { "ports": 1, "vulns": 0, "flagged": false } }
+            ]
+          ],
+          "factors": [
+            { "factor": "Proxy", "checked": 5, "flagged_by": [] },
+            {
+              "factor": "Datacenter",
+              "checked": 6,
+              "flagged_by": ["IP2Location"]
+            }
+          ],
+          "dnsbl": { "checked": 112, "refused": 2, "listed": ["SPFBL"] },
+          "mail": [
+            {
+              "id": "gmail",
+              "name": "Gmail",
+              "status": { "Deliverable": 220 }
+            },
+            { "id": "outlook", "name": "Outlook", "status": "Blocked" }
+          ],
+          "notes": []
+        },
+        "ipv6": null
+      }
+    },
+    {
+      "id": "ip.media",
+      "group": "ip",
+      "title": "服务解锁测试",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 165.4,
+      "elapsed_seconds": 8.0,
+      "output": {
+        "settings": { "groups": ["all"], "services": [], "custom_base": false },
+        "unknown": [],
+        "ipv4_reachable": true,
+        "ipv6_reachable": false,
+        "results": [
+          {
+            "id": "netflix",
+            "name": "Netflix",
+            "group": "global",
+            "ipv4": { "Yes": { "region": "HK" } },
+            "ipv6": null
+          },
+          {
+            "id": "openai",
+            "name": "ChatGPT",
+            "group": "global",
+            "ipv4": { "No": { "restriction": "ProxyDetected" } },
+            "ipv6": null
+          },
+          {
+            "id": "bahamut",
+            "name": "Bahamut Anime",
+            "group": "asia",
+            "ipv4": { "Yes": { "region": "HK" } },
+            "ipv6": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "network.iperf3",
+      "group": "network",
+      "title": "iperf3 国际测速",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 173.4,
+      "elapsed_seconds": 30.0,
+      "output": {
+        "version": "3.17.1",
+        "settings": { "seconds": 10, "streams": 4, "rate": null },
+        "unknown": [],
+        "ipv4": [
+          {
+            "location": "Tokyo",
+            "country": "JP",
+            "provider": "Clouvider",
+            "upload": {
+              "Measured": {
+                "bits": 942500000,
+                "tries": 1,
+                "rtt": 46210,
+                "retransmits": 12
+              }
+            },
+            "download": {
+              "Measured": {
+                "bits": 961200000,
+                "tries": 1,
+                "rtt": null,
+                "retransmits": null
+              }
+            }
+          }
+        ],
+        "ipv6": []
+      }
+    },
+    {
+      "id": "network.taier",
+      "group": "network",
+      "title": "泰尔国内测速",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 203.4,
+      "elapsed_seconds": 22.0,
+      "output": {
+        "settings": {
+          "seconds": 10,
+          "streams": 4,
+          "cities": ["Beijing", "Shanghai", "Guangzhou"],
+          "operators": ["telecom", "unicom", "mobile"],
+          "custom_list": false
+        },
+        "unknown": [],
+        "results": [
+          {
+            "id": "bj-ct",
+            "province": "Beijing",
+            "city": "Beijing",
+            "operator": "telecom",
+            "ip": "202.106.0.1",
+            "port": 8080,
+            "tried_nodes": 1,
+            "outcome": {
+              "state": "measured",
+              "data": { "download_bps": 925400000, "upload_bps": 884200000 }
+            }
+          },
+          {
+            "id": "sh-cu",
+            "province": "Shanghai",
+            "city": "Shanghai",
+            "operator": "unicom",
+            "ip": "210.22.0.1",
+            "port": 8080,
+            "tried_nodes": 2,
+            "outcome": { "state": "unreachable" }
+          },
+          {
+            "id": "gz-cm",
+            "province": "Guangzhou",
+            "city": "Guangzhou",
+            "operator": "mobile",
+            "ip": "211.136.0.1",
+            "port": 8080,
+            "tried_nodes": 1,
+            "outcome": { "state": "failed", "data": "upload connect timed out" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "network.cloudflare",
+      "group": "network",
+      "title": "Cloudflare Speedtest",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 225.4,
+      "elapsed_seconds": 18.0,
+      "output": {
+        "settings": {
+          "seconds": 10,
+          "concurrency": 4,
+          "udp": true,
+          "udp_packets": 200,
+          "idle_ms": 1000,
+          "custom_endpoints": false
+        },
+        "ipv4": {
+          "client_ip": "198.51.100.42",
+          "colo": "HKG",
+          "server": "HKG",
+          "asn": 36002,
+          "as_org": "Hong Kong Broadband Network Limited",
+          "idle_latency": {
+            "sent": 20,
+            "received": 20,
+            "loss_pct": 0.0,
+            "min_ms": 1.12,
+            "mean_ms": 1.34,
+            "median_ms": 1.28,
+            "p25_ms": 1.18,
+            "p75_ms": 1.42,
+            "p95_ms": 1.65,
+            "p99_ms": 1.72,
+            "max_ms": 1.75,
+            "jitter_ms": 0.14
+          },
+          "download": {
+            "bytes": 1850000000,
+            "duration_ms": 10120,
+            "bps": 1462450592,
+            "mbps": 1462.45,
+            "mean_mbps": 1420.1,
+            "median_mbps": 1445.2,
+            "p25_mbps": 1380.0,
+            "p75_mbps": 1490.5,
+            "p95_mbps": 1520.0,
+            "p99_mbps": 1532.4
+          },
+          "upload": {
+            "bytes": 980000000,
+            "duration_ms": 10080,
+            "bps": 777777777,
+            "mbps": 777.78,
+            "mean_mbps": 760.4,
+            "median_mbps": 772.0,
+            "p25_mbps": 740.2,
+            "p75_mbps": 790.1,
+            "p95_mbps": 805.0,
+            "p99_mbps": 810.2
+          },
+          "loaded_download_latency": {
+            "sent": 20,
+            "received": 20,
+            "loss_pct": 0.0,
+            "min_ms": 2.4,
+            "mean_ms": 6.8,
+            "median_ms": 5.9,
+            "p25_ms": 4.1,
+            "p75_ms": 8.5,
+            "p95_ms": 12.4,
+            "p99_ms": 14.1,
+            "max_ms": 14.8,
+            "jitter_ms": 2.1
+          },
+          "loaded_upload_latency": {
+            "sent": 20,
+            "received": 20,
+            "loss_pct": 0.0,
+            "min_ms": 2.1,
+            "mean_ms": 4.9,
+            "median_ms": 4.5,
+            "p25_ms": 3.2,
+            "p75_ms": 6.1,
+            "p95_ms": 9.2,
+            "p99_ms": 10.4,
+            "max_ms": 10.9,
+            "jitter_ms": 1.5
+          },
+          "udp": {
+            "target": "stun:stun.cloudflare.com:3478",
+            "sent": 200,
+            "received": 200,
+            "loss_pct": 0.0,
+            "out_of_order": 0,
+            "out_of_order_pct": 0.0,
+            "median_ms": 1.312,
+            "jitter_ms": 0.185,
+            "mos": 4.402,
+            "quality": "Excellent"
+          },
+          "udp_note": null,
+          "quality": {
+            "bufferbloat_grade": "A+",
+            "bufferbloat_ms": 4.62,
+            "stability_grade": "A",
+            "stability_cv_pct": 3.85
+          }
+        },
+        "ipv6": null,
+        "notes": []
+      }
+    },
+    {
+      "id": "network.inetspeed",
+      "group": "network",
+      "title": "Apple CDN Speedtest",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 243.4,
+      "elapsed_seconds": 20.0,
+      "output": {
+        "settings": {
+          "threads": 16,
+          "timeout_secs": 15,
+          "max": "2G",
+          "max_bytes": 2147483648,
+          "latency_count": 20,
+          "forced_endpoint": null,
+          "custom_endpoints": false
+        },
+        "selected": {
+          "host": "mensura.cdn-apple.com",
+          "ip": "17.253.85.201",
+          "source": "doh",
+          "rtt_ms": 1.84
+        },
+        "candidates": [],
+        "idle_latency": {
+          "samples": 20,
+          "min_ms": 1.62,
+          "avg_ms": 1.88,
+          "median_ms": 1.81,
+          "max_ms": 2.45,
+          "jitter_ms": 0.19
+        },
+        "rounds": [
+          {
+            "direction": "download",
+            "threads": 1,
+            "bytes": 1620000000,
+            "duration_ms": 8020,
+            "bps": 1615960099,
+            "mbps": 1615.96,
+            "fault_count": 0,
+            "loaded_latency": {
+              "samples": 16,
+              "min_ms": 2.1,
+              "avg_ms": 3.4,
+              "median_ms": 3.2,
+              "max_ms": 5.8,
+              "jitter_ms": 0.62
+            },
+            "error": null
+          },
+          {
+            "direction": "upload",
+            "threads": 16,
+            "bytes": 840000000,
+            "duration_ms": 8150,
+            "bps": 824539877,
+            "mbps": 824.54,
+            "fault_count": 2,
+            "loaded_latency": {
+              "samples": 16,
+              "min_ms": 2.9,
+              "avg_ms": 7.6,
+              "median_ms": 7.1,
+              "max_ms": 15.2,
+              "jitter_ms": 1.94
+            },
+            "error": { "kind": "worker_faults", "detail": 2 }
+          }
+        ],
+        "total_bytes": 2460000000,
+        "warnings": []
+      }
+    },
+    {
+      "id": "network.trace",
+      "group": "network",
+      "title": "路由追踪",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 263.4,
+      "elapsed_seconds": 35.0,
+      "output": {
+        "settings": {
+          "groups": ["all"],
+          "targets": [],
+          "list": false,
+          "geo": true,
+          "tcp": true,
+          "large_packets": 1024
+        },
+        "unknown": [],
+        "exchanges": { "Read": 420 },
+        "ipv4": [
+          {
+            "target": {
+              "Listed": {
+                "id": "bj-ct",
+                "group": "China",
+                "name": "Beijing Telecom 163"
+              }
+            },
+            "host": null,
+            "route": {
+              "Traced": {
+                "reached": true,
+                "hops": [
+                  {
+                    "answers": [
+                      {
+                        "address": "198.51.100.1",
+                        "asn": "AS36002",
+                        "network": "GoMami",
+                        "exchange": null,
+                        "place": "中国 香港",
+                        "latency": 420
+                      }
+                    ]
+                  },
+                  { "answers": [] },
+                  {
+                    "answers": [
+                      {
+                        "address": "59.43.246.1",
+                        "asn": "AS4809",
+                        "network": "中国电信 CN2",
+                        "exchange": null,
+                        "place": "中国 北京",
+                        "latency": 34820
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "tcp": {
+              "port": 443,
+              "packet_size": 1024,
+              "route": {
+                "Traced": {
+                  "reached": false,
+                  "fragmented": { "hop": 2, "mtu": 1460 },
+                  "hops": [
+                    {
+                      "answers": [
+                        {
+                          "address": "198.51.100.1",
+                          "asn": "AS36002",
+                          "network": "GoMami",
+                          "exchange": null,
+                          "place": "中国 香港",
+                          "latency": 450
+                        }
+                      ]
+                    },
+                    {
+                      "answers": [
+                        {
+                          "address": "202.97.33.1",
+                          "asn": "AS4134",
+                          "network": "中国电信",
+                          "exchange": null,
+                          "place": "中国 广东 广州",
+                          "latency": 12600
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "target": { "Netflix": { "city": "Tsuen Wan", "country": "HK" } },
+            "host": "ipv4-c001-hkg001-ix.1.oca.nflxvideo.net",
+            "route": {
+              "Traced": {
+                "reached": true,
+                "hops": [
+                  {
+                    "answers": [
+                      {
+                        "address": "203.0.113.88",
+                        "asn": "AS2906",
+                        "network": "Netflix",
+                        "exchange": "Equinix Hong Kong",
+                        "place": "中国 香港",
+                        "latency": 1250
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "tcp": null
+          }
+        ],
+        "ipv6": []
+      }
+    }
+  ],
+  "not_applicable": ["NUMA 跨节点内存", "SMART 磁盘健康"],
+  "summary": {
+    "items": 12,
+    "completed": 12,
+    "skipped": 0,
+    "failed": 0,
+    "timed_out": 0,
+    "interrupted": 0,
+    "total_seconds": 298.4
+  }
+}

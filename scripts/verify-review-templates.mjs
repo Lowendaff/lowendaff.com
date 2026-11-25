@@ -55,13 +55,26 @@ try {
     await add(name, template.replace('draft: true', 'draft: false'));
     await add(`${name}-draft`, template);
   }
+  const vpsTemplate = await read('templates/reviews/vps.mdx');
   const dedicated = await read('templates/reviews/dedicated-server.mdx');
   const header = dedicated
     .slice(0, dedicated.indexOf('\n## 买'))
     .replace('draft: true', 'draft: false')
+    .replace(/^benchVersion:.*\n/m, '')
     .replace(
       "title: '待填写商家与地区 独立服务器测试记录'",
       "title: 'Template minimal dedicated'",
+    )
+    .replace(
+      "description: '待填写硬件、磁盘健康与网络测试结论。'",
+      "description: 'Synthetic validation fixture.'",
+    )
+    .replace("vendor: '待填写商家'", "vendor: 'Fixture'")
+    .replace("location: '待填写实际机房地区'", "location: 'Los Angeles'")
+    .replace("city: '待填写测评城市'", "city: '洛杉矶'")
+    .replace(
+      "testedAt: '待填写测试日期、时段与时区'",
+      "testedAt: '2026-11-08 12:00 UTC'",
     );
   await add(
     'minimal',
@@ -83,10 +96,15 @@ try {
     );
     assert(html.includes('class="full-review"'));
     assert(html.includes('data-route-explorer="return-route"'));
+    assert(html.includes('data-route-explorer="return-tcp-route"'));
+    assert(html.includes('data-review-tab="ip-quality"'));
     assert(html.includes('data-review-panels="unlock"'));
     assert(!html.includes('href="#speed"') || html.includes('id="speed"'));
     const heading = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)[1];
     assert.equal((heading.match(/测试记录/g) || []).length, 1);
+    if (name === 'vps') {
+      assert(html.includes('data-vm-telemetry-root'));
+    }
     if (name === 'dedicated-server') {
       assert(!heading.includes('VPS'));
       assert(html.includes('SMART 与健康状态'));
@@ -253,6 +271,51 @@ try {
       /Unexpected|Expected|MDX/i,
     );
   }
+  await rejectsArticle(
+    'bad-route-headers',
+    vpsTemplate.replace(
+      /#### 北京电信 163 AS4134 \(IPv4\)[\s\S]*?(?=#### 上海联通)/,
+      '#### 北京电信 163 AS4134 (IPv4)\n\n| 跳数 | 应答地址（脱敏） | ASN | 位置 / 网络 | 最小 RTT（ms） |\n| --- | --- | --- | --- | --- |\n| 1 | 103.73.*.* | AS36002 | 香港 | 0.8 ms |\n\n',
+    ),
+    /standard 6-column headers/,
+  );
+  await rejectsArticle(
+    'missing-standard-section',
+    vpsTemplate.replace(/## IP 质量检测[\s\S]*?(?=## 服务解锁测试)/, ''),
+    /Missing standard vps review section "IP 质量检测"/,
+  );
+  await rejectsArticle(
+    'missing-vm-telemetry',
+    vpsTemplate.replace(/```vm-cpu-telemetry[\s\S]*?```\n\n/, ''),
+    /vm-cpu-telemetry/,
+  );
+  await rejectsArticle(
+    'stale-omitted-section',
+    vpsTemplate.replace(
+      /^benchVersion: '0\.1\.2'\n/m,
+      "benchVersion: '0.1.2'\nomittedSections: ['系统信息']\n",
+    ),
+    /omittedSections lists "系统信息"/,
+  );
+  await rejectsArticle(
+    'placeholder-leak',
+    header.replace(
+      /^---\n/,
+      "---\npermalink: '/reviews/real-published-placeholder-20261108/'\n",
+    ) + '\n## 系统信息\n\n| 项目 | 结果 |\n| --- | --- |\n| CPU | 待填写 |\n',
+    /template placeholders/,
+    false,
+  );
+  await rejectsArticle(
+    'missing-local-asset',
+    header.replace(
+      /^---\n/,
+      "---\npermalink: '/reviews/real-published-missing-asset-20261108/'\n",
+    ) +
+      '\n## BGP 透视\n\n### IPv4\n\n![IPv4 BGP 透视](/archive-assets/nonexistent-fixture/bgp-ipv4.svg)\n',
+    /missing local asset/,
+    false,
+  );
   console.log(
     'PASS: both templates, product titles, optional sections/TOC, raw output escaping, route/unlock output, local image markup, draft exclusion, YAML/schema/Markdown/MDX rejection.',
   );

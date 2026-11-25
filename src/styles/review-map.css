@@ -255,7 +255,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  max-height: 560px;
+  max-height: 640px;
   border: 0;
   background: transparent;
 }
@@ -334,9 +334,6 @@
   background: var(--sticker-blue-bg);
   border-color: var(--accent);
 }
-.atlas-region-item.is-dimmed {
-  opacity: 0.45;
-}
 .atlas-region-meta {
   display: flex;
   align-items: baseline;
@@ -369,14 +366,52 @@
   color: var(--muted);
   font-size: 12px;
 }
+.atlas-articles-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
 .atlas-articles-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
-.atlas-place-group + .atlas-place-group {
+.atlas-articles-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.atlas-articles-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.atlas-articles-scroll::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+}
+.atlas-scroll-fade {
+  position: absolute;
+  inset-inline: 0;
+  height: 28px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+.atlas-scroll-fade-top {
+  top: 0;
+  background: linear-gradient(to bottom, var(--canvas), transparent);
+}
+.atlas-scroll-fade-bottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--canvas), transparent);
+}
+.atlas-articles-frame[data-scroll-up='true'] > .atlas-scroll-fade-top,
+.atlas-articles-frame[data-scroll-down='true'] > .atlas-scroll-fade-bottom {
+  opacity: 1;
+}
+.atlas-place-group:not([hidden]) ~ .atlas-place-group:not([hidden]) {
   margin-top: 14px;
 }
 .atlas-place-group-label {
@@ -398,7 +433,7 @@
 }
 .atlas-article a {
   display: block;
-  padding: 14px 16px;
+  padding: 12px 15px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -415,7 +450,7 @@
   font-size: 14.5px;
   line-height: 1.55;
   letter-spacing: 0;
-  margin-block: 6px 10px;
+  margin-block: 5px 8px;
   text-wrap: pretty;
   overflow-wrap: anywhere;
   color: var(--text);

@@ -1,10 +1,14 @@
 ---
+import { compactRouteHops } from '../../lib/route-hops';
 interface Props {
   headers: string[];
   rows: string[][];
+  links?: Record<string, { href: string; sponsored?: boolean }>;
   caption: string;
+  routeHops?: boolean;
 }
-const { headers, rows, caption } = Astro.props;
+const { headers, rows, links, caption, routeHops } = Astro.props;
+const displayRows = routeHops ? compactRouteHops(headers, rows) : rows;
 ---
 
 <div
@@ -24,23 +28,71 @@ const { headers, rows, caption } = Astro.props;
       </tr>
     </thead>
     <tbody>
-      {rows.map((row) => (
-        <tr>
-          {row.map((cell, i) =>
-            i === 0 ? (
-              <th scope="row">{cell}</th>
-            ) : (
-              <td
-                class:list={{
-                  'data-missing': ['busy', 'N/A', '–', '—'].includes(cell),
-                }}
-              >
-                {cell}
-              </td>
-            ),
-          )}
-        </tr>
-      ))}
+      {displayRows.map((row, rowIndex) =>
+        Array.isArray(row) ? (
+          <tr>
+            {row.map((cell, i) => {
+              const link = !routeHops ? links?.[`${rowIndex}:${i}`] : undefined;
+              const external = link ? /^https?:\/\//.test(link.href) : false;
+              const rel = external
+                ? link?.sponsored
+                  ? 'noopener noreferrer sponsored'
+                  : 'noopener noreferrer'
+                : undefined;
+              return i === 0 ? (
+                <th scope="row">
+                  {link ? (
+                    <a
+                      class="table-cell-link"
+                      href={link.href}
+                      target={external ? '_blank' : undefined}
+                      rel={rel}
+                    >
+                      {cell}
+                    </a>
+                  ) : (
+                    cell
+                  )}
+                </th>
+              ) : (
+                <td
+                  class:list={{
+                    'data-missing':
+                      !link && ['busy', 'N/A', '–', '—'].includes(cell),
+                  }}
+                >
+                  {link ? (
+                    <a
+                      class="table-cell-link"
+                      href={link.href}
+                      target={external ? '_blank' : undefined}
+                      rel={rel}
+                    >
+                      {cell}
+                    </a>
+                  ) : (
+                    cell
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+        ) : (
+          <tr data-no-reply>
+            <th scope="row">
+              {row.first === row.last ? row.first : `${row.first}–${row.last}`}
+            </th>
+            <td class="data-missing">
+              <span role="img" aria-label="无应答" title="无应答">
+                *
+              </span>
+            </td>
+            {headers.slice(2).map(() => (
+              <td class="data-missing">—</td>
+            ))}
+          </tr>
+        ),
+      )}
     </tbody>
   </table>
   {!rows.length && <p class="empty-table">暂无测试数据，稍后补充。</p>}

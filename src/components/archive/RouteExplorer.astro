@@ -103,6 +103,7 @@ const groups = groupNames.map((name) => ({
             ) : (
               <div class="route-table-frame" data-route-table>
                 <BenchmarkResultsTable
+                  routeHops
                   headers={table.headers || []}
                   rows={table.rows || []}
                   caption={table.headings?.at(-1) || '路由测试'}

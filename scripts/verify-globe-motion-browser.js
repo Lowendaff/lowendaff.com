@@ -40,15 +40,15 @@ async function verifyGlobeMotion(page) {
     await verify('returning to mouse resumes', true);
     await p.mouse.move(720, 480);
     await p.waitForTimeout(100);
-    await p.locator('.atlas-marker').click();
-    await p.waitForSelector('dialog[open]');
+    await p.locator('.atlas-marker').first().click();
+    await p.waitForSelector('[data-map-clear]:not([hidden])');
     await p.waitForTimeout(1000);
     await p.mouse.move(5, 5);
-    await verify('review dialog pauses', false);
-    await p.keyboard.press('Escape');
-    await p.waitForFunction(() => !document.querySelector('dialog').open);
+    await verify('selected city pauses', false);
+    await p.locator('[data-map-clear]').click();
+    await p.waitForSelector('[data-map-clear][hidden]', { state: 'attached' });
     await p.mouse.move(5, 8);
-    await verify('closing dialog resumes', true);
+    await verify('clearing selection resumes', true);
     await p.emulateMedia({ reducedMotion: 'reduce' });
     await verify('reduced motion pauses', false);
     if (results.some((result) => !result.passed)) {

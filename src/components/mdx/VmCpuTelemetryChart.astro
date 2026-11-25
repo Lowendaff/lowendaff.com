@@ -1,0 +1,146 @@
+---
+interface Props {
+  id: string;
+  payload: string;
+}
+const { id, payload } = Astro.props;
+const parsed = JSON.parse(payload) as {
+  interval_seconds: number;
+  sample_count: number;
+  samples: Array<{ elapsed_seconds: number }>;
+};
+const maxSec = Math.max(
+  0,
+  ...parsed.samples.map((sample) => sample.elapsed_seconds),
+);
+const totalRound = Math.round(maxSec);
+const durationLabel = `${String(Math.floor(totalRound / 60)).padStart(2, '0')}:${String(totalRound % 60).padStart(2, '0')}`;
+const safeJson = payload.replaceAll('</', '<\\/');
+---
+
+<figure
+  id={id}
+  class="telemetry-card"
+  data-vm-telemetry-root
+  aria-label="虚拟化 CPU 抢占（%st）与软中断（%si）全程采样折线图"
+>
+  <header class="telemetry-head">
+    <strong class="telemetry-title">
+      虚拟化 CPU 抢占（%st）与软中断（%si）采样曲线
+    </strong>
+    <div class="telemetry-actions">
+      <span class="telemetry-meta">
+        每 {parsed.interval_seconds}s 采样 · {parsed.sample_count} 个样本 ·
+        总时长 {durationLabel}
+      </span>
+      <button
+        type="button"
+        class="telemetry-reset"
+        data-vm-telemetry-reset
+        hidden
+      >
+        重置缩放
+      </button>
+    </div>
+  </header>
+  <div class="telemetry-echart" data-vm-telemetry-chart></div>
+  <noscript>
+    <p class="telemetry-noscript">
+      启用 JavaScript 后可查看交互式采样折线图；下方表格已列出完整统计值。
+    </p>
+  </noscript>
+  <script
+    is:inline
+    type="application/json"
+    data-vm-telemetry-json
+    set:html={safeJson}
+  />
+</figure>
+
+<script>
+  import '../../scripts/vm-cpu-telemetry';
+</script>
+
+<style>
+  .telemetry-card {
+    margin: 16px 0;
+    padding: 14px 16px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    min-width: 0;
+  }
+  .telemetry-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+    margin-bottom: 8px;
+  }
+  .telemetry-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .telemetry-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .telemetry-meta {
+    font-family:
+      'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .telemetry-reset {
+    position: relative;
+    height: var(--control-h-sm);
+    padding: 0 var(--control-px-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--subtle);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: var(--transition-ui);
+  }
+  .telemetry-reset::after {
+    content: '';
+    position: absolute;
+    inset: -9px -4px;
+  }
+  .telemetry-reset:hover,
+  .telemetry-reset:focus-visible {
+    background: var(--subtle-hover);
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+  .telemetry-reset[hidden] {
+    display: none;
+  }
+  .telemetry-echart {
+    width: 100%;
+    height: 318px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .telemetry-noscript {
+    margin: 8px 0 4px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  @media (max-width: 640px) {
+    .telemetry-card {
+      padding: 12px 12px 8px;
+    }
+    .telemetry-echart {
+      height: 282px;
+    }
+  }
+</style>

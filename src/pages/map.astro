@@ -141,7 +141,9 @@ const types = [
               <h2>
                 <Icon name="location-line" size={15} />
                 <span>已测评地区</span>
-                <span class="atlas-panel-badge mono">{places.length}</span>
+                <span class="atlas-panel-badge mono" data-map-region-badge>
+                  {places.length}
+                </span>
               </h2>
               <button
                 type="button"
@@ -153,9 +155,10 @@ const types = [
               </button>
             </div>
 
-            {places.length > 0 ? (
+            {places.length > 0 && (
               <div
                 class="atlas-region-list"
+                data-map-region-list
                 role="group"
                 aria-label="按城市联动定位"
               >
@@ -165,6 +168,7 @@ const types = [
                     class="atlas-region-item"
                     data-map-select={place.id}
                     data-city-label={place.city}
+                    data-country-code={place.country}
                     data-country-label={countryLabel(
                       place.country || 'unspecified',
                     )}
@@ -183,12 +187,21 @@ const types = [
                   </button>
                 ))}
               </div>
-            ) : (
-              <p class="atlas-empty-inline">暂无已测评地区。</p>
             )}
+            <p
+              class="atlas-empty-inline"
+              data-map-regions-empty
+              hidden={places.length > 0}
+            >
+              暂无已测评地区。
+            </p>
           </div>
 
-          <div class="atlas-articles-panel" data-map-articles-panel>
+          <div
+            class="atlas-articles-panel"
+            id="map-records"
+            data-map-articles-panel
+          >
             <div class="atlas-panel-header">
               <h2 data-map-title>测评文章列表</h2>
               <span
@@ -200,37 +213,47 @@ const types = [
               </span>
             </div>
 
-            <div class="atlas-articles-scroll" data-map-articles-scroll>
-              {places.map((place) => (
-                <section
-                  class="atlas-place-group"
-                  data-map-place={place.id}
-                  data-city-label={place.city}
-                  data-country-label={countryLabel(
-                    place.country || 'unspecified',
-                  )}
-                >
-                  <div class="atlas-place-group-label">
-                    <Flag code={place.country} size={13} />
-                    <span>
-                      {countryLabel(place.country || 'unspecified')} ·{' '}
-                      {place.city}
-                    </span>
-                  </div>
-                  <ul class="atlas-articles">
-                    {place.articles.map((article) => (
-                      <MapArticle article={article} />
-                    ))}
-                  </ul>
-                </section>
-              ))}
+            <div class="atlas-articles-frame" data-map-articles-frame>
+              <div class="atlas-articles-scroll" data-map-articles-scroll>
+                {places.map((place) => (
+                  <section
+                    class="atlas-place-group"
+                    data-map-place={place.id}
+                    data-city-label={place.city}
+                    data-country-label={countryLabel(
+                      place.country || 'unspecified',
+                    )}
+                  >
+                    <div class="atlas-place-group-label">
+                      <Flag code={place.country} size={13} />
+                      <span>
+                        {countryLabel(place.country || 'unspecified')} ·{' '}
+                        {place.city}
+                      </span>
+                    </div>
+                    <ul class="atlas-articles">
+                      {place.articles.map((article) => (
+                        <MapArticle article={article} />
+                      ))}
+                    </ul>
+                  </section>
+                ))}
 
-              <p class="atlas-empty" data-map-empty hidden={articleCount > 0}>
-                暂无测试记录。
-              </p>
+                <p class="atlas-empty" data-map-empty hidden={articleCount > 0}>
+                  暂无测试记录。
+                </p>
+              </div>
+              <span
+                class="atlas-scroll-fade atlas-scroll-fade-top"
+                aria-hidden="true"
+              ></span>
+              <span
+                class="atlas-scroll-fade atlas-scroll-fade-bottom"
+                aria-hidden="true"
+              ></span>
             </div>
 
-            <a class="atlas-all-records" href="/tags/">
+            <a class="atlas-all-records" href="/tags/" data-map-tags-link>
               <span>在标签云按商家与地区组合检索</span>
               <Icon name="arrow-right-line" size={15} />
             </a>

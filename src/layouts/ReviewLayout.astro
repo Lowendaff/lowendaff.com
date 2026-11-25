@@ -285,9 +285,18 @@ const chapterIcon: Record<string, string> = {
             </a>
           </div>
 
-          {(p.location || p.tags.length > 0) && (
+          {(p.vendor || p.location || p.tags.length > 0) && (
             <div class="related-signal-pills" aria-label="本文关联特征">
               <span class="subtle-label">匹配特征：</span>
+              {p.vendor && (
+                <a
+                  class="tag"
+                  href={`/tags/?merchant=${encodeURIComponent(p.vendor)}`}
+                >
+                  <Icon name="building-2-line" size={12} />
+                  <span translate="no">{p.vendor}</span>
+                </a>
+              )}
               {p.location && (
                 <a
                   class="tag"
@@ -302,10 +311,10 @@ const chapterIcon: Record<string, string> = {
                 </a>
               )}
               {p.tags.map((tag) => (
-                <a class="tag" href="/tags/">
+                <span class="tag">
                   <Icon name="tag-line" size={12} />
                   <span>{tag}</span>
-                </a>
+                </span>
               ))}
             </div>
           )}

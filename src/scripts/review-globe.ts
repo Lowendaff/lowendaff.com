@@ -160,7 +160,7 @@ export async function createReviewGlobe(
   }
   const baseHalfTan = Math.tan((40 * Math.PI) / 360);
   const camera = new PerspectiveCamera(40, 1, 0.1, 30);
-  const home = initialPlaces[0] ?? { latitude: 20, longitude: 25 };
+  let home = initialPlaces[0] ?? { latitude: 20, longitude: 25 };
   const homeDistance = () => (stageBox.clientWidth < 500 ? 3.8 : 3.35);
   camera.position.fromArray(
     globePoint(home.latitude, home.longitude, homeDistance()),
@@ -555,7 +555,11 @@ export async function createReviewGlobe(
         stageBox.clientWidth < 500 ? 3.4 : 2.7,
       );
     },
+    resetHome() {
+      move(home.latitude, home.longitude, homeDistance());
+    },
     setPlaces(places: Place[], selected = '') {
+      home = places[0] ?? { latitude: 20, longitude: 25 };
       const focused = markerLayer.contains(document.activeElement)
         ? (document.activeElement as HTMLElement).dataset.placeId
         : undefined;
@@ -565,7 +569,6 @@ export async function createReviewGlobe(
         button.type = 'button';
         button.className = 'atlas-marker';
         button.dataset.placeId = place.id;
-        button.setAttribute('aria-haspopup', 'dialog');
         button.setAttribute('aria-controls', 'map-records');
         button.setAttribute(
           'aria-label',

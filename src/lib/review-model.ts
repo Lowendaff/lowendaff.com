@@ -7,6 +7,7 @@ export interface ReviewBlock {
   id?: string;
   level?: number;
   text?: string;
+  language?: string;
   html?: string;
   src?: string;
   alt?: string;
@@ -19,6 +20,7 @@ export interface ReviewBlock {
   headings?: string[];
   headers?: string[];
   rows?: string[][];
+  links?: Record<string, { href: string; sponsored?: boolean }>;
 }
 export interface ReviewSection {
   id: string;
@@ -29,7 +31,7 @@ export interface ReviewPanel {
   id: string;
   label: string;
   sections: ReviewSection[];
-  route?: 'return' | 'outbound';
+  route?: 'return' | 'return-tcp' | 'outbound';
 }
 export const reviewNavigation = [
   { id: 'purchase', label: '套餐与购买' },
@@ -52,6 +54,11 @@ export function reviewModel(review: Review) {
       id: 'network',
       label: '网络与 IP',
       sections: [section('网络信息'), section('BGP 透视')],
+    },
+    {
+      id: 'ip-quality',
+      label: 'IP 质量',
+      sections: [section('IP 质量检测')],
     },
   ];
   const unlockSection = section('服务解锁测试');
@@ -102,6 +109,12 @@ export function reviewModel(review: Review) {
       label: '回程路由',
       sections: [section('路由追踪')],
       route: 'return',
+    },
+    {
+      id: 'return-tcp',
+      label: 'TCP 大包回程路由',
+      sections: [section('TCP 大包回程路由')],
+      route: 'return-tcp',
     },
     {
       id: 'outbound',

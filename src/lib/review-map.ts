@@ -27,6 +27,32 @@ export interface ReviewPlace {
   longitude: number;
   articles: MapArticle[];
 }
+export type MapReviewFilter = 'all' | ReviewType;
+export type FilteredReviewPlace = ReviewPlace & {
+  count: number;
+};
+
+export function filterReviewPlaces(
+  places: ReviewPlace[],
+  type: MapReviewFilter = 'all',
+): FilteredReviewPlace[] {
+  const filtered: FilteredReviewPlace[] = [];
+  for (const place of places) {
+    const articles =
+      type === 'all'
+        ? place.articles
+        : place.articles.filter((article) => article.reviewType === type);
+    if (!articles.length) continue;
+    filtered.push({
+      ...place,
+      articles,
+      count: articles.length,
+    });
+  }
+  return filtered.sort(
+    (a, b) => b.count - a.count || a.city.localeCompare(b.city, 'zh-CN'),
+  );
+}
 interface MapPost {
   data: {
     title: string;
@@ -43,6 +69,22 @@ interface MapPost {
   };
 }
 
+export function reviewPlaceId(country: string, city: string) {
+  return `${country.toLowerCase()}-${city.trim().normalize('NFKC').toLowerCase()}`;
+}
+
+export function reviewPlaceHref(
+  country: string,
+  city: string,
+  reviewType: ReviewType,
+) {
+  const params = new URLSearchParams({
+    type: reviewType,
+    place: reviewPlaceId(country, city),
+  });
+  return `/map/?${params.toString()}`;
+}
+
 export function buildReviewMap(posts: MapPost[]) {
   const places = new Map<string, ReviewPlace>();
   for (const { data } of posts) {
@@ -54,11 +96,11 @@ export function buildReviewMap(posts: MapPost[]) {
       vendor: data.vendor,
       country: data.country,
       location: data.location,
-      date: data.testedAt?.slice(0, 10) ?? data.publishedAt,
+      date: data.publishedAt,
       reviewType: data.reviewType,
     };
     const geo = reviewGeoSchema.parse(data.geo);
-    const id = `${data.country.toLowerCase()}-${geo.city.normalize('NFKC').toLowerCase()}`;
+    const id = reviewPlaceId(data.country, geo.city);
     const place = places.get(id) ?? {
       id,
       country: data.country,

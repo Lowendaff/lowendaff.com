@@ -117,12 +117,25 @@
 [data-review-panels='hardware'] .data-table table {
   white-space: normal;
 }
-[data-review-panels='hardware'] .data-table th:first-child {
-  min-width: 130px;
-  width: 24%;
+[data-review-panels='hardware'] .data-table thead th {
+  white-space: nowrap;
 }
-[data-review-panels='hardware'] .data-table td {
-  overflow-wrap: anywhere;
+[data-review-panels='hardware'] .data-table tbody th,
+[data-review-panels='hardware'] .data-table tbody td {
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+[data-review-panels='hardware']
+  .data-table
+  table:not(:has(thead tr > th:nth-child(2):last-child)):has(
+    thead tr > th:nth-child(4)
+  ) {
+  min-width: 480px;
+}
+[data-review-panels='hardware']
+  .data-table
+  table:has(thead tr > th:nth-child(5)) {
+  min-width: 580px;
 }
 .review-revision .route-explorer .data-table {
   max-height: 420px;
@@ -146,13 +159,6 @@
   .review-panel .data-table th,
   .review-panel .data-table td {
     padding: 9px 12px;
-  }
-  [data-review-panels='hardware'] .data-table th:first-child {
-    min-width: 94px !important;
-    width: 30% !important;
-  }
-  [data-review-panels='hardware'] .data-table td {
-    min-width: 0 !important;
   }
   .review-revision .route-explorer .data-table {
     max-height: 360px;

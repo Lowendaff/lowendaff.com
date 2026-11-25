@@ -7,7 +7,7 @@ description: Eyeball 兼顾国际网络和大陆家庭宽带，适合同时面�
 url: https://www.dmit.io/aff.php?aff=2679
 tags:
   - 洛杉矶
-  - 家宽线路优化
+  - 三网优化线路
 theme: indigo
 enabled: true
 order: 0

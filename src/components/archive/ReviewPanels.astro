@@ -51,7 +51,13 @@ const { id, label, panels } = Astro.props;
           {panel.route ? (
             <RouteExplorer
               blocks={section.blocks}
-              id={panel.route === 'return' ? 'return-route' : 'outbound-route'}
+              id={
+                panel.route === 'return'
+                  ? 'return-route'
+                  : panel.route === 'return-tcp'
+                    ? 'return-tcp-route'
+                    : 'outbound-route'
+              }
               inbound={panel.route === 'outbound'}
             />
           ) : section.title === 'BGP 透视' ? (

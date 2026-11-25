@@ -1,0 +1,594 @@
+{
+  "version": "0.1.2",
+  "environment": "物理裸机",
+  "show_ip": false,
+  "system": {
+    "platform": { "kind": "dedicated", "hypervisor": null, "container": null },
+    "arch": "x86_64",
+    "libc": { "kind": "glibc", "version": "2.39" },
+    "hardware": {
+      "state": "done",
+      "data": {
+        "machine": {
+          "vendor": "Supermicro",
+          "name": "SYS-510P-MR",
+          "detail": null
+        },
+        "board": {
+          "vendor": "Supermicro",
+          "name": "X12STH-SYS",
+          "detail": null
+        },
+        "firmware": {
+          "kind": "bios",
+          "vendor": "American Megatrends Inc.",
+          "version": "1.6",
+          "date": "2024-05-10",
+          "timestamp": null
+        },
+        "bmc": {
+          "source": "driver",
+          "vendor": "ASPEED",
+          "firmware": "01.04.12",
+          "ipmi": "2.0",
+          "interface": "kcs"
+        },
+        "ecc_modes": ["multi_bit"],
+        "edac_errors": { "corrected": 0, "uncorrected": 0 },
+        "board_memory_bytes": 68719476736,
+        "slots": [
+          {
+            "name": "DIMMA1",
+            "status": "installed",
+            "size_bytes": 34359738368,
+            "generation": "DDR4",
+            "form": "UDIMM",
+            "speed_mts": 3200,
+            "configured_speed_mts": 3200,
+            "manufacturer": "Micron",
+            "part_number": "MTA18ASF4G72AZ"
+          },
+          {
+            "name": "DIMMB1",
+            "status": "installed",
+            "size_bytes": 34359738368,
+            "generation": "DDR4",
+            "form": "UDIMM",
+            "speed_mts": 3200,
+            "configured_speed_mts": 3200,
+            "manufacturer": "Micron",
+            "part_number": "MTA18ASF4G72AZ"
+          }
+        ]
+      }
+    },
+    "cpu": {
+      "state": "done",
+      "data": {
+        "model": "Intel Xeon E-2388G",
+        "logical": 16,
+        "usable": 16,
+        "quota": null,
+        "sockets": 1,
+        "cores": 8,
+        "mhz": 3200.0,
+        "caches": [
+          { "name": "L1d", "size_bytes": 393216 },
+          { "name": "L2", "size_bytes": 4194304 },
+          { "name": "L3", "size_bytes": 16777216 }
+        ],
+        "aes": true,
+        "virtualization": "intel_vt_x"
+      }
+    },
+    "memory": {
+      "state": "done",
+      "data": {
+        "total_bytes": 67420815360,
+        "used_bytes": 612368384,
+        "used_estimated": false,
+        "swap_total_bytes": 4294967296,
+        "swap_used_bytes": 0
+      }
+    },
+    "storage": {
+      "state": "done",
+      "data": {
+        "raid": [
+          {
+            "address": "0000:01:00.0",
+            "name": "Broadcom MegaRAID SAS-3 3108",
+            "driver": "megaraid_sas",
+            "disks": [{ "name": "sda", "attachment": "array" }]
+          }
+        ],
+        "disks": [
+          {
+            "name": "nvme0n1",
+            "interface": "NVMe",
+            "size_bytes": 1000204886016,
+            "rotational": false,
+            "model": "SAMSUNG MZVL21T0HCLR",
+            "uses": ["/"]
+          },
+          {
+            "name": "sda",
+            "interface": "SCSI",
+            "size_bytes": 2000398934016,
+            "rotational": true,
+            "model": "TOSHIBA MG04ACA200E",
+            "uses": []
+          }
+        ],
+        "filesystems": [
+          {
+            "mount_point": "/",
+            "fs_type": "ext4",
+            "zfs_pool": null,
+            "disks": ["nvme0n1"],
+            "test_directory": true,
+            "total_bytes": 983440120832,
+            "used_bytes": 8420065280,
+            "available_bytes": 925120053248
+          }
+        ]
+      }
+    },
+    "os": {
+      "state": "done",
+      "data": {
+        "distribution": "Ubuntu 24.04.2 LTS",
+        "kernel": "6.8.0-55-generic",
+        "uptime_seconds": 7860,
+        "uptime_from_host": false,
+        "load": [0.12, 0.08, 0.04],
+        "load_from_host": false,
+        "congestion_control": "bbr",
+        "qdisc": "fq"
+      }
+    },
+    "cards": {
+      "state": "done",
+      "data": [
+        {
+          "interface": "eno1",
+          "bus": "pci",
+          "model": "Intel Ethernet Controller I210",
+          "driver": "igb",
+          "link_up": true,
+          "speed_mbps": 1000,
+          "duplex": "full",
+          "mtu": 1500,
+          "pcie_degraded": false,
+          "virtual_functions": 0,
+          "master": null,
+          "master_kind": null,
+          "default_ipv4": true,
+          "default_ipv6": true
+        }
+      ]
+    },
+    "network": {
+      "ipv4": {
+        "reachable": true,
+        "public_address": "203.0.*.*",
+        "source": "probe",
+        "text": "203.0.*.*"
+      },
+      "ipv6": {
+        "reachable": true,
+        "public_address": "2001:0db8:…",
+        "source": "probe",
+        "text": "2001:0db8:…"
+      }
+    }
+  },
+  "runs": [
+    {
+      "id": "memory.numa",
+      "group": "memory",
+      "title": "NUMA 跨节点内存",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 1.0,
+      "elapsed_seconds": 4.0,
+      "output": {
+        "nodes": 2,
+        "rows": [0, 1],
+        "columns": [0, 1],
+        "cells": [
+          [
+            {
+              "bandwidth": {
+                "value": { "text": "42100.0", "value": 42100.0 },
+                "retries": []
+              },
+              "latency": {
+                "value": { "text": "68.2", "value": 68.2 },
+                "retries": []
+              }
+            },
+            {
+              "bandwidth": {
+                "value": { "text": "26400.0", "value": 26400.0 },
+                "retries": []
+              },
+              "latency": {
+                "value": { "text": "118.5", "value": 118.5 },
+                "retries": []
+              }
+            }
+          ],
+          [
+            {
+              "bandwidth": {
+                "value": { "text": "26150.0", "value": 26150.0 },
+                "retries": []
+              },
+              "latency": {
+                "value": { "text": "119.1", "value": 119.1 },
+                "retries": []
+              }
+            },
+            {
+              "bandwidth": {
+                "value": { "text": "41980.0", "value": 41980.0 },
+                "retries": []
+              },
+              "latency": {
+                "value": { "text": "68.6", "value": 68.6 },
+                "retries": []
+              }
+            }
+          ]
+        ],
+        "cache_unknown": false
+      }
+    },
+    {
+      "id": "cpu.bench",
+      "group": "cpu",
+      "title": "CPU 性能测试",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 5.0,
+      "elapsed_seconds": 60.0,
+      "output": {
+        "suites": ["geekbench", "sysbench"],
+        "geekbench": {
+          "status": "done",
+          "output": {
+            "memory": null,
+            "first_to_go": "Done",
+            "scores": {
+              "version": "7.1.0",
+              "single": 2290,
+              "multi": 11420,
+              "url": "https://browser.geekbench.com/v6/cpu/8888888"
+            },
+            "uploads": [],
+            "swap_left": null
+          }
+        },
+        "sysbench": {
+          "status": "done",
+          "output": {
+            "version": "1.0.20",
+            "single": {
+              "threads": 1,
+              "rate": { "text": "3120.4", "value": 3120.4 },
+              "retries": []
+            },
+            "multi": {
+              "threads": 16,
+              "rate": { "text": "39840.2", "value": 39840.2 },
+              "retries": []
+            }
+          }
+        },
+        "seven_zip": null,
+        "unixbench": null,
+        "hpl": null,
+        "passmark": null,
+        "ycruncher": null,
+        "prime95": null
+      }
+    },
+    {
+      "id": "disk.health",
+      "group": "disk",
+      "title": "SMART 磁盘健康",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 65.0,
+      "elapsed_seconds": 2.0,
+      "output": {
+        "version": "7.4",
+        "disks": [
+          {
+            "location": { "Named": "nvme0n1" },
+            "health": "Passed",
+            "values": {
+              "hours": 1420,
+              "temperature": 38,
+              "endurance_used": 1,
+              "written": 4850000000000,
+              "bad_blocks": { "Count": 0 },
+              "interface_errors": null
+            }
+          },
+          {
+            "location": { "Card": { "host": 0, "numbers": [0, 1] } },
+            "health": "Passed",
+            "values": {
+              "hours": 18600,
+              "temperature": 34,
+              "endurance_used": null,
+              "written": null,
+              "bad_blocks": { "Sectors": { "reallocated": 0, "pending": 0 } },
+              "interface_errors": 0
+            }
+          }
+        ],
+        "nodes_left": []
+      }
+    },
+    {
+      "id": "disk.fio",
+      "group": "disk",
+      "title": "fio 磁盘读写",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 67.0,
+      "elapsed_seconds": 20.0,
+      "output": {
+        "version": "3.38",
+        "size": 2147483648,
+        "zfs_needed": null,
+        "tests": [
+          {
+            "block_size": "4k",
+            "outcome": {
+              "Done": {
+                "read_kib": 420500,
+                "read_iops": 105125,
+                "write_kib": 421200,
+                "write_iops": 105300
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ip.quality",
+      "group": "ip",
+      "title": "IP 质量检测",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 87.0,
+      "elapsed_seconds": 5.0,
+      "output": {
+        "settings": { "dnsbl": true, "mail": false, "custom_endpoints": false },
+        "ipv4_reachable": true,
+        "ipv6_reachable": false,
+        "ipv4": {
+          "address": "203.0.*.*",
+          "asn": 174,
+          "org": "COGENT-174",
+          "hostname": null,
+          "rir": "ARIN",
+          "registered_country": "US",
+          "geo_country": "JP",
+          "geo_votes": [
+            { "country": "JP", "count": 5 },
+            { "country": "US", "count": 1 }
+          ],
+          "geo_total": 6,
+          "origin": { "Broadcast": { "registered": "US", "located": "JP" } },
+          "usage": "Hosting",
+          "scores": [
+            [
+              "Scamalytics",
+              { "Numeric": { "score": 8, "max": 100, "level": "Low" } }
+            ]
+          ],
+          "factors": [
+            {
+              "factor": "Datacenter",
+              "checked": 6,
+              "flagged_by": ["IPinfo", "MaxMind"]
+            }
+          ],
+          "dnsbl": { "checked": 100, "refused": 0, "listed": [] },
+          "mail": [],
+          "notes": []
+        },
+        "ipv6": null
+      }
+    },
+    {
+      "id": "ip.media",
+      "group": "ip",
+      "title": "服务解锁测试",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 92.0,
+      "elapsed_seconds": 4.0,
+      "output": {
+        "settings": {
+          "groups": ["global"],
+          "services": [],
+          "custom_base": false
+        },
+        "unknown": [],
+        "ipv4_reachable": true,
+        "ipv6_reachable": true,
+        "results": [
+          {
+            "id": "youtube",
+            "name": "YouTube Premium",
+            "group": "global",
+            "ipv4": { "Yes": { "region": "JP" } },
+            "ipv6": { "Yes": { "region": "JP" } }
+          }
+        ]
+      }
+    },
+    {
+      "id": "network.iperf3",
+      "group": "network",
+      "title": "iperf3 国际测速",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 96.0,
+      "elapsed_seconds": 15.0,
+      "output": {
+        "version": "3.17.1",
+        "settings": { "seconds": 10, "streams": 4, "rate": null },
+        "unknown": [],
+        "ipv4": [
+          {
+            "location": "Singapore",
+            "country": "SG",
+            "provider": "Leaseweb",
+            "upload": {
+              "Measured": {
+                "bits": 890000000,
+                "tries": 1,
+                "rtt": 68100,
+                "retransmits": 0
+              }
+            },
+            "download": {
+              "Measured": {
+                "bits": 920000000,
+                "tries": 1,
+                "rtt": null,
+                "retransmits": null
+              }
+            }
+          }
+        ],
+        "ipv6": [
+          {
+            "location": "Singapore",
+            "country": "SG",
+            "provider": "Leaseweb",
+            "upload": "Busy",
+            "download": {
+              "Measured": {
+                "bits": 905000000,
+                "tries": 1,
+                "rtt": null,
+                "retransmits": null
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "network.trace",
+      "group": "network",
+      "title": "路由追踪",
+      "status": "completed",
+      "status_text": "done",
+      "reason": null,
+      "started_seconds": 111.0,
+      "elapsed_seconds": 12.0,
+      "output": {
+        "settings": {
+          "groups": ["china"],
+          "targets": [],
+          "list": false,
+          "geo": true,
+          "tcp": false
+        },
+        "unknown": [],
+        "exchanges": { "Read": 420 },
+        "ipv4": [
+          {
+            "target": {
+              "Listed": {
+                "id": "sh-cu",
+                "group": "China",
+                "name": "Shanghai Unicom 169"
+              }
+            },
+            "host": null,
+            "route": {
+              "Traced": {
+                "reached": true,
+                "hops": [
+                  {
+                    "answers": [
+                      {
+                        "address": "203.0.113.1",
+                        "asn": "AS174",
+                        "network": "Cogent",
+                        "exchange": null,
+                        "place": "日本 东京",
+                        "latency": 810
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "tcp": null
+          }
+        ],
+        "ipv6": [
+          {
+            "target": {
+              "Listed": {
+                "id": "sh-cu-v6",
+                "group": "China",
+                "name": "Shanghai Unicom 169"
+              }
+            },
+            "host": null,
+            "route": {
+              "Traced": {
+                "reached": true,
+                "hops": [
+                  {
+                    "answers": [
+                      {
+                        "address": "2001:db8:abcd:1::1",
+                        "asn": "AS4837",
+                        "network": "中国联通",
+                        "exchange": null,
+                        "place": "中国 上海",
+                        "latency": 48200
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "tcp": null
+          }
+        ]
+      }
+    }
+  ],
+  "not_applicable": [],
+  "summary": {
+    "items": 8,
+    "completed": 8,
+    "skipped": 0,
+    "failed": 0,
+    "timed_out": 0,
+    "interrupted": 0,
+    "total_seconds": 123.0
+  }
+}

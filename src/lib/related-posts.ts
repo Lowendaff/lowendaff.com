@@ -1,6 +1,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { postPath } from './posts';
 import { countryLabel } from './records';
+import { reviewPlaceHref } from './review-map';
 import { reviewTypeLabels } from './review-types';
 
 const MACRO_REGIONS: Record<string, string> = {
@@ -154,15 +155,11 @@ export function buildRecommendations(
     });
   }
   if (p.geo?.city && p.country) {
-    const placeId = `${p.country.toLowerCase()}-${p.geo.city
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-')}`;
     inferredTopics.push({
       badge: '空间邻近节点',
       title: `在 3D 地图定位 ${p.geo.city}`,
       subtitle: '查看当地及周边城市的测评记录',
-      href: `/map/?place=${encodeURIComponent(placeId)}`,
+      href: reviewPlaceHref(p.country, p.geo.city, p.reviewType),
       icon: 'earth-2-line',
     });
   }

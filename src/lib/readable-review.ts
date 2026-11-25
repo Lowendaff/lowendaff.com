@@ -11,6 +11,35 @@ import type { Root, RootContent, Paragraph } from 'mdast';
 import type { Root as HtmlRoot, Element } from 'hast';
 
 const identifier = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+export const STANDARD_ROUTE_HEADERS = [
+  '跳数',
+  '应答地址（脱敏）',
+  'ASN',
+  '运营商',
+  '位置',
+  '最小 RTT（ms）',
+] as const;
+export const STANDARD_VPS_SECTIONS = [
+  '系统信息',
+  'CPU 性能测试',
+  '磁盘性能测试',
+  '网络信息',
+  'IP 质量检测',
+  '服务解锁测试',
+  '网络带宽测试',
+  '路由追踪',
+  'TCP 大包回程路由',
+] as const;
+export const STANDARD_DEDICATED_SECTIONS = [
+  '系统信息',
+  'CPU 性能测试',
+  '磁盘性能测试',
+  '网络信息',
+  'IP 质量检测',
+  '服务解锁测试',
+  '网络带宽测试',
+  '路由追踪',
+] as const;
 export const compatibilitySchema = z.object({
   sections: z.record(z.string(), identifier).default({}),
   tables: z.record(z.string(), identifier).default({}),
@@ -30,8 +59,35 @@ const optionsSchema = z.object({
   recordId: identifier.optional(),
   archiveSnapshot: z.url().optional(),
   purchaseUrl: z.url().optional(),
+  affiliate: z.boolean().optional(),
   compatibility: compatibilitySchema.optional(),
   images: reviewImagesSchema.optional(),
+});
+const vmCpuMetricSchema = z.object({
+  avg: z.number().min(0),
+  p95: z.number().min(0),
+  max: z.number().min(0),
+  peak_elapsed_seconds: z.number().min(0),
+  peak_item: z.string().nullable().optional(),
+  peak_title: z.string(),
+});
+export const vmCpuTelemetrySchema = z.object({
+  interval_seconds: z.number().positive(),
+  sample_count: z.number().int().positive(),
+  si_pct: vmCpuMetricSchema,
+  st_pct: vmCpuMetricSchema,
+  samples: z
+    .array(
+      z.object({
+        elapsed_seconds: z.number().min(0),
+        time: z.string(),
+        item: z.string().nullable().optional(),
+        title: z.string(),
+        si_pct: z.number().min(0),
+        st_pct: z.number().min(0),
+      }),
+    )
+    .min(1),
 });
 type Block =
   | { type: 'bilibili'; src: string; text?: string; line: number }
@@ -58,6 +114,7 @@ type Block =
       headings: string[];
       headers: string[];
       rows: string[][];
+      links?: Record<string, { href: string; sponsored?: boolean }>;
       line: number;
     };
 type Section = {
@@ -97,7 +154,7 @@ export function parseReadableReview(
   };
   const stableId = (kind: string, path: string) =>
     `${key}-${kind}-${createHash('sha256').update(path).digest('hex').slice(0, 16)}`;
-  const inlineHtml = (node: Paragraph) => {
+  const inlineHtml = (node: Paragraph, sectionTitle?: string) => {
     const root: Root = { type: 'root', children: [node] };
     const html = htmlProcessor.runSync(root) as HtmlRoot;
     const visit = (parent: HtmlRoot | Element) => {
@@ -106,11 +163,14 @@ export function parseReadableReview(
         if (child.tagName === 'a') {
           const href = String(child.properties.href ?? '');
           if (/^https?:\/\//.test(href)) {
+            const isSponsored =
+              href === options.purchaseUrl ||
+              (Boolean(options.affiliate) && sectionTitle === '买');
             child.properties.target = '_blank';
             child.properties.rel = [
               'noopener',
               'noreferrer',
-              ...(href === options.purchaseUrl ? ['sponsored'] : []),
+              ...(isSponsored ? ['sponsored'] : []),
             ];
           } else if (
             !href.startsWith('#') &&
@@ -183,10 +243,37 @@ export function parseReadableReview(
       headings.length = node.depth - 2;
       section.blocks.push({ type: 'heading', level: node.depth, text, line });
     } else if (node.type === 'table') {
-      const rows = node.children.map((row) =>
-        row.children.map((cell) => toString(cell)),
+      const [headerRow, ...bodyRows] = node.children;
+      const headers = headerRow.children.map((cell) => toString(cell));
+      const links: Record<string, { href: string; sponsored?: boolean }> = {};
+      const rows = bodyRows.map((row, rowIdx) =>
+        row.children.map((cell, colIdx) => {
+          checkInline(cell as unknown as RootContent);
+          if (cell.children.length === 1 && cell.children[0].type === 'link') {
+            const href = cell.children[0].url;
+            if (
+              !/^https?:\/\//.test(href) &&
+              !href.startsWith('#') &&
+              !href.startsWith('/') &&
+              !href.startsWith('mailto:')
+            ) {
+              fail(
+                node,
+                'Links must use HTTP(S), mailto, a root-relative path, or an anchor',
+              );
+            }
+            const sponsored =
+              /^https?:\/\//.test(href) &&
+              (href === options.purchaseUrl ||
+                (Boolean(options.affiliate) && section.title === '买'));
+            links[`${rowIdx}:${colIdx}`] = {
+              href,
+              ...(sponsored ? { sponsored: true } : {}),
+            };
+          }
+          return toString(cell);
+        }),
       );
-      const headers = rows.shift()!;
       if (rows.some((row) => row.length !== headers.length))
         fail(node, 'Each row must match the table header width');
       const path = [section.title, ...headings].join(' / ');
@@ -201,9 +288,29 @@ export function parseReadableReview(
         headings: [...headings],
         headers,
         rows,
+        ...(Object.keys(links).length > 0 ? { links } : {}),
         line,
       });
     } else if (node.type === 'code') {
+      const language = node.lang ?? 'text';
+      if (language === 'vm-cpu-telemetry') {
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(node.value);
+        } catch (err) {
+          fail(
+            node,
+            `Invalid vm-cpu-telemetry JSON: ${(err as Error).message}`,
+          );
+        }
+        const checked = vmCpuTelemetrySchema.safeParse(parsed);
+        if (!checked.success) {
+          fail(
+            node,
+            `Invalid vm-cpu-telemetry schema: ${checked.error.issues[0]?.message ?? 'unknown error'}`,
+          );
+        }
+      }
       const path = [section.title, ...headings, 'code'].join(' / ');
       const occurrence = (occurrences.get(path) ?? 0) + 1;
       occurrences.set(path, occurrence);
@@ -212,7 +319,7 @@ export function parseReadableReview(
         id: stableId('code', `${path} / #${occurrence}`),
         headings: [...headings],
         text: node.value,
-        language: node.lang ?? 'text',
+        language,
         line,
       });
     } else if (
@@ -248,7 +355,11 @@ export function parseReadableReview(
         });
         continue;
       }
-      section.blocks.push({ type: 'paragraph', html: inlineHtml(node), line });
+      section.blocks.push({
+        type: 'paragraph',
+        html: inlineHtml(node, section.title),
+        line,
+      });
     } else if (
       node.type === 'blockquote' &&
       node.children.length === 1 &&
@@ -257,7 +368,7 @@ export function parseReadableReview(
       checkInline(node);
       section.blocks.push({
         type: 'quote',
-        html: inlineHtml(node.children[0]),
+        html: inlineHtml(node.children[0], section.title),
         line,
       });
     } else {

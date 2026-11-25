@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { parseReadableReview } from '../src/lib/readable-review.ts';
+import { compactRouteHops } from '../src/lib/route-hops.ts';
 
 const options = {
   format: 'review-markdown',
@@ -14,6 +15,35 @@ const convert = (body, extra = {}) =>
     'fixture.mdx',
   );
 const table = '| Name | Result |\n| --- | --- |\n| Alpha | N/A |';
+
+test('route display merges only adjacent, fully unanswered TTLs within a destination', () => {
+  const headers = ['跳数', 'IP', 'RTT 1', 'RTT 2'];
+  const rows = [
+    ['1', '无应答', '—', '—'],
+    ['2', '*', '*', '*'],
+    ['3', '192.0.*.*', '*', '0 ms'],
+    ['4', '超时', '', ''],
+    ['6', '–', '–', '–'],
+    ['7', '–', '–', '–'],
+    ['7', '203.0.113.7', '9 ms', '*'],
+    ['8', '', '', ''],
+    ['9', '*', '*', '*'],
+    ['10', '*', '*', '*'],
+  ];
+  const original = structuredClone(rows);
+  assert.deepEqual(compactRouteHops(headers, rows), [
+    { first: 1, last: 2 },
+    rows[2],
+    { first: 4, last: 4 },
+    { first: 6, last: 6 },
+    { first: 7, last: 7 },
+    rows[6],
+    rows[7],
+    { first: 9, last: 10 },
+  ]);
+  assert.deepEqual(rows, original);
+  assert.deepEqual(compactRouteHops(['节点', ...headers.slice(1)], rows), rows);
+});
 
 test('GFM cells preserve escaped pipes, literal formatting, entities and missing-data states', () => {
   const review = convert(

@@ -88,8 +88,16 @@ await test('native pre-commit validates the actual index in an isolated build', 
       'scripts/check-staged-content.mjs',
     ])
       files.add(path);
+    const deleted = new Set(
+      execFileSync('git', ['ls-files', '--deleted', '-z'], {
+        cwd: source,
+        encoding: 'utf8',
+      })
+        .split('\0')
+        .filter(Boolean),
+    );
     for (const path of files) {
-      if (path.startsWith('src/content/posts/')) continue;
+      if (path.startsWith('src/content/posts/') || deleted.has(path)) continue;
       await mkdir(dirname(join(root, path)), { recursive: true });
       await cp(join(source, path), join(root, path));
     }

@@ -2,6 +2,7 @@
 import BenchmarkResultsTable from '../mdx/BenchmarkResultsTable.astro';
 import BenchmarkTerminal from '../mdx/BenchmarkTerminal.astro';
 import BilibiliVideo from '../mdx/BilibiliVideo.astro';
+import VmCpuTelemetryChart from '../mdx/VmCpuTelemetryChart.astro';
 import Icon from '../Icon.astro';
 import type { ReviewBlock } from '../../lib/review-model';
 interface Props {
@@ -23,6 +24,7 @@ const local =
     <BenchmarkResultsTable
       headers={block.headers || []}
       rows={block.rows || []}
+      links={block.links}
       caption={block.headings?.at(-1) || sectionTitle}
     />
   </div>
@@ -33,15 +35,21 @@ const local =
 {block.type === 'quote' && (
   <blockquote class="archive-quote" set:html={block.html} />
 )}
-{block.type === 'code' && (
-  <div id={block.id}>
-    <BenchmarkTerminal
-      output={block.text ?? ''}
-      title={block.headings?.at(-1) || sectionTitle}
-      format="raw"
+{block.type === 'code' &&
+  (block.language === 'vm-cpu-telemetry' ? (
+    <VmCpuTelemetryChart
+      id={block.id ?? 'vm-telemetry'}
+      payload={block.text ?? '{}'}
     />
-  </div>
-)}
+  ) : (
+    <div id={block.id}>
+      <BenchmarkTerminal
+        output={block.text ?? ''}
+        title={block.headings?.at(-1) || sectionTitle}
+        format="raw"
+      />
+    </div>
+  ))}
 {block.type === 'heading' &&
   (block.level === 3 ? (
     <h3 class="archive-subheading">{block.text}</h3>
@@ -73,7 +81,13 @@ const local =
     )}
     {local && (
       <figcaption>
-        {sectionTitle === 'BGP 透视' ? 'BGP 透视' : '测评配图 · 点击查看原图'}
+        {sectionTitle === 'BGP 透视'
+          ? 'BGP 透视'
+          : block.alt &&
+              !/\.(?:png|jpe?g|webp|avif|gif|svg)$/i.test(block.alt) &&
+              block.alt !== '原作者测评配图'
+            ? `${block.alt} · 点击查看原图`
+            : '测评配图 · 点击查看原图'}
       </figcaption>
     )}
   </figure>

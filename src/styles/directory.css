@@ -114,6 +114,16 @@
   inset: 0;
   display: block;
 }
+.tag-cloud-empty {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  min-height: 192px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
 .tag-cloud button {
   display: inline-flex;
   align-items: center;
