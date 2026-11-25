@@ -144,7 +144,7 @@ test('VPS v0.1.2 fixture renders all 9 standard sections, ECharts telemetry, spl
   );
 });
 
-test('Dedicated v0.1.2 fixture renders bare-metal DIMM/BMC/NUMA, NVMe+RAID SMART, Broadcast IP, and dual-stack IPv6 routes', async () => {
+test('Dedicated v0.1.2 fixture renders SMBIOS slots/EDAC/BMC, RAID array+passthrough, ZFS, SMART TB+CRC, multi-NIC Bond/PCIe, and TCP routes', async () => {
   const dedReport = await readJson(
     'tests/fixtures/bench/dedicated-v0.1.2.json',
   );
@@ -161,11 +161,14 @@ test('Dedicated v0.1.2 fixture renders bare-metal DIMM/BMC/NUMA, NVMe+RAID SMART
       purchaseUrl: 'https://example.com/dedicated-offer',
       offer: {
         cpu: 'Intel Xeon E-2388G',
-        memory: '64 GB DDR4 ECC',
-        disk: '1 TB NVMe + 2 TB HDD',
-        port: '1 Gbps',
-        traffic: '50 TB',
+        memory: '64 GB DDR4 ECC RDIMM',
+        disk: '1 TB NVMe + 2 TB HDD + 960 GB SSD',
+        raid: 'MegaRAID SAS-3 3108（阵列卷 + HBA 直通）',
+        port: '1 Gbps + 10 Gbps SFP+',
+        traffic: '50 TB（出方向计算）',
         ip: '1 IPv4 + /64 IPv6',
+        ipmi: '独立 ASPEED IPMI 2.0（含远程 KVM）',
+        delivery: '付款后 2 小时内自动交付',
         monthly: '$129.00',
         setup: '$0',
       },
@@ -176,11 +179,41 @@ test('Dedicated v0.1.2 fixture renders bare-metal DIMM/BMC/NUMA, NVMe+RAID SMART
   assert.equal(rendered.reviewType, 'dedicated');
   assert.deepEqual(rendered.omittedSections, []);
   assert(rendered.mdx.includes('## 买'));
+  assert(rendered.mdx.includes('带外管理（IPMI / KVM）'));
   assert(
     rendered.mdx.includes('这是推广链接，通过该链接购买，本站可能获得佣金。'),
   );
+  // Dedicated hardware: SMBIOS slots, downclocked MT/s, disabled DIMM warning, EDAC & BMC
+  assert(
+    rendered.mdx.includes('Supermicro SYS-510P-MR / Supermicro X12STH-SYS'),
+  );
+  assert(rendered.mdx.includes('EDAC 已纠正 CE 2 次，未纠正 UE 0 次'));
+  assert(rendered.mdx.includes('ASPEED · 固件 01.04.12 · IPMI 2.0 · 接口 KCS'));
+  assert(rendered.mdx.includes('### 内存插槽（SMBIOS）'));
+  assert(rendered.mdx.includes('2933 / 3200 MT/s'));
+  assert(rendered.mdx.includes('空槽'));
+  assert(rendered.mdx.includes('已插未启用'));
+  assert(rendered.mdx.includes('插槽 DIMMB2 检测到内存模块信息但处于未启用'));
   assert(rendered.mdx.includes('### NUMA 本地与跨节点访问'));
-  assert(rendered.mdx.includes('重映射 0 / 待定 0'));
+
+  // Dedicated storage: SSD/HDD medium, ZFS pool + test_directory, RAID array vs pass_through, SMART TB + CRC
+  assert(rendered.mdx.includes('NVMe · SSD'));
+  assert(rendered.mdx.includes('SCSI · HDD'));
+  assert(rendered.mdx.includes('zfs（池 rpool，挂载 / · 测试目录'));
+  assert(rendered.mdx.includes('关联设备：sda 阵列卷、sdb 直通盘'));
+  assert(rendered.mdx.includes('4.85 TB'));
+  assert(rendered.mdx.includes('重映射 0 / 待定 0 · CRC 3'));
+
+  // Dedicated NICs: Bond, Down link, SR-IOV VF, and PCIe degradation warning
+  assert(rendered.mdx.includes('Bond bond0 · 默认 IPv4 / IPv6'));
+  assert(rendered.mdx.includes('未连接（Down）'));
+  assert(rendered.mdx.includes('SR-IOV 2 VF'));
+  assert(
+    rendered.mdx.includes(
+      '网卡 ens1f0 当前 PCIe 链路协商速率或通道数低于硬件规格上限',
+    ),
+  );
+
   assert(rendered.mdx.includes('广播 IP（注册地 US，定位 JP）'));
   assert(rendered.mdx.includes('2001:0db8:…'));
 
@@ -194,6 +227,25 @@ test('Dedicated v0.1.2 fixture renders bare-metal DIMM/BMC/NUMA, NVMe+RAID SMART
   for (const required of STANDARD_DEDICATED_SECTIONS) {
     assert(titles.includes(required), `Missing section: ${required}`);
   }
+
+  // Objective omission: if disk.health was skipped on a dedicated server, omittedSections records 'disk-health'
+  const withoutSmart = structuredClone(dedReport);
+  const dhRun = withoutSmart.runs.find((r) => r.id === 'disk.health');
+  dhRun.status = 'skipped';
+  dhRun.output = null;
+  const renderedNoSmart = renderBenchReport(
+    withoutSmart,
+    {
+      vendor: 'ExampleHost',
+      country: 'JP',
+      location: '东京',
+      geo: { city: '东京', latitude: 35.6895, longitude: 139.6917 },
+      publishedAt: '2026-11-25',
+      testedAt: '2026-11-25 20:00 JST',
+    },
+    { assetSlug: 'fixture-dedicated-nosmart' },
+  );
+  assert.deepEqual(renderedNoSmart.omittedSections, ['disk-health']);
 });
 
 test('Unconsumed completed plugin or CPU suite fails loudly instead of silently dropping data', async () => {

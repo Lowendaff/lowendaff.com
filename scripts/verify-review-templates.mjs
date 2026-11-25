@@ -290,6 +290,11 @@ try {
     /vm-cpu-telemetry/,
   );
   await rejectsArticle(
+    'missing-dedicated-disk-health',
+    dedicated.replace(/### SMART 与健康状态[\s\S]*?(?=### fio)/, ''),
+    /disk-health/,
+  );
+  await rejectsArticle(
     'stale-omitted-section',
     vpsTemplate.replace(
       /^benchVersion: '0\.1\.2'\n/m,

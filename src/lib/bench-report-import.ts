@@ -69,9 +69,12 @@ export const benchOfferSchema = z.object({
   cpu: z.string().trim().min(1),
   memory: z.string().trim().min(1),
   disk: z.string().trim().min(1),
+  raid: z.string().trim().min(1).optional(),
   port: z.string().trim().min(1),
   traffic: z.string().trim().min(1),
   ip: z.string().trim().min(1),
+  ipmi: z.string().trim().min(1).optional(),
+  delivery: z.string().trim().min(1).optional(),
   monthly: z.string().trim().min(1),
   setup: z.string().trim().min(1).optional(),
   notes: z.string().trim().min(1).optional(),
@@ -513,40 +516,172 @@ function formatMailStatus(stObj: unknown): string {
   return String(stObj);
 }
 
-function formatDiskHealthLocation(loc: unknown): string {
+function formatDiskHealthLocation(loc: unknown, severalCards = false): string {
   if (loc && typeof loc === 'object') {
     const l = loc as AnyRecord;
     if (typeof l.Named === 'string') return l.Named;
     if (l.Card) {
-      return `RAID Host ${l.Card.host} [${(l.Card.numbers ?? []).join(', ')}]`;
+      const nums = (l.Card.numbers ?? []).join(':');
+      return severalCards
+        ? `RAID Host ${l.Card.host} [${nums}]`
+        : `RAID 槽位 [${nums}]`;
     }
   }
   return String(loc ?? '—');
 }
 
 function formatDiskHealthVerdict(health: unknown): string {
-  if (typeof health === 'string') return health;
+  if (typeof health === 'string') {
+    const map: Record<string, string> = {
+      Passed: '通过（Passed）',
+      Failed: '失败（Failed）',
+      Unsupported: '不支持 SMART',
+    };
+    return map[health] ?? health;
+  }
   if (health && typeof health === 'object') {
     const h = health as AnyRecord;
     if (h.Unknown) {
-      return h.Unknown.smart_off ? '未知（SMART 未开启）' : '未知';
+      return h.Unknown.smart_off ? '未知（SMART 已关闭）' : '未知';
     }
     if (h.ReadFailed) {
+      if (typeof h.ReadFailed === 'string') {
+        const faultMap: Record<string, string> = {
+          Unparsable: '返回无法解析',
+          Unopened: '无法打开设备',
+          Refused: '参数被拒绝',
+        };
+        return `读取失败（${faultMap[h.ReadFailed] ?? h.ReadFailed}）`;
+      }
+      if (h.ReadFailed.Message) return `读取失败（${h.ReadFailed.Message}）`;
       return `读取失败（${JSON.stringify(h.ReadFailed)}）`;
     }
   }
   return String(health ?? '—');
 }
 
-function formatDiskBadBlocks(badBlocks: unknown): string | number | null {
-  if (!badBlocks || typeof badBlocks !== 'object') return null;
-  const b = badBlocks as AnyRecord;
-  if ('Count' in b) return b.Count ?? null;
-  if (b.Sectors) {
-    const realloc = b.Sectors.reallocated ?? '—';
-    const pending = b.Sectors.pending ?? '—';
-    return `重映射 ${realloc} / 待定 ${pending}`;
+function formatDiskWritten(bytes: unknown): string | null {
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes) || bytes < 0) {
+    return null;
   }
+  if (bytes < 1e12) return `${(bytes / 1e9).toFixed(1)} GB`;
+  if (bytes < 1e15) return `${(bytes / 1e12).toFixed(2)} TB`;
+  return `${(bytes / 1e15).toFixed(2)} PB`;
+}
+
+function formatDiskErrors(
+  badBlocks: unknown,
+  interfaceErrors: unknown,
+): string | number | null {
+  let badPart: string | null = null;
+  if (badBlocks && typeof badBlocks === 'object') {
+    const b = badBlocks as AnyRecord;
+    if ('Count' in b && b.Count !== null && b.Count !== undefined) {
+      badPart = String(b.Count);
+    } else if (b.Sectors) {
+      const realloc = b.Sectors.reallocated;
+      const pending = b.Sectors.pending;
+      if (realloc !== null || pending !== null) {
+        badPart = `重映射 ${realloc ?? '—'} / 待定 ${pending ?? '—'}`;
+      }
+    }
+  }
+  const hasCrc =
+    typeof interfaceErrors === 'number' && Number.isFinite(interfaceErrors);
+  if (badPart !== null && hasCrc) {
+    return `${badPart} · CRC ${interfaceErrors}`;
+  }
+  if (badPart !== null) return badPart;
+  if (hasCrc) return `CRC ${interfaceErrors}`;
+  return null;
+}
+
+const ECC_MODE_CN: Record<string, string> = {
+  none: '无 ECC',
+  parity: '奇偶校验（Parity）',
+  single_bit: '单比特纠错 ECC（SECDED）',
+  multi_bit: '多比特纠错 ECC（Multi-bit）',
+  crc: 'CRC 校验',
+  unknown: '未知',
+};
+
+const RAID_ATTACHMENT_CN: Record<string, string> = {
+  array: '阵列卷',
+  pass_through: '直通盘',
+  unknown: '通道未知',
+};
+
+function formatHwLine(line: AnyRecord | null | undefined): string | null {
+  if (!line || typeof line !== 'object') return null;
+  const name = typeof line.name === 'string' ? line.name.trim() : '';
+  const vendorRaw = typeof line.vendor === 'string' ? line.vendor.trim() : '';
+  const vendor =
+    vendorRaw &&
+    (!name || !name.toLowerCase().startsWith(vendorRaw.toLowerCase()))
+      ? vendorRaw
+      : '';
+  const main = [vendor, name].filter(Boolean).join(' ');
+  const detail = typeof line.detail === 'string' ? line.detail.trim() : '';
+  if (!main && !detail) return null;
+  if (!main) return detail;
+  return detail ? `${main}（${detail}）` : main;
+}
+
+function formatFirmwareLine(fw: AnyRecord | null | undefined): string | null {
+  if (!fw || typeof fw !== 'object') return null;
+  if (fw.kind === 'u_boot') {
+    return fw.version ? `U-Boot ${fw.version}` : 'U-Boot';
+  }
+  if (fw.kind === 'raspberry_pi') {
+    const built =
+      typeof fw.timestamp === 'number'
+        ? new Date(fw.timestamp * 1000).toISOString().slice(0, 10)
+        : null;
+    return built
+      ? `Raspberry Pi Bootloader（${built}）`
+      : 'Raspberry Pi Bootloader';
+  }
+  const main = [fw.vendor, fw.version].filter(Boolean).join(' ');
+  const dateStr =
+    typeof fw.date === 'string' && fw.date.trim() ? fw.date.trim() : '';
+  if (!main && !dateStr) return null;
+  return dateStr ? `${main || 'BIOS'}（${dateStr}）` : main;
+}
+
+function formatBmcLine(bmc: AnyRecord | null | undefined): string | null {
+  if (!bmc || typeof bmc !== 'object') return null;
+  if (bmc.source === 'acpi') return 'ACPI IPMI 设备（IPI0001）';
+  const parts = [
+    bmc.vendor ?? null,
+    bmc.firmware ? `固件 ${bmc.firmware}` : null,
+    bmc.ipmi ? `IPMI ${bmc.ipmi}` : null,
+    bmc.interface ? `接口 ${String(bmc.interface).toUpperCase()}` : null,
+  ].filter(Boolean);
+  if (parts.length > 0) return parts.join(' · ');
+  return bmc.source === 'driver' ? 'IPMI 驱动已就绪' : '固件声明支持 BMC';
+}
+
+function formatSlotCapacity(slot: AnyRecord): string {
+  if (slot.status === 'empty') return '空槽';
+  if (slot.status === 'disabled') return '已插未启用';
+  if (slot.status === 'unknown') return '未知容量';
+  const bytes = slot.size_bytes;
+  if (typeof bytes === 'number' && bytes > 0) {
+    if (bytes % 2 ** 30 === 0) return `${bytes / 2 ** 30} GB`;
+    if (bytes % 2 ** 20 === 0) return `${bytes / 2 ** 20} MB`;
+    return gib(bytes) ?? '—';
+  }
+  return '—';
+}
+
+function formatSlotSpeed(slot: AnyRecord): string | null {
+  const cfg = slot.configured_speed_mts;
+  const rated = slot.speed_mts;
+  if (cfg && rated) {
+    return cfg === rated ? `${cfg} MT/s` : `${cfg} / ${rated} MT/s`;
+  }
+  if (cfg) return `${cfg} MT/s`;
+  if (rated) return `额定 ${rated} MT/s`;
   return null;
 }
 
@@ -886,11 +1021,16 @@ export function renderBenchReport(
       ['处理器', offer.cpu],
       ['内存', offer.memory],
       ['硬盘', offer.disk],
+    );
+    if (offer.raid) offerRows.push(['阵列 / RAID', offer.raid]);
+    offerRows.push(
       ['公网端口', offer.port],
       ['流量', offer.traffic],
       ['IP 地址', offer.ip],
-      ['月租', price ?? offer.monthly],
     );
+    if (offer.ipmi) offerRows.push(['带外管理（IPMI / KVM）', offer.ipmi]);
+    if (offer.delivery) offerRows.push(['交付时效', offer.delivery]);
+    offerRows.push(['月租', price ?? offer.monthly]);
     if (offer.setup) offerRows.push(['一次性初装费', offer.setup]);
     table(['套餐项目', '商家标称配置与费用'], offerRows);
     para(`[前往 ${editorial.vendor} 购买此套餐](${editorial.purchaseUrl})`);
@@ -916,84 +1056,158 @@ export function renderBenchReport(
     para(
       `lowendaff-bench ${report.version} 完成 ${summary.completed} 个测试组，用时 ${mins} 分 ${secs} 秒。系统未检测到虚拟化（${sys.arch ?? '—'}）。以下均为本机本轮读数。`,
     );
-    const installedSlots = (hw?.slots ?? []).filter(
-      (sl: AnyRecord) => sl.status === 'installed',
+    const allSlots: AnyRecord[] = Array.isArray(hw?.slots) ? hw.slots : [];
+    const installedSlots = allSlots.filter((sl) => sl.status === 'installed');
+    const uniqueGenForms = Array.from(
+      new Set(
+        installedSlots
+          .map((sl) => [sl.generation, sl.form].filter(Boolean).join(' '))
+          .filter(Boolean),
+      ),
+    );
+    const uniqueSpeeds = Array.from(
+      new Set(
+        installedSlots
+          .map((sl) => sl.configured_speed_mts ?? sl.speed_mts)
+          .filter(Boolean),
+      ),
     );
     const dimmSummary =
       installedSlots.length > 0
-        ? `（${installedSlots.length} 条 ${installedSlots[0].generation ?? 'DIMM'}${installedSlots[0].configured_speed_mts ? ` @ ${installedSlots[0].configured_speed_mts} MT/s` : ''}）`
+        ? `（${installedSlots.length} 条${uniqueGenForms.length > 0 ? ` ${uniqueGenForms.join('/')}` : ' DIMM'}${uniqueSpeeds.length > 0 ? ` @ ${uniqueSpeeds.join('/')} MT/s` : ''}）`
         : '';
-    const eccSummary =
-      hw?.ecc_modes?.length && !hw.ecc_modes.includes('none')
-        ? `，ECC: ${hw.ecc_modes.join('/')}`
+    const memUsedTxt =
+      typeof memInfo.used_bytes === 'number'
+        ? `（采样已用 ${mib(memInfo.used_bytes)}）`
         : '';
     const memLine = hw?.board_memory_bytes
-      ? `${gib(hw.board_memory_bytes)}${dimmSummary} / ${gib(memInfo.total_bytes)}${eccSummary}`
-      : `${gib(memInfo.total_bytes)}${dimmSummary}${eccSummary}`;
-    const fwParts = [hw?.firmware?.vendor, hw?.firmware?.version].filter(
-      Boolean,
+      ? `${gib(hw.board_memory_bytes)}${dimmSummary} / 系统可见 ${gib(memInfo.total_bytes)}${memUsedTxt}`
+      : `${gib(memInfo.total_bytes)}${dimmSummary}${memUsedTxt}`;
+
+    const eccLabels = ((hw?.ecc_modes ?? []) as string[]).map(
+      (m) => ECC_MODE_CN[m] ?? m,
     );
-    const bmcParts = hw?.bmc
-      ? [hw.bmc.vendor, hw.bmc.firmware, hw.bmc.interface].filter(Boolean)
-      : [];
-    const fwLine = [
-      fwParts.join(' ') || null,
-      bmcParts.length > 0 ? `BMC: ${bmcParts.join(' ')}` : null,
-    ]
-      .filter(Boolean)
+    const edac = hw?.edac_errors;
+    const eccLine =
+      eccLabels.length > 0 || edac
+        ? [
+            eccLabels.length > 0 ? eccLabels.join(' / ') : null,
+            edac
+              ? `EDAC 已纠正 CE ${edac.corrected} 次，未纠正 UE ${edac.uncorrected} 次`
+              : null,
+          ]
+            .filter(Boolean)
+            .join('（') + (eccLabels.length > 0 && edac ? '）' : '')
+        : null;
+
+    const swapLine =
+      memInfo.swap_total_bytes > 0
+        ? `${mib(memInfo.swap_total_bytes)}（已用 ${mib(memInfo.swap_used_bytes ?? 0)}）`
+        : '0 MiB';
+    const machineBoard = [formatHwLine(hw?.machine), formatHwLine(hw?.board)]
+      .filter(
+        (v, idx, arr): v is string => Boolean(v) && arr.indexOf(v) === idx,
+      )
       .join(' / ');
-    const machineBoard = [hw?.machine?.name, hw?.board?.name]
-      .filter((v, idx, arr) => Boolean(v) && arr.indexOf(v) === idx)
-      .join(' / ');
-    table(
-      ['项目', '结果'],
+    const fwLine = formatFirmwareLine(hw?.firmware);
+    const bmcLine = formatBmcLine(hw?.bmc);
+    const aesVirtParts = [
+      cpuInfo.aes === true
+        ? 'AES 可用'
+        : cpuInfo.aes === false
+          ? 'AES 未开启'
+          : null,
+      cpuInfo.virtualization && cpuInfo.virtualization !== 'not_applicable'
+        ? `虚拟化 ${cpuInfo.virtualization}`
+        : null,
+    ].filter(Boolean);
+    const platformRows: unknown[][] = [
+      ['机型 / 主板', machineBoard || null],
+      ['架构 / 处理器', `${sys.arch ?? '—'} / ${cpuInfo.model ?? '—'}`],
       [
-        ['机型 / 主板', machineBoard || null],
-        ['架构 / 处理器', `${sys.arch ?? '—'} / ${cpuInfo.model ?? '—'}`],
-        [
-          '插槽 / 核心 / 逻辑 CPU',
-          `${cpuInfo.sockets ?? '—'} / ${cpuInfo.cores ?? '—'} / ${cpuInfo.logical ?? '—'}（进程可用 ${cpuInfo.usable ?? '—'}）`,
-        ],
-        [
-          '报告频率',
-          cpuInfo.mhz !== null && cpuInfo.mhz !== undefined
-            ? `${Number(cpuInfo.mhz.toFixed(3))} MHz`
-            : null,
-        ],
-        [
-          'CPU 缓存',
-          (cpuInfo.caches ?? [])
-            .map(
-              (x: AnyRecord) =>
-                `${x.name} ${Math.floor(x.size_bytes / 1024)} KiB`,
-            )
-            .join('、') || null,
-        ],
-        ['板载内存 / 系统可见', memLine],
-        ['系统采样时的 swap', mib(memInfo.swap_total_bytes)],
-        ['固件', fwLine || null],
-        [
-          '系统 / 内核 / C 库',
-          `${osInfo.distribution ?? '—'} / ${osInfo.kernel ?? '—'} / ${sys.libc.kind}${sys.libc.version ? ` ${sys.libc.version}` : ''}`,
-        ],
-        [
-          '系统运行时间',
-          fmtUptime(osInfo.uptime_seconds)
-            ? `${fmtUptime(osInfo.uptime_seconds)}${osInfo.uptime_from_host ? '（宿主机）' : ''}`
-            : null,
-        ],
-        [
-          '采样时系统负载（1 / 5 / 15 min）',
-          Array.isArray(osInfo.load)
-            ? `${osInfo.load.map((x: number) => x.toFixed(2)).join(' / ')}${osInfo.load_from_host ? '（宿主机）' : ''}`
-            : null,
-        ],
-        [
-          '拥塞控制 / 队列',
-          `${osInfo.congestion_control ?? '—'} / ${osInfo.qdisc ?? '—'}`,
-        ],
+        '插槽 / 核心 / 逻辑 CPU',
+        `${cpuInfo.sockets ?? '—'} / ${cpuInfo.cores ?? '—'} / ${cpuInfo.logical ?? '—'}（进程可用 ${cpuInfo.usable ?? '—'}${aesVirtParts.length > 0 ? `，${aesVirtParts.join('，')}` : ''}）`,
+      ],
+      [
+        '报告频率',
+        cpuInfo.mhz !== null && cpuInfo.mhz !== undefined
+          ? `${Number(cpuInfo.mhz.toFixed(3))} MHz`
+          : null,
+      ],
+      [
+        'CPU 缓存',
+        (cpuInfo.caches ?? [])
+          .map(
+            (x: AnyRecord) =>
+              `${x.name} ${Math.floor(x.size_bytes / 1024)} KiB`,
+          )
+          .join('、') || null,
+      ],
+      ['物理内存 / 系统可见', memLine],
+    ];
+    if (eccLine) platformRows.push(['ECC 与内存纠错', eccLine]);
+    platformRows.push(['系统采样时的 swap', swapLine]);
+    platformRows.push(['固件', fwLine]);
+    if (bmcLine) platformRows.push(['带外管理（BMC）', bmcLine]);
+    platformRows.push(
+      [
+        '系统 / 内核 / C 库',
+        `${osInfo.distribution ?? '—'} / ${osInfo.kernel ?? '—'} / ${sys.libc.kind}${sys.libc.version ? ` ${sys.libc.version}` : ''}`,
+      ],
+      [
+        '系统运行时间',
+        fmtUptime(osInfo.uptime_seconds)
+          ? `${fmtUptime(osInfo.uptime_seconds)}${osInfo.uptime_from_host ? '（宿主机）' : ''}`
+          : null,
+      ],
+      [
+        '采样时系统负载（1 / 5 / 15 min）',
+        Array.isArray(osInfo.load)
+          ? `${osInfo.load.map((x: number) => x.toFixed(2)).join(' / ')}${osInfo.load_from_host ? '（宿主机）' : ''}`
+          : null,
+      ],
+      [
+        '拥塞控制 / 队列',
+        `${osInfo.congestion_control ?? '—'} / ${osInfo.qdisc ?? '—'}`,
       ],
     );
+    table(['项目', '结果'], platformRows);
+
+    if (allSlots.length > 0) {
+      heading(3, '内存插槽（SMBIOS）');
+      const emptyCount = allSlots.filter((s) => s.status === 'empty').length;
+      const disabledSlots = allSlots
+        .map((s, idx) => ({
+          slot: s,
+          label: s.name ?? `Slot ${idx + 1}`,
+        }))
+        .filter(({ slot }) => slot.status === 'disabled');
+      const summaryBits = [
+        `共检测到 ${allSlots.length} 个内存插槽`,
+        `已启用 ${installedSlots.length} 条`,
+        ...(emptyCount > 0 ? [`空置 ${emptyCount} 个`] : []),
+        ...(disabledSlots.length > 0
+          ? [`已插未启用 ${disabledSlots.length} 个`]
+          : []),
+      ];
+      para(`${summaryBits.join('，')}。`);
+      table(
+        ['插槽', '容量 / 状态', '规格', '频率（运行 / 额定）', '厂商', '料号'],
+        allSlots.map((sl, idx) => [
+          sl.name ?? `Slot ${idx + 1}`,
+          formatSlotCapacity(sl),
+          [sl.generation, sl.form].filter(Boolean).join(' ') || null,
+          formatSlotSpeed(sl),
+          sl.manufacturer ?? null,
+          sl.part_number ?? null,
+        ]),
+      );
+      if (disabledSlots.length > 0) {
+        para(
+          `注意：插槽 ${disabledSlots.map((d) => d.label).join('、')} 检测到内存模块信息但处于未启用（Disabled）状态，建议核查内存条状态或主板通道。`,
+        );
+      }
+    }
   } else {
     para(
       `lowendaff-bench ${report.version} 完成 ${summary.completed} 个测试组，用时 ${mins} 分 ${secs} 秒。运行环境为 ${report.environment}（${sys.arch ?? '—'}）。以下均为本机本轮读数。`,
@@ -1202,6 +1416,11 @@ export function renderBenchReport(
         }
       }
       table(['CPU 节点', '内存节点', '带宽（MiB/s）', '延迟（ns）'], numaRows);
+      if (numa.cache_unknown) {
+        para(
+          '末级缓存容量未能从系统读取，按默认缓存规模估算跨节点测试工作集。',
+        );
+      }
     }
   }
 
@@ -1376,46 +1595,109 @@ export function renderBenchReport(
   }
 
   // ## 磁盘性能测试
+  let hasDiskHealth = false;
   if (
     (storInfo.disks ?? []).length > 0 ||
     completedRuns['disk.health'] ||
     completedRuns['disk.fio']
   ) {
     heading(2, '磁盘性能测试');
+    const raidCards: AnyRecord[] = Array.isArray(storInfo.raid)
+      ? storInfo.raid
+      : [];
+    const raidAttachmentByDisk = new Map<string, string>();
+    for (const rc of raidCards) {
+      for (const rd of (rc.disks ?? []) as AnyRecord[]) {
+        if (rd.name) {
+          raidAttachmentByDisk.set(
+            rd.name,
+            RAID_ATTACHMENT_CN[rd.attachment] ?? rd.attachment,
+          );
+        }
+      }
+    }
     if ((storInfo.disks ?? []).length > 0) {
       heading(
         3,
         reviewType === 'dedicated' ? '磁盘与文件系统' : '虚拟磁盘与文件系统',
       );
       table(
-        ['设备', '型号', '接口', '容量（GB）', '文件系统与可用空间'],
+        [
+          '设备',
+          '型号',
+          reviewType === 'dedicated' ? '接口 / 介质' : '接口',
+          '容量（GB）',
+          '文件系统与可用空间',
+        ],
         (storInfo.disks as AnyRecord[]).map((dItem) => {
           const fsMatches = (storInfo.filesystems ?? []).filter(
             (f: AnyRecord) => (f.disks ?? []).includes(dItem.name),
           );
-          const fsDesc =
-            fsMatches
-              .map(
-                (f: AnyRecord) =>
-                  `${f.fs_type}（挂载 ${f.mount_point}，可用 ${val(f.available_bytes / 1e9) ?? '—'} GB）`,
-              )
-              .join(', ') || null;
+          const mountedPools = new Set(
+            fsMatches.map((f: AnyRecord) => f.zfs_pool).filter(Boolean),
+          );
+          const fsParts = fsMatches.map((f: AnyRecord) => {
+            const testMark = f.test_directory ? ' · 测试目录' : '';
+            const availTxt =
+              f.available_bytes !== null && f.available_bytes !== undefined
+                ? `可用 ${val(f.available_bytes / 1e9) ?? '—'} GB`
+                : '容量未知';
+            if (f.zfs_pool) {
+              return `zfs（池 ${f.zfs_pool}，挂载 ${f.mount_point}${testMark}，${availTxt}）`;
+            }
+            return `${f.fs_type}（挂载 ${f.mount_point}${testMark}，${availTxt}）`;
+          });
+          for (const u of (dItem.uses ?? []) as string[]) {
+            if (u === 'swap') {
+              fsParts.push('swap 交换分区');
+            } else if (u.startsWith('zfs:')) {
+              const pool = u.slice(4);
+              if (!mountedPools.has(pool))
+                fsParts.push(`ZFS 池成员（${pool}）`);
+            }
+          }
+          const raidMode = raidAttachmentByDisk.get(dItem.name);
+          if (raidMode) fsParts.push(`RAID ${raidMode}`);
+          const mediumLabel =
+            reviewType === 'dedicated'
+              ? dItem.rotational === false
+                ? 'SSD'
+                : dItem.rotational === true
+                  ? 'HDD'
+                  : null
+              : null;
+          const ifaceCell =
+            mediumLabel && dItem.interface
+              ? `${dItem.interface} · ${mediumLabel}`
+              : (dItem.interface ?? mediumLabel);
           return [
             dItem.name,
             dItem.model ?? null,
-            dItem.interface,
+            ifaceCell,
             val(dItem.size_bytes / 1e9),
-            fsDesc,
+            fsParts.join('；') || null,
           ];
         }),
       );
-      if (Array.isArray(storInfo.raid) && storInfo.raid.length > 0) {
-        const raidDesc = storInfo.raid
-          .map(
-            (rc: AnyRecord) =>
-              `${rc.name ?? rc.address}（驱动 ${rc.driver ?? '—'}）`,
-          )
-          .join('、');
+      if (raidCards.length > 0) {
+        const raidDesc = raidCards
+          .map((rc: AnyRecord) => {
+            const diskModes = ((rc.disks ?? []) as AnyRecord[])
+              .map(
+                (rd) =>
+                  `${rd.name} ${RAID_ATTACHMENT_CN[rd.attachment] ?? rd.attachment}`,
+              )
+              .join('、');
+            const detail = [
+              rc.address ? `PCI ${rc.address}` : null,
+              `驱动 ${rc.driver ?? '—'}`,
+              diskModes ? `关联设备：${diskModes}` : null,
+            ]
+              .filter(Boolean)
+              .join('，');
+            return `${rc.name ?? rc.address}（${detail}）`;
+          })
+          .join('；');
         para(`检测到阵列控制器：${raidDesc}。`);
       }
     }
@@ -1425,6 +1707,14 @@ export function renderBenchReport(
       (completedRuns['disk.health'].disks ?? []).length > 0
     ) {
       const dh = completedRuns['disk.health'];
+      const dhDisks = dh.disks as AnyRecord[];
+      const raidHostSet = new Set(
+        dhDisks
+          .map((r) => r.location?.Card?.host)
+          .filter((h) => h !== undefined && h !== null),
+      );
+      const severalCards = raidHostSet.size > 1;
+      hasDiskHealth = true;
       heading(3, 'SMART 与健康状态');
       table(
         [
@@ -1432,31 +1722,39 @@ export function renderBenchReport(
           'SMART',
           '通电（h）',
           '温度（°C）',
-          '写入量（GB）',
+          '累计写入',
           '寿命已消耗',
-          '坏块 / 扇区',
+          '坏块 / 接口错误',
         ],
-        (dh.disks as AnyRecord[]).map((r) => [
-          formatDiskHealthLocation(r.location),
+        dhDisks.map((r) => [
+          formatDiskHealthLocation(r.location, severalCards),
           formatDiskHealthVerdict(r.health),
           r.values?.hours ?? null,
           r.values?.temperature ?? null,
-          r.values?.written !== null && r.values?.written !== undefined
-            ? val(r.values.written / 1e9)
-            : null,
+          formatDiskWritten(r.values?.written),
           r.values?.endurance_used !== null &&
           r.values?.endurance_used !== undefined
             ? `${r.values.endurance_used}%`
             : null,
-          formatDiskBadBlocks(r.values?.bad_blocks),
+          formatDiskErrors(r.values?.bad_blocks, r.values?.interface_errors),
         ]),
       );
+      if (Array.isArray(dh.nodes_left) && dh.nodes_left.length > 0) {
+        const leftList = (dh.nodes_left as AnyRecord[])
+          .map((n) => `${n.path}（${n.error}）`)
+          .join('、');
+        para(`注意：smartctl 创建的临时设备节点未能自动清理：${leftList}。`);
+      }
     }
 
     if (completedRuns['disk.fio']) {
       const fio = completedRuns['disk.fio'];
       heading(3, `fio ${fio.version ?? ''}`.trim());
-      para(`测试文件大小为 ${mib(fio.size)}。带宽保留工具原始单位 KiB/s。`);
+      let fioNote = `测试文件大小为 ${mib(fio.size)}。带宽保留工具原始单位 KiB/s。`;
+      if (typeof fio.zfs_needed === 'number' && fio.zfs_needed > 0) {
+        fioNote += `ZFS 空间膨胀预估需至少 ${mib(fio.zfs_needed)} 可用空间。`;
+      }
+      para(fioNote);
       table(
         ['块大小', '读取（KiB/s）', '读取 IOPS', '写入（KiB/s）', '写入 IOPS'],
         (fio.tests as AnyRecord[]).map((t) => {
@@ -1487,24 +1785,67 @@ export function renderBenchReport(
           ? '网卡与公网连通性'
           : '虚拟网卡与公网连通性',
       );
-      table(
-        [
-          '接口',
-          reviewType === 'dedicated'
-            ? '网卡型号 / 驱动'
-            : '虚拟网卡型号 / 驱动',
-          '协商速率（Mbps）',
-          '双工',
-          'MTU',
-        ],
-        cardsInfo.map((c) => [
-          c.interface,
-          c.model ? `${c.model}（${c.driver ?? '—'}）` : (c.driver ?? null),
-          c.speed_mbps ?? null,
-          c.duplex ?? null,
-          c.mtu ?? null,
-        ]),
+      const hasRoleCol = cardsInfo.some(
+        (c) =>
+          Boolean(c.master) ||
+          Boolean(c.default_ipv4) ||
+          Boolean(c.default_ipv6) ||
+          (typeof c.virtual_functions === 'number' && c.virtual_functions > 0),
       );
+      const cardHeaders = [
+        '接口',
+        reviewType === 'dedicated' ? '网卡型号 / 驱动' : '虚拟网卡型号 / 驱动',
+        '链路与速率',
+        'MTU',
+        ...(hasRoleCol ? ['聚合与默认路由'] : []),
+      ];
+      table(
+        cardHeaders,
+        cardsInfo.map((c) => {
+          const linkTxt =
+            c.link_up === false
+              ? '未连接（Down）'
+              : c.speed_mbps
+                ? `${c.speed_mbps} Mbps${c.duplex ? `（${c.duplex}）` : ''}`
+                : '已连接（速率未上报）';
+          const roles: string[] = [];
+          if (c.master) {
+            const kindLabel =
+              c.master_kind === 'bond'
+                ? 'Bond'
+                : c.master_kind === 'bridge'
+                  ? '网桥'
+                  : '上层接口';
+            roles.push(`${kindLabel} ${c.master}`);
+          }
+          if (c.default_ipv4 && c.default_ipv6) {
+            roles.push('默认 IPv4 / IPv6');
+          } else if (c.default_ipv4) {
+            roles.push('默认 IPv4');
+          } else if (c.default_ipv6) {
+            roles.push('默认 IPv6');
+          }
+          if (
+            typeof c.virtual_functions === 'number' &&
+            c.virtual_functions > 0
+          ) {
+            roles.push(`SR-IOV ${c.virtual_functions} VF`);
+          }
+          return [
+            c.interface,
+            c.model ? `${c.model}（${c.driver ?? '—'}）` : (c.driver ?? null),
+            linkTxt,
+            c.mtu ?? null,
+            ...(hasRoleCol ? [roles.join(' · ') || null] : []),
+          ];
+        }),
+      );
+      const degradedCards = cardsInfo.filter((c) => c.pcie_degraded === true);
+      if (degradedCards.length > 0) {
+        para(
+          `注意：网卡 ${degradedCards.map((c) => c.interface).join('、')} 当前 PCIe 链路协商速率或通道数低于硬件规格上限（pcie_degraded），高带宽传输可能受插槽通道限制。`,
+        );
+      }
     }
     const netV4 = sys.network?.ipv4;
     const netV6 = sys.network?.ipv6;
@@ -2141,6 +2482,12 @@ export function renderBenchReport(
       omittedSet.add('vm-cpu-telemetry');
     } else {
       omittedSet.delete('vm-cpu-telemetry');
+    }
+  } else if (reviewType === 'dedicated') {
+    if (!hasDiskHealth) {
+      omittedSet.add('disk-health');
+    } else {
+      omittedSet.delete('disk-health');
     }
   }
   const omittedSections = Array.from(omittedSet);

@@ -39,6 +39,7 @@ export const STANDARD_DEDICATED_SECTIONS = [
   '服务解锁测试',
   '网络带宽测试',
   '路由追踪',
+  'TCP 大包回程路由',
 ] as const;
 export const compatibilitySchema = z.object({
   sections: z.record(z.string(), identifier).default({}),

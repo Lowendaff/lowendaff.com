@@ -34,7 +34,7 @@
           "interface": "kcs"
         },
         "ecc_modes": ["multi_bit"],
-        "edac_errors": { "corrected": 0, "uncorrected": 0 },
+        "edac_errors": { "corrected": 2, "uncorrected": 0 },
         "board_memory_bytes": 68719476736,
         "slots": [
           {
@@ -42,22 +42,44 @@
             "status": "installed",
             "size_bytes": 34359738368,
             "generation": "DDR4",
-            "form": "UDIMM",
+            "form": "RDIMM",
             "speed_mts": 3200,
-            "configured_speed_mts": 3200,
+            "configured_speed_mts": 2933,
             "manufacturer": "Micron",
-            "part_number": "MTA18ASF4G72AZ"
+            "part_number": "MTA36ASF4G72PZ"
+          },
+          {
+            "name": "DIMMA2",
+            "status": "empty",
+            "size_bytes": null,
+            "generation": null,
+            "form": null,
+            "speed_mts": null,
+            "configured_speed_mts": null,
+            "manufacturer": null,
+            "part_number": null
           },
           {
             "name": "DIMMB1",
             "status": "installed",
             "size_bytes": 34359738368,
             "generation": "DDR4",
-            "form": "UDIMM",
+            "form": "RDIMM",
             "speed_mts": 3200,
-            "configured_speed_mts": 3200,
+            "configured_speed_mts": 2933,
             "manufacturer": "Micron",
-            "part_number": "MTA18ASF4G72AZ"
+            "part_number": "MTA36ASF4G72PZ"
+          },
+          {
+            "name": "DIMMB2",
+            "status": "disabled",
+            "size_bytes": null,
+            "generation": "DDR4",
+            "form": "RDIMM",
+            "speed_mts": 3200,
+            "configured_speed_mts": null,
+            "manufacturer": "Micron",
+            "part_number": "MTA36ASF4G72PZ"
           }
         ]
       }
@@ -99,7 +121,10 @@
             "address": "0000:01:00.0",
             "name": "Broadcom MegaRAID SAS-3 3108",
             "driver": "megaraid_sas",
-            "disks": [{ "name": "sda", "attachment": "array" }]
+            "disks": [
+              { "name": "sda", "attachment": "array" },
+              { "name": "sdb", "attachment": "pass_through" }
+            ]
           }
         ],
         "disks": [
@@ -109,7 +134,7 @@
             "size_bytes": 1000204886016,
             "rotational": false,
             "model": "SAMSUNG MZVL21T0HCLR",
-            "uses": ["/"]
+            "uses": ["zfs:rpool"]
           },
           {
             "name": "sda",
@@ -117,18 +142,26 @@
             "size_bytes": 2000398934016,
             "rotational": true,
             "model": "TOSHIBA MG04ACA200E",
+            "uses": ["swap"]
+          },
+          {
+            "name": "sdb",
+            "interface": "SCSI",
+            "size_bytes": 960197124096,
+            "rotational": false,
+            "model": "INTEL SSDSC2KB960G8",
             "uses": []
           }
         ],
         "filesystems": [
           {
             "mount_point": "/",
-            "fs_type": "ext4",
-            "zfs_pool": null,
+            "fs_type": "zfs",
+            "zfs_pool": "rpool",
             "disks": ["nvme0n1"],
             "test_directory": true,
-            "total_bytes": 983440120832,
-            "used_bytes": 8420065280,
+            "total_bytes": null,
+            "used_bytes": null,
             "available_bytes": 925120053248
           }
         ]
@@ -161,10 +194,42 @@
           "mtu": 1500,
           "pcie_degraded": false,
           "virtual_functions": 0,
-          "master": null,
-          "master_kind": null,
+          "master": "bond0",
+          "master_kind": "bond",
           "default_ipv4": true,
           "default_ipv6": true
+        },
+        {
+          "interface": "eno2",
+          "bus": "pci",
+          "model": "Intel Ethernet Controller I210",
+          "driver": "igb",
+          "link_up": false,
+          "speed_mbps": null,
+          "duplex": null,
+          "mtu": 1500,
+          "pcie_degraded": false,
+          "virtual_functions": 0,
+          "master": null,
+          "master_kind": null,
+          "default_ipv4": false,
+          "default_ipv6": false
+        },
+        {
+          "interface": "ens1f0",
+          "bus": "pci",
+          "model": "Intel Ethernet 10G 2P X520 Adapter",
+          "driver": "ixgbe",
+          "link_up": true,
+          "speed_mbps": 10000,
+          "duplex": "full",
+          "mtu": 9000,
+          "pcie_degraded": true,
+          "virtual_functions": 2,
+          "master": null,
+          "master_kind": null,
+          "default_ipv4": false,
+          "default_ipv6": false
         }
       ]
     },
@@ -329,7 +394,7 @@
               "endurance_used": null,
               "written": null,
               "bad_blocks": { "Sectors": { "reallocated": 0, "pending": 0 } },
-              "interface_errors": 0
+              "interface_errors": 3
             }
           }
         ],
@@ -510,7 +575,8 @@
           "targets": [],
           "list": false,
           "geo": true,
-          "tcp": false
+          "tcp": true,
+          "large_packets": 1024
         },
         "unknown": [],
         "exchanges": { "Read": 420 },
@@ -543,7 +609,29 @@
                 ]
               }
             },
-            "tcp": null
+            "tcp": {
+              "port": 443,
+              "packet_size": 1024,
+              "route": {
+                "Traced": {
+                  "reached": true,
+                  "hops": [
+                    {
+                      "answers": [
+                        {
+                          "address": "203.0.113.1",
+                          "asn": "AS174",
+                          "network": "Cogent",
+                          "exchange": null,
+                          "place": "日本 东京",
+                          "latency": 850
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
           }
         ],
         "ipv6": [

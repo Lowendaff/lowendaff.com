@@ -272,10 +272,17 @@ const posts = defineCollection({
         data.benchVersion &&
         data.review
       ) {
-        const requiredSections =
+        const requiredSections = (
           data.reviewType === 'dedicated'
             ? STANDARD_DEDICATED_SECTIONS
-            : STANDARD_VPS_SECTIONS;
+            : STANDARD_VPS_SECTIONS
+        ).filter(
+          (title) =>
+            !(
+              title === 'TCP 大包回程路由' &&
+              (data.benchVersion === '0.1.0' || data.benchVersion === '0.1.1')
+            ),
+        );
         const presentSections = new Set(
           data.review.sections.map((section) => section.title),
         );
@@ -309,10 +316,34 @@ const posts = defineCollection({
             message: `VPS review (benchVersion ${data.benchVersion}) must include a vm-cpu-telemetry chart block in 系统信息, or declare "vm-cpu-telemetry" in omittedSections`,
           });
         }
+        const diskSection = data.review.sections.find(
+          (section) => section.title === '磁盘性能测试',
+        );
+        const hasDiskHealth = Boolean(
+          diskSection?.blocks.some(
+            (b) =>
+              b.type === 'heading' &&
+              b.level === 3 &&
+              b.text === 'SMART 与健康状态',
+          ),
+        );
+        if (
+          data.reviewType === 'dedicated' &&
+          diskSection &&
+          !hasDiskHealth &&
+          !omittedSet.has('disk-health')
+        ) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['review'],
+            message: `Dedicated server review (benchVersion ${data.benchVersion}) must include "### SMART 与健康状态" in 磁盘性能测试, or declare "disk-health" in omittedSections`,
+          });
+        }
         for (const item of omittedSet) {
           if (
             presentSections.has(item) ||
-            (item === 'vm-cpu-telemetry' && hasVmTelemetry)
+            (item === 'vm-cpu-telemetry' && hasVmTelemetry) ||
+            (item === 'disk-health' && hasDiskHealth)
           ) {
             ctx.addIssue({
               code: 'custom',
