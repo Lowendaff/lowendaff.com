@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2",
+  "version": "0.1.4",
   "environment": "KVM 虚拟机",
   "show_ip": true,
   "system": {
@@ -14,8 +14,8 @@
         "logical": 2,
         "usable": 2,
         "quota": null,
-        "sockets": 1,
-        "cores": 2,
+        "sockets": null,
+        "cores": null,
         "mhz": 3295.058,
         "caches": [
           { "name": "L1d", "size_bytes": 65536 },
@@ -46,7 +46,7 @@
             "name": "vda",
             "interface": "virtio",
             "size_bytes": 21474836480,
-            "rotational": false,
+            "rotational": null,
             "model": "Virtio Block Device",
             "uses": ["/"]
           }
@@ -610,7 +610,25 @@
             },
             { "id": "outlook", "name": "Outlook", "status": "Blocked" }
           ],
-          "notes": []
+          "notes": [["IP2Location", "HTTP 429 on 198.51.100.42"]],
+          "city": "Kwai Chung",
+          "region": "Kwai Tsing District",
+          "timezone": "Asia/Hong_Kong",
+          "asn_usage": "Residential",
+          "company_usage": "Hosting",
+          "dual_isp": true,
+          "usage_sources": [
+            {
+              "source": "IPinfo",
+              "asn_usage": "Residential",
+              "company_usage": "Hosting"
+            },
+            {
+              "source": "IPRegistry",
+              "asn_usage": "Hosting",
+              "company_usage": "Hosting"
+            }
+          ]
         },
         "ipv6": null
       }
@@ -635,7 +653,8 @@
             "name": "Netflix",
             "group": "global",
             "ipv4": { "Yes": { "region": "HK" } },
-            "ipv6": null
+            "ipv6": null,
+            "ipv4_unlock": "native"
           },
           {
             "id": "openai",
@@ -649,7 +668,8 @@
             "name": "Bahamut Anime",
             "group": "asia",
             "ipv4": { "Yes": { "region": "HK" } },
-            "ipv6": null
+            "ipv6": null,
+            "ipv4_unlock": "dns"
           }
         ]
       }

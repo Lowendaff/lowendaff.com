@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2",
+  "version": "0.1.4",
   "environment": "物理裸机",
   "show_ip": false,
   "system": {
@@ -472,7 +472,20 @@
           ],
           "dnsbl": { "checked": 100, "refused": 0, "listed": [] },
           "mail": [],
-          "notes": []
+          "notes": [],
+          "city": "Tokyo",
+          "region": "Tokyo",
+          "timezone": "Asia/Tokyo",
+          "asn_usage": "Hosting",
+          "company_usage": "Business",
+          "dual_isp": false,
+          "usage_sources": [
+            {
+              "source": "IPinfo",
+              "asn_usage": "Hosting",
+              "company_usage": "Business"
+            }
+          ]
         },
         "ipv6": null
       }
@@ -501,7 +514,9 @@
             "name": "YouTube Premium",
             "group": "global",
             "ipv4": { "Yes": { "region": "JP" } },
-            "ipv6": { "Yes": { "region": "JP" } }
+            "ipv6": { "Yes": { "region": "JP" } },
+            "ipv4_unlock": "native",
+            "ipv6_unlock": "dns"
           }
         ]
       }

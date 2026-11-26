@@ -99,6 +99,8 @@ try {
     assert(html.includes('data-route-explorer="return-tcp-route"'));
     assert(html.includes('data-review-tab="ip-quality"'));
     assert(html.includes('data-review-panels="unlock"'));
+    assert(html.includes('ASN 类型'));
+    assert(html.includes('解锁方式'));
     assert(!html.includes('href="#speed"') || html.includes('id="speed"'));
     const heading = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)[1];
     assert.equal((heading.match(/测试记录/g) || []).length, 1);
@@ -297,8 +299,8 @@ try {
   await rejectsArticle(
     'stale-omitted-section',
     vpsTemplate.replace(
-      /^benchVersion: '0\.1\.2'\n/m,
-      "benchVersion: '0.1.2'\nomittedSections: ['系统信息']\n",
+      /^(benchVersion: .*\n)/m,
+      "$1omittedSections: ['系统信息']\n",
     ),
     /omittedSections lists "系统信息"/,
   );

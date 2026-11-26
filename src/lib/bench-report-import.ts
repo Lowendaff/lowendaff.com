@@ -476,6 +476,57 @@ function formatIpOrigin(orig: unknown): string {
   return String(orig);
 }
 
+function formatIpLocation(city: unknown, region: unknown): string | null {
+  const c = typeof city === 'string' ? city.trim() : '';
+  const r = typeof region === 'string' ? region.trim() : '';
+  if (c && r) {
+    return c.toLowerCase() === r.toLowerCase() ? c : `${c}, ${r}`;
+  }
+  return c || r || null;
+}
+
+function formatAsnUsage(
+  asnUsage: unknown,
+  usageSources: unknown,
+): string | null {
+  if (typeof asnUsage !== 'string' || !asnUsage) return null;
+  const primaryLabel = USAGE_TYPE_CN[asnUsage] ?? asnUsage;
+  if (!Array.isArray(usageSources)) return primaryLabel;
+  const diffs: string[] = [];
+  for (const entry of usageSources as AnyRecord[]) {
+    if (
+      entry &&
+      typeof entry.asn_usage === 'string' &&
+      entry.asn_usage !== asnUsage
+    ) {
+      diffs.push(
+        `${entry.source}: ${USAGE_TYPE_CN[entry.asn_usage] ?? entry.asn_usage}`,
+      );
+    }
+  }
+  return diffs.length > 0
+    ? `${primaryLabel}（${diffs.join('，')}）`
+    : primaryLabel;
+}
+
+function formatCompanyUsage(
+  companyUsage: unknown,
+  dualIsp: unknown,
+): string | null {
+  if (typeof companyUsage !== 'string' || !companyUsage) {
+    return dualIsp === true ? '双 ISP' : null;
+  }
+  const base = USAGE_TYPE_CN[companyUsage] ?? companyUsage;
+  return dualIsp === true ? `${base}（双 ISP）` : base;
+}
+
+function redactInlineIpTokens(text: string): string {
+  return text.replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, (m) => {
+    const masked = maskIpAddress(m);
+    return masked ? `\`${masked}\`` : m;
+  });
+}
+
 function formatScoreVerdict(verdict: unknown): string {
   if (typeof verdict === 'string') {
     return MEDIA_VERDICT_CN[verdict] ?? verdict;
@@ -1950,24 +2001,45 @@ export function renderBenchReport(
       const votesStr = (ipq.geo_votes ?? [])
         .map((v: AnyRecord) => `${v.country}（${v.count}/${ipq.geo_total}）`)
         .join('、');
-      table(
-        ['项目', '检测结果'],
+      const hasV014IpFields =
+        'asn_usage' in ipq ||
+        'company_usage' in ipq ||
+        'city' in ipq ||
+        'timezone' in ipq;
+      const ipSummaryRows: unknown[][] = [
+        ['检测地址（脱敏）', maskIpAddress(ipq.address)],
         [
-          ['检测地址（脱敏）', maskIpAddress(ipq.address)],
-          [
-            '路由宣告 ASN',
-            ipq.asn !== null && ipq.asn !== undefined ? `AS${ipq.asn}` : null,
-          ],
-          ['RIR 网段登记标识（org）', ipq.org ?? null],
-          ['区域互联网注册机构（RIR）', ipq.rir ?? null],
-          [
-            '注册国家 / GeoIP 投票',
-            `${ipq.registered_country || '—'} / ${votesStr || ipq.geo_country || '—'}`,
-          ],
-          ['原生 / 广播判定', formatIpOrigin(ipq.origin)],
-          ['使用场景分类', USAGE_TYPE_CN[ipq.usage] ?? ipq.usage ?? null],
+          '路由宣告 ASN',
+          ipq.asn !== null && ipq.asn !== undefined ? `AS${ipq.asn}` : null,
         ],
-      );
+        ['RIR 网段登记标识（org）', ipq.org ?? null],
+        ['区域互联网注册机构（RIR）', ipq.rir ?? null],
+        [
+          '注册国家 / GeoIP 投票',
+          `${ipq.registered_country || '—'} / ${votesStr || ipq.geo_country || '—'}`,
+        ],
+        ['原生 / 广播判定', formatIpOrigin(ipq.origin)],
+      ];
+      if (hasV014IpFields) {
+        ipSummaryRows.push(
+          ['所在城市', formatIpLocation(ipq.city, ipq.region) ?? '未知'],
+          ['时区', ipq.timezone ?? '未知'],
+          [
+            'ASN 类型',
+            formatAsnUsage(ipq.asn_usage, ipq.usage_sources) ?? '未知',
+          ],
+          [
+            '机构类型',
+            formatCompanyUsage(ipq.company_usage, ipq.dual_isp) ?? '未知',
+          ],
+        );
+      } else {
+        ipSummaryRows.push([
+          '使用场景分类',
+          USAGE_TYPE_CN[ipq.usage] ?? ipq.usage ?? null,
+        ]);
+      }
+      table(['项目', '检测结果'], ipSummaryRows);
       if ((ipq.scores ?? []).length > 0) {
         heading(3, `${prefix}风险评分与安全情报`);
         table(
@@ -2010,6 +2082,12 @@ export function renderBenchReport(
           ]),
         );
       }
+      if (Array.isArray(ipq.notes) && ipq.notes.length > 0) {
+        const noteTxt = (ipq.notes as [string, string][])
+          .map(([prov, reason]) => `${prov}：${redactInlineIpTokens(reason)}`)
+          .join('；');
+        para(`数据源备注：${noteTxt}。`);
+      }
     }
   }
 
@@ -2018,6 +2096,10 @@ export function renderBenchReport(
   if (mediaOut && (mediaOut.results ?? []).length > 0) {
     heading(2, '服务解锁测试');
     const mediaResults = mediaOut.results as AnyRecord[];
+    const showUnlockCol =
+      mediaResults.some(
+        (r) => Boolean(r.ipv4_unlock) || Boolean(r.ipv6_unlock),
+      ) || !['0.1.0', '0.1.1', '0.1.2'].includes(String(report.version));
     const families: Array<['ipv4' | 'ipv6', string]> = [];
     if (
       mediaOut.ipv4_reachable ||
@@ -2033,6 +2115,7 @@ export function renderBenchReport(
     }
     for (const [fKey, fLabel] of families) {
       heading(3, fLabel);
+      const unlockField = `${fKey}_unlock` as 'ipv4_unlock' | 'ipv6_unlock';
       for (const [groupKey, groupTitle] of [
         ['global', 'Multination'],
         ['asia', '亚洲平台'],
@@ -2046,7 +2129,9 @@ export function renderBenchReport(
         if (groupItems.length === 0) continue;
         heading(4, groupTitle);
         table(
-          ['服务', '状态', '区域', '检测备注'],
+          showUnlockCol
+            ? ['服务', '状态', '区域', '解锁方式', '检测备注']
+            : ['服务', '状态', '区域', '检测备注'],
           groupItems.map((r) => {
             const x = r[fKey];
             const tag = typeof x === 'string' ? x : Object.keys(x)[0]!;
@@ -2061,7 +2146,12 @@ export function renderBenchReport(
               typeof rawRestriction === 'string'
                 ? (MEDIA_RESTRICTION_CN[rawRestriction] ?? rawRestriction)
                 : rawRestriction;
-            return [r.name, MEDIA_VERDICT_CN[tag] ?? tag, region, note];
+            const rawMode = r[unlockField];
+            const modeLabel =
+              rawMode === 'native' ? '原生' : rawMode === 'dns' ? 'DNS' : null;
+            return showUnlockCol
+              ? [r.name, MEDIA_VERDICT_CN[tag] ?? tag, region, modeLabel, note]
+              : [r.name, MEDIA_VERDICT_CN[tag] ?? tag, region, note];
           }),
         );
       }

@@ -4,6 +4,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { isDeepStrictEqual } from 'node:util';
 import * as prettier from 'prettier';
 import {
   maskCidrPrefix,
@@ -22,7 +23,270 @@ const root = new URL('../', import.meta.url);
 const readJson = async (relPath) =>
   JSON.parse(await readFile(new URL(relPath, root), 'utf8'));
 
-test('VPS v0.1.2 fixture renders all 9 standard sections, ECharts telemetry, split ASN/org, and masks show_ip=true addresses', async () => {
+const KNOWN_SCHEMA_KEYWORDS = new Set([
+  '$schema',
+  '$id',
+  'title',
+  'description',
+  '$defs',
+  '$ref',
+  'type',
+  'const',
+  'enum',
+  'required',
+  'properties',
+  'patternProperties',
+  'additionalProperties',
+  'items',
+  'prefixItems',
+  'minItems',
+  'maxItems',
+  'minimum',
+  'maximum',
+  'oneOf',
+  'anyOf',
+  'allOf',
+  'if',
+  'then',
+  'else',
+  'not',
+]);
+
+function matchesJsonType(value, expected) {
+  switch (expected) {
+    case 'null':
+      return value === null;
+    case 'boolean':
+      return typeof value === 'boolean';
+    case 'string':
+      return typeof value === 'string';
+    case 'number':
+      return typeof value === 'number' && Number.isFinite(value);
+    case 'integer':
+      return typeof value === 'number' && Number.isInteger(value);
+    case 'array':
+      return Array.isArray(value);
+    case 'object':
+      return (
+        typeof value === 'object' && value !== null && !Array.isArray(value)
+      );
+    default:
+      throw new Error(`Unsupported JSON Schema type "${expected}"`);
+  }
+}
+
+function validateJsonSchema(value, schema, rootSchema = schema, path = '$') {
+  if (typeof schema === 'boolean') {
+    return schema ? [] : [`${path}: disallowed by false schema`];
+  }
+  for (const key of Object.keys(schema)) {
+    if (!KNOWN_SCHEMA_KEYWORDS.has(key)) {
+      throw new Error(`Unhandled JSON Schema keyword "${key}" at ${path}`);
+    }
+  }
+  const errors = [];
+  if (schema.$ref) {
+    const prefix = '#/$defs/';
+    if (!schema.$ref.startsWith(prefix)) {
+      throw new Error(`Unsupported $ref "${schema.$ref}" at ${path}`);
+    }
+    const defName = schema.$ref.slice(prefix.length);
+    const target = rootSchema.$defs?.[defName];
+    if (target === undefined) {
+      throw new Error(`Missing $defs.${defName} referenced at ${path}`);
+    }
+    errors.push(...validateJsonSchema(value, target, rootSchema, path));
+  }
+
+  if (schema.type !== undefined) {
+    const allowed = Array.isArray(schema.type) ? schema.type : [schema.type];
+    if (!allowed.some((t) => matchesJsonType(value, t))) {
+      errors.push(`${path}: expected type ${allowed.join('|')}`);
+      return errors;
+    }
+  }
+  if ('const' in schema && !isDeepStrictEqual(value, schema.const)) {
+    errors.push(`${path}: expected const ${JSON.stringify(schema.const)}`);
+  }
+  if (
+    schema.enum &&
+    !schema.enum.some((item) => isDeepStrictEqual(value, item))
+  ) {
+    errors.push(`${path}: value not in enum`);
+  }
+  if (typeof value === 'number') {
+    if (schema.minimum !== undefined && value < schema.minimum) {
+      errors.push(`${path}: ${value} < minimum ${schema.minimum}`);
+    }
+    if (schema.maximum !== undefined && value > schema.maximum) {
+      errors.push(`${path}: ${value} > maximum ${schema.maximum}`);
+    }
+  }
+  if (Array.isArray(value)) {
+    if (schema.minItems !== undefined && value.length < schema.minItems) {
+      errors.push(
+        `${path}: length ${value.length} < minItems ${schema.minItems}`,
+      );
+    }
+    if (schema.maxItems !== undefined && value.length > schema.maxItems) {
+      errors.push(
+        `${path}: length ${value.length} > maxItems ${schema.maxItems}`,
+      );
+    }
+    let startIdx = 0;
+    if (Array.isArray(schema.prefixItems)) {
+      startIdx = schema.prefixItems.length;
+      for (let i = 0; i < Math.min(value.length, startIdx); i += 1) {
+        errors.push(
+          ...validateJsonSchema(
+            value[i],
+            schema.prefixItems[i],
+            rootSchema,
+            `${path}[${i}]`,
+          ),
+        );
+      }
+    }
+    if ('items' in schema) {
+      for (let i = startIdx; i < value.length; i += 1) {
+        errors.push(
+          ...validateJsonSchema(
+            value[i],
+            schema.items,
+            rootSchema,
+            `${path}[${i}]`,
+          ),
+        );
+      }
+    }
+  }
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    if (Array.isArray(schema.required)) {
+      for (const reqKey of schema.required) {
+        if (!Object.hasOwn(value, reqKey)) {
+          errors.push(`${path}: missing required property "${reqKey}"`);
+        }
+      }
+    }
+    const evaluated = new Set();
+    if (schema.properties) {
+      for (const [propKey, propSchema] of Object.entries(schema.properties)) {
+        if (Object.hasOwn(value, propKey)) {
+          evaluated.add(propKey);
+          errors.push(
+            ...validateJsonSchema(
+              value[propKey],
+              propSchema,
+              rootSchema,
+              `${path}.${propKey}`,
+            ),
+          );
+        }
+      }
+    }
+    if (schema.patternProperties) {
+      for (const [pattern, patSchema] of Object.entries(
+        schema.patternProperties,
+      )) {
+        const re = new RegExp(pattern);
+        for (const propKey of Object.keys(value)) {
+          if (re.test(propKey)) {
+            evaluated.add(propKey);
+            errors.push(
+              ...validateJsonSchema(
+                value[propKey],
+                patSchema,
+                rootSchema,
+                `${path}.${propKey}`,
+              ),
+            );
+          }
+        }
+      }
+    }
+    if ('additionalProperties' in schema) {
+      for (const propKey of Object.keys(value)) {
+        if (!evaluated.has(propKey)) {
+          errors.push(
+            ...validateJsonSchema(
+              value[propKey],
+              schema.additionalProperties,
+              rootSchema,
+              `${path}.${propKey}`,
+            ),
+          );
+        }
+      }
+    }
+  }
+  if (Array.isArray(schema.allOf)) {
+    for (const sub of schema.allOf) {
+      errors.push(...validateJsonSchema(value, sub, rootSchema, path));
+    }
+  }
+  if (Array.isArray(schema.anyOf)) {
+    const ok = schema.anyOf.some(
+      (sub) => validateJsonSchema(value, sub, rootSchema, path).length === 0,
+    );
+    if (!ok) errors.push(`${path}: matched 0 schemas in anyOf`);
+  }
+  if (Array.isArray(schema.oneOf)) {
+    let matches = 0;
+    const branchErrors = [];
+    for (const sub of schema.oneOf) {
+      const subErrs = validateJsonSchema(value, sub, rootSchema, path);
+      if (subErrs.length === 0) matches += 1;
+      else branchErrors.push(subErrs[0]);
+    }
+    if (matches !== 1) {
+      errors.push(
+        `${path}: matched ${matches} schemas in oneOf (${branchErrors.slice(0, 2).join('; ')})`,
+      );
+    }
+  }
+  if ('not' in schema) {
+    if (validateJsonSchema(value, schema.not, rootSchema, path).length === 0) {
+      errors.push(`${path}: matched forbidden "not" schema`);
+    }
+  }
+  if ('if' in schema) {
+    const condOk =
+      validateJsonSchema(value, schema.if, rootSchema, path).length === 0;
+    if (condOk && 'then' in schema) {
+      errors.push(...validateJsonSchema(value, schema.then, rootSchema, path));
+    } else if (!condOk && 'else' in schema) {
+      errors.push(...validateJsonSchema(value, schema.else, rootSchema, path));
+    }
+  }
+  return errors;
+}
+
+test('Official v0.1.4 JSON Schemas strictly validate VPS & Dedicated fixtures and cross-reject wrong platform types', async () => {
+  const [reportSchema, vpsSchema, dedicatedSchema, vpsReport, dedReport] =
+    await Promise.all([
+      readJson('schemas/bench/lowendaff-bench-report.schema.json'),
+      readJson('schemas/bench/lowendaff-bench-vps.schema.json'),
+      readJson('schemas/bench/lowendaff-bench-dedicated.schema.json'),
+      readJson('tests/fixtures/bench/vps-v0.1.2.json'),
+      readJson('tests/fixtures/bench/dedicated-v0.1.2.json'),
+    ]);
+
+  assert.deepEqual(validateJsonSchema(vpsReport, reportSchema), []);
+  assert.deepEqual(validateJsonSchema(vpsReport, vpsSchema), []);
+  assert(
+    validateJsonSchema(vpsReport, dedicatedSchema).length > 0,
+    'Dedicated schema must reject VPS report',
+  );
+
+  assert.deepEqual(validateJsonSchema(dedReport, reportSchema), []);
+  assert.deepEqual(validateJsonSchema(dedReport, dedicatedSchema), []);
+  assert(
+    validateJsonSchema(dedReport, vpsSchema).length > 0,
+    'VPS schema must reject Dedicated report',
+  );
+});
+
+test('VPS v0.1.4 fixture renders all 9 standard sections, ECharts telemetry, v0.1.4 IP quality & unlock mode, and masks show_ip=true addresses', async () => {
   const vpsReport = await readJson('tests/fixtures/bench/vps-v0.1.2.json');
   const rendered = renderBenchReport(
     vpsReport,
@@ -69,12 +333,17 @@ test('VPS v0.1.2 fixture renders all 9 standard sections, ECharts telemetry, spl
   assert.deepEqual(rendered.omittedSections, []);
   assert.equal(rendered.assets.length, 1);
 
-  // Even when show_ip: true in raw JSON, neither MDX nor BGP SVG may leak raw host IP / CIDR
+  // Even when show_ip: true in raw JSON, neither MDX, notes, nor BGP SVG may leak raw host IP / CIDR
   assert(!rendered.mdx.includes('198.51.100.42'));
   assert(!rendered.mdx.includes('198.51.100.0/24'));
   assert(!rendered.mdx.includes('17.253.85.201'));
   assert(rendered.mdx.includes('`198.51.*.*`'));
   assert(rendered.mdx.includes('198.51.\\*.\\*/24'));
+  assert(
+    rendered.mdx.includes(
+      '数据源备注：IP2Location：HTTP 429 on `198.51.*.*`。',
+    ),
+  );
   assert(!rendered.assets[0].content.includes('198.51.100.42'));
   assert(rendered.assets[0].content.includes('198.51.*.*/24'));
 
@@ -114,13 +383,40 @@ test('VPS v0.1.2 fixture renders all 9 standard sections, ECharts telemetry, spl
   assert(rendered.mdx.includes('140 天 13 小时 19 分'));
   assert(rendered.mdx.includes('0.02 / 0.01 / 0.00'));
 
-  // Verify split 路由宣告 ASN vs RIR 网段登记标识（org）
+  // Verify split 路由宣告 ASN vs RIR org + v0.1.4 city/timezone/asn_usage divergence/dual_isp
   assert(rendered.mdx.includes('| 路由宣告 ASN | AS36002 |'));
   assert(
     rendered.mdx.includes(
       '| RIR 网段登记标识（org） | Hong-Kong-Broadband-Network-Limited |',
     ),
   );
+  assert(
+    rendered.mdx.includes('| 所在城市 | Kwai Chung, Kwai Tsing District |'),
+  );
+  assert(rendered.mdx.includes('| 时区 | Asia/Hong\\_Kong |'));
+  assert(
+    rendered.mdx.includes(
+      '| ASN 类型 | 住宅宽带（Residential）（IPRegistry: 数据中心（Hosting）） |',
+    ),
+  );
+  assert(rendered.mdx.includes('| 机构类型 | 数据中心（Hosting）（双 ISP） |'));
+
+  // Verify 5-column 服务解锁测试 with 原生 / DNS / —
+  const unlockSec = parsed.sections.find((s) => s.title === '服务解锁测试');
+  const unlockTables = unlockSec.blocks.filter((b) => b.type === 'table');
+  assert.equal(unlockTables.length, 2);
+  for (const tbl of unlockTables) {
+    assert.deepEqual(tbl.headers, [
+      '服务',
+      '状态',
+      '区域',
+      '解锁方式',
+      '检测备注',
+    ]);
+  }
+  assert(rendered.mdx.includes('| Netflix | 可用 | HK | 原生 | — |'));
+  assert(rendered.mdx.includes('| ChatGPT | 不支持 | — | — | ProxyDetected |'));
+  assert(rendered.mdx.includes('| Bahamut Anime | 可用 | HK | DNS | — |'));
 
   // Verify 7-Zip & y-cruncher utilization, Cloudflare & Apple CDN split tables
   assert(rendered.mdx.includes('188%'));
@@ -142,9 +438,46 @@ test('VPS v0.1.2 fixture renders all 9 standard sections, ECharts telemetry, spl
       '在第 2 跳因需要分片停止，路由器最大允许 1460 字节。',
     ),
   );
+
+  // Legacy 0.1.2 fallback check: reports without v0.1.4 IP/media fields keep 使用场景分类 & 4-col unlock table
+  const legacyV012 = structuredClone(vpsReport);
+  legacyV012.version = '0.1.2';
+  const ipqV4 = legacyV012.runs.find((r) => r.id === 'ip.quality').output.ipv4;
+  for (const k of [
+    'city',
+    'region',
+    'timezone',
+    'asn_usage',
+    'company_usage',
+    'dual_isp',
+    'usage_sources',
+  ]) {
+    delete ipqV4[k];
+  }
+  for (const r of legacyV012.runs.find((x) => x.id === 'ip.media').output
+    .results) {
+    delete r.ipv4_unlock;
+    delete r.ipv6_unlock;
+  }
+  const legacyRendered = renderBenchReport(
+    legacyV012,
+    {
+      vendor: 'GoMami',
+      country: 'HK',
+      location: '香港',
+      geo: { city: '香港', latitude: 22.27832, longitude: 114.17469 },
+      publishedAt: '2026-11-25',
+      testedAt: '2026-11-25 18:06 CST',
+    },
+    { assetSlug: 'fixture-vps-legacy' },
+  );
+  assert(
+    legacyRendered.mdx.includes('| 使用场景分类 | 住宅宽带（Residential） |'),
+  );
+  assert(legacyRendered.mdx.includes('| 服务 | 状态 | 区域 | 检测备注 |'));
 });
 
-test('Dedicated v0.1.2 fixture renders SMBIOS slots/EDAC/BMC, RAID array+passthrough, ZFS, SMART TB+CRC, multi-NIC Bond/PCIe, and TCP routes', async () => {
+test('Dedicated v0.1.4 fixture renders SMBIOS slots/EDAC/BMC, RAID array+passthrough, ZFS, SMART TB+CRC, multi-NIC Bond/PCIe, v0.1.4 IP/unlock, and TCP routes', async () => {
   const dedReport = await readJson(
     'tests/fixtures/bench/dedicated-v0.1.2.json',
   );
@@ -214,7 +547,14 @@ test('Dedicated v0.1.2 fixture renders SMBIOS slots/EDAC/BMC, RAID array+passthr
     ),
   );
 
+  // v0.1.4 IP location deduplication (Tokyo, Tokyo -> Tokyo) and IPv4 native vs IPv6 DNS unlock
   assert(rendered.mdx.includes('广播 IP（注册地 US，定位 JP）'));
+  assert(rendered.mdx.includes('| 所在城市 | Tokyo |'));
+  assert(rendered.mdx.includes('| 时区 | Asia/Tokyo |'));
+  assert(rendered.mdx.includes('| ASN 类型 | 数据中心（Hosting） |'));
+  assert(rendered.mdx.includes('| 机构类型 | 商业网络（Business） |'));
+  assert(rendered.mdx.includes('| YouTube Premium | 可用 | JP | 原生 | — |'));
+  assert(rendered.mdx.includes('| YouTube Premium | 可用 | JP | DNS | — |'));
   assert(rendered.mdx.includes('2001:0db8:…'));
 
   const parsed = parseReadableReview(
@@ -338,7 +678,7 @@ test('CLI review:import writes Prettier-clean MDX + BGP SVG and guards against a
     );
     const receipt = JSON.parse(stdout);
     assert.equal(receipt.draft, true);
-    assert.equal(receipt.benchVersion, '0.1.2');
+    assert.equal(receipt.benchVersion, '0.1.4');
     assert.deepEqual(receipt.assets, ['/archive-assets/cli-test/bgp-ipv4.svg']);
 
     const mdxContent = await readFile(outMdx, 'utf8');
