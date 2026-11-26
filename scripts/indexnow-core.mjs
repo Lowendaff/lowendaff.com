@@ -33,8 +33,9 @@ export function validPage(url, site) {
       !parsed.search &&
       !parsed.hash &&
       parsed.href === url &&
-      // Keep former ASCII article URLs valid for deletion notifications after migration.
-      /^\/(?:ads\/|tags\/|map\/|exotic\/|reviews\/[a-z0-9\p{Script=Han}]+(?:-[a-z0-9\p{Script=Han}]+)*\/)?$/u.test(
+      // Keep former ASCII article URLs valid for deletion notifications after migration,
+      // alongside quality-gated static type, country and vendor topic hubs.
+      /^\/(?:ads\/|tags\/|map\/|exotic\/|vps\/|dedicated\/|countries\/[a-z]{2}\/|vendors\/[a-z0-9\p{Script=Han}]+(?:-[a-z0-9\p{Script=Han}]+)*\/|reviews\/[a-z0-9\p{Script=Han}]+(?:-[a-z0-9\p{Script=Han}]+)*\/)?$/u.test(
         decodeURIComponent(parsed.pathname),
       ) &&
       encodeURI(decodeURIComponent(parsed.pathname)) === parsed.pathname

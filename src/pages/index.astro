@@ -7,10 +7,18 @@ import HomeAds from '../components/ads/HomeAds.astro';
 import FriendLinks from '../components/FriendLinks.astro';
 import RecordList from '../components/RecordList.astro';
 import { getRecords } from '../lib/records';
+import '../styles/home.css';
 const records = getRecords(await getCollection('posts'));
 ---
 
-<BaseLayout title="我们评测全世界">
+<BaseLayout
+  title="我们评测全世界"
+  seoTitle="LowEndAFF · 全球 VPS 与独立服务器实测记录（性能跑分 / 三网回程 / 原生解锁）"
+  items={records
+    .filter((r) => !r.external)
+    .slice(0, 20)
+    .map((r) => ({ name: r.title, path: r.href }))}
+>
   <div class="shell home-revision home-page">
     <header class="journal-masthead">
       <div class="masthead-main">

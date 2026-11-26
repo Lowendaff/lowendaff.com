@@ -288,7 +288,8 @@ table,
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 12%);
 }
-.flag-badge svg {
+.flag-badge svg,
+.flag-badge img {
   display: block;
   width: 100%;
   height: 100%;

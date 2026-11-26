@@ -7,10 +7,14 @@ import { reviewModel } from '../lib/review-model';
 import { reviewTypeLabels } from '../lib/review-types';
 import { postPath } from '../lib/posts';
 import { buildRecommendations } from '../lib/related-posts';
+import { buildTopicHubs } from '../lib/topic-hubs';
 import ArticleTopAds from '../components/ads/ArticleTopAds.astro';
 import ArticleBottomAds from '../components/ads/ArticleBottomAds.astro';
 import ArticleSidebarAds from '../components/ads/ArticleSidebarAds.astro';
 import Sponsors from '../components/archive/Sponsors.astro';
+import '../styles/editorial.css';
+import '../styles/compact.css';
+import '../styles/reading.css';
 interface Props {
   post: CollectionEntry<'posts'>;
   headings: { depth: number; slug: string; text: string }[];
@@ -30,9 +34,12 @@ const fullDisplayTitle = cleanTitle.endsWith('测试记录')
 const currentPath = postPath(post);
 const canonicalHref = new URL(currentPath, Astro.site).href;
 
+const allCollectionPosts = await getCollection('posts');
+const hubs = buildTopicHubs(allCollectionPosts);
+const typeCategoryHref = hubs.typeHubHref(p.reviewType);
 const { articles: relatedRecords, inferredTopics } = buildRecommendations(
   post,
-  await getCollection('posts'),
+  allCollectionPosts,
   6,
 );
 
@@ -49,13 +56,14 @@ const chapterIcon: Record<string, string> = {
   title={p.title}
   description={p.description}
   active="review"
-  coverImage={p.coverImage}
-  coverAlt={p.coverAlt}
+  coverImage={p.coverImage ?? `/og/reviews/${post.id}.png`}
+  coverAlt={p.coverAlt ?? `${fullDisplayTitle}（${p.location}）实测摘要卡`}
+  markdownAlternate={`/ai/reviews/${post.id}.md`}
   breadcrumbs={[
     { name: '首页', path: '/' },
     {
       name: `${reviewTypeLabels[p.reviewType]} 测评`,
-      path: `/?type=${p.reviewType}#reviews`,
+      path: typeCategoryHref,
     },
     { name: p.vendor, path: currentPath },
   ]}
@@ -66,6 +74,9 @@ const chapterIcon: Record<string, string> = {
     authorUrl: p.authorUrl,
     tags: p.tags,
     section: `${reviewTypeLabels[p.reviewType]} 测评`,
+    license: 'https://creativecommons.org/licenses/by/4.0/',
+    location: p.location,
+    country: p.country || undefined,
   }}
 >
   <div class="shell review-shell review-revision">
@@ -75,9 +86,7 @@ const chapterIcon: Record<string, string> = {
         <span>首页</span>
       </a>
       <Icon name="right-line" size={14} />
-      <a href={`/?type=${p.reviewType}#reviews`}>
-        {reviewTypeLabels[p.reviewType]} 测评
-      </a>
+      <a href={typeCategoryHref}>{reviewTypeLabels[p.reviewType]} 测评</a>
       <Icon name="right-line" size={14} />
       <span class="breadcrumb-current" translate="no">
         {p.vendor}
@@ -159,6 +168,26 @@ const chapterIcon: Record<string, string> = {
                 <dd class="review-introduction">
                   测试时间：<strong>{p.testedAt}</strong>
                 </dd>
+              </div>
+            )}
+            {p.price && (
+              <div class="notion-prop-row">
+                <dt>
+                  <Icon name="shopping-bag-2-line" size={15} />
+                  <span>参考起步价</span>
+                </dt>
+                <dd>
+                  <span class="mono">{p.price}</span>
+                </dd>
+              </div>
+            )}
+            {p.verdict && (
+              <div class="notion-prop-row is-multiline">
+                <dt>
+                  <Icon name="check-line" size={15} />
+                  <span>实测结论</span>
+                </dt>
+                <dd class="notion-prop-verdict">{p.verdict}</dd>
               </div>
             )}
           </dl>
@@ -289,23 +318,13 @@ const chapterIcon: Record<string, string> = {
             <div class="related-signal-pills" aria-label="本文关联特征">
               <span class="subtle-label">匹配特征：</span>
               {p.vendor && (
-                <a
-                  class="tag"
-                  href={`/tags/?merchant=${encodeURIComponent(p.vendor)}`}
-                >
+                <a class="tag" href={hubs.vendorHubHref(p.vendor)}>
                   <Icon name="building-2-line" size={12} />
                   <span translate="no">{p.vendor}</span>
                 </a>
               )}
               {p.location && (
-                <a
-                  class="tag"
-                  href={
-                    p.country
-                      ? `/tags/?country=${encodeURIComponent(p.country)}`
-                      : '/tags/'
-                  }
-                >
+                <a class="tag" href={hubs.countryHubHref(p.country)}>
                   <Flag code={p.country} size={12} />
                   <span>{p.location}</span>
                 </a>

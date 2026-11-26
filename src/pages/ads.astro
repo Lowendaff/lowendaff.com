@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
 import TelegramLogo from '../components/TelegramLogo.astro';
 import { getEntry } from 'astro:content';
+import '../styles/directory.css';
 const entry = await getEntry('advertising', 'policy');
 if (!entry) throw new Error('Missing src/content/advertising/policy.md');
 const policy = entry.data;
@@ -21,6 +22,10 @@ const priceByType = Object.fromEntries(
   title="广告"
   active="ads"
   description="了解 LowEndAFF 的广告位置、页面实景分布、赞助权益与合作方式。"
+  breadcrumbs={[
+    { name: '首页', path: '/' },
+    { name: '广告合作', path: '/ads/' },
+  ]}
 >
   <div class="shell directory-page ads-page" data-ads-studio>
     <header class="directory-heading ads-heading">

@@ -63,6 +63,18 @@
   min-width: 0;
   color: var(--text);
 }
+.notion-prop-row.is-multiline {
+  align-items: start;
+  padding-block: 6px;
+}
+.notion-prop-row.is-multiline dt {
+  padding-top: 2px;
+}
+.notion-prop-verdict {
+  line-height: 1.62;
+  color: var(--text);
+  max-width: 68ch;
+}
 .notion-prop-inline {
   display: inline-flex;
   align-items: center;

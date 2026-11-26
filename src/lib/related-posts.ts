@@ -3,6 +3,7 @@ import { postPath } from './posts';
 import { countryLabel } from './records';
 import { reviewPlaceHref } from './review-map';
 import { reviewTypeLabels } from './review-types';
+import { buildTopicHubs } from './topic-hubs';
 
 const MACRO_REGIONS: Record<string, string> = {
   US: '北美西岸与美东',
@@ -142,6 +143,7 @@ export function buildRecommendations(
     .slice(0, limit);
 
   // Build inferred topic channels from the article's region, vendor and tags.
+  const hubs = buildTopicHubs(allPosts);
   const inferredTopics: InferredTopicChannel[] = [];
   if (p.country) {
     const regionText = countryLabel(p.country);
@@ -149,7 +151,7 @@ export function buildRecommendations(
       badge: `同国家地区 · ${p.country}`,
       title: `${regionText}${p.geo?.city ? ` · ${p.geo.city}` : ''} 相关测评`,
       subtitle: `检索位于${regionText}机房的其他 VPS 与独服实测数据`,
-      href: `/tags/?country=${encodeURIComponent(p.country)}`,
+      href: hubs.countryHubHref(p.country),
       icon: 'location-line',
       countryCode: p.country,
     });
@@ -170,7 +172,7 @@ export function buildRecommendations(
       p.tags.length > 0
         ? `关联标签：${p.tags.slice(0, 3).join(' / ')}`
         : '查看这家服务商的其他测评',
-    href: `/tags/?merchant=${encodeURIComponent(p.vendor)}`,
+    href: hubs.vendorHubHref(p.vendor),
     icon: 'building-2-line',
   });
   inferredTopics.push({
