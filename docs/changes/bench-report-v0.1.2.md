@@ -1,14 +1,14 @@
-# 从 lowendaff-bench v0.1.2 / v0.1.4 生成标准 VPS 与独服测评
+# 从 lowendaff-bench v0.1.2–v0.1.5 生成标准 VPS 与独服测评
 
-自 `lowendaff-bench` `v0.1.2` 起（现行报告 Schema 升级至 `v0.1.4`），站点采用「官方 JSON Schema 门禁 + 导入器 + 模板规范 + 基准夹具回归」四层闭环保证每篇 VPS 与独立服务器测评内容完整、口径统一、桌面端表格零横向溢出。早期手工对照说明 `docs/changes/dedicated-bench-report-v0.1.1.md` 作为历史归档保留，现行标准以本文为准。
+自 `lowendaff-bench` `v0.1.2` 起（现行报告 Schema 升级至 `v0.1.5`），站点采用「官方 JSON Schema 门禁 + 导入器 + 模板规范 + 基准夹具回归」四层闭环保证每篇 VPS 与独立服务器测评内容完整、口径统一、桌面端表格零横向溢出。早期手工对照说明 `docs/changes/dedicated-bench-report-v0.1.1.md` 作为历史归档保留，现行标准以本文为准。
 
 ## 1. 官方 JSON Schema 与导入命令
 
-官方 `v0.1.4` Draft 2020-12 JSON Schema 随仓保存在 `schemas/bench/`：
+官方 `v0.1.5` Draft 2020-12 JSON Schema 随仓保存在 `schemas/bench/`：
 
-- 统一报告 Schema：`schemas/bench/lowendaff-bench-report.schema.json`
-- VPS 专用 Schema（`system.platform.kind` 为 `vm | container`）：`schemas/bench/lowendaff-bench-vps.schema.json`
-- 独立服务器专用 Schema（`system.platform.kind === "dedicated"`）：`schemas/bench/lowendaff-bench-dedicated.schema.json`
+- 统一报告 Schema（16 插件，177 `$defs`）：`schemas/bench/lowendaff-bench-report.schema.json`
+- VPS 专用 Schema（`system.platform.kind` 为 `vm | container`，15 插件，161 `$defs`）：`schemas/bench/lowendaff-bench-vps.schema.json`
+- 独立服务器专用 Schema（`system.platform.kind === "dedicated"`，16 插件，174 `$defs`）：`schemas/bench/lowendaff-bench-dedicated.schema.json`
 
 ```sh
 npm run review:import -- \
@@ -37,11 +37,12 @@ npm run review:import -- \
 | `network.iperf3`、`network.taier`                                   | `网络带宽测试`                                 | iperf3 支持双栈表并转换 `Mbps` 与 `ms`；泰尔保留 `完成`、`不可达`、`节点繁忙`、`超时`、`失败（原因）` 等全部状态。                                                                                                                                                                                             |
 | `network.cloudflare`                                                | `Cloudflare Speedtest`                         | 拆分为「上下行吞吐与传输流量」「空载与负载延迟统计」「延迟分位分布（ms）」「UDP 与稳定性」四张适宽表，分别陈述客户端 ASN 与地址库归属。                                                                                                                                                                        |
 | `network.inetspeed`                                                 | `Apple CDN Speedtest`                          | 拆分为「节点与空载延迟基准」「分轮吞吐与传输流量（含 `worker_faults` 等故障标记）」「分轮负载延迟分布」三张表。                                                                                                                                                                                                |
+| `network.tcping`                                                    | `TCP 延迟测试`（网络检测 → `TCP 延迟` 页签）   | `v0.1.5+` 新增：按 `IPv4 / IPv6` 与「中国大陆常规节点 / 中国大陆优化线路 / 国际与公共节点」分组渲染 6 列适宽表，记录最小/均值、中位/P95、最大/抖动及丢包率、备用地址标记或脱敏失败原因。                                                                                                                       |
 | `network.trace`                                                     | `路由追踪` + `TCP 大包回程路由`                | 强制 6 列表头 `跳数 \| 应答地址（脱敏） \| ASN \| 运营商 \| 位置 \| 最小 RTT（ms）`；Netflix 节点在 `运营商` 列追加 `[exchange]`；中国境内目标含 `tcp` 字段时单独渲染 `TCP 大包回程路由` 页签并标注探测端口、包大小与分片停止跳点/MTU。                                                                        |
 
 ## 3. Schema 与 CI 质量门禁
 
-1. **标准章节与遥测/SMART 完整性**：声明 `benchVersion` 的 `review-markdown` 文章在 `src/content.config.ts` 构建期校验标准 9 章节集合（VPS 另要求 `vm-cpu-telemetry` 图表块；独服另要求 `SMART 与健康状态`，兼容 `0.1.1` 旧稿无 TCP 大包章节）。客观缺测项必须在 Frontmatter `omittedSections`（如 `'vm-cpu-telemetry'`、`'disk-health'`）显式声明，且禁止在 `omittedSections` 保留实际已存在的章节。
+1. **标准章节与遥测/SMART 完整性**：声明 `benchVersion` 的 `review-markdown` 文章在 `src/content.config.ts` 构建期校验标准 10 章节集合（`v0.1.5+`；VPS 另要求 `vm-cpu-telemetry` 图表块；独服另要求 `SMART 与健康状态`；自动向下兼容 `0.1.2–0.1.4` 无 `TCP 延迟测试` 及 `0.1.1` 无 `TCP 大包回程路由` 的既有文章）。客观缺测项必须在 Frontmatter `omittedSections`（如 `'vm-cpu-telemetry'`、`'disk-health'`、`'TCP 延迟测试'`）显式声明，且禁止在 `omittedSections` 保留实际已存在的章节。
 2. **6 列路由表头锁定**：`路由追踪`、`TCP 大包回程路由` 与 `去程路由追踪` 下所有表格表头必须严格匹配 6 列标准定义，防止列错位或退回 5/7 列导致桌面端横向滚动条。
 3. **正式发布防呆**：非草稿（`draft: false`）文章若残留 `待填写`、`example.com/replace-` 占位符，或引用了不存在的 `/archive-assets/` 本地配图，构建、`.githooks/pre-commit` 与 GitHub Actions 直接阻断。
-4. **JSON Schema 与自动化回归**：`npm run verify:bench`（`scripts/verify-bench-import.mjs`）同时将 VPS 与独服夹具（`tests/fixtures/bench/{vps,dedicated}-v0.1.2.json`）对照 `schemas/bench/lowendaff-bench-{report,vps,dedicated}.schema.json` 做正向一致性与跨平台反向拒绝校验，并验证 `v0.1.4` 字段渲染、`v0.1.2` 兼容回退、脱敏规则、未知插件阻断与 CLI 格式化输出，已纳入 `.github/workflows/content-validation.yml`。
+4. **JSON Schema 与自动化回归**：`npm run verify:bench`（`scripts/verify-bench-import.mjs`）同时将 VPS 与独服夹具（`tests/fixtures/bench/{vps,dedicated}-v0.1.2.json`）对照 `schemas/bench/lowendaff-bench-{report,vps,dedicated}.schema.json` 做正向一致性与跨平台反向拒绝校验，并验证 `v0.1.5` `network.tcping`、`v0.1.4` 字段渲染、`v0.1.2` 兼容回退、脱敏规则、未知插件阻断与 CLI 格式化输出，已纳入 `.github/workflows/content-validation.yml`。

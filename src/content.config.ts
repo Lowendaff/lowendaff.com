@@ -10,6 +10,7 @@ import { isReviewPermalink } from './lib/review-url';
 import { reviewGeoSchema } from './lib/review-map';
 import {
   compatibilitySchema,
+  isBenchVersionBefore,
   reviewImagesSchema,
   STANDARD_DEDICATED_SECTIONS,
   STANDARD_ROUTE_HEADERS,
@@ -129,6 +130,7 @@ const review = z
       'CPU 性能测试',
       '磁盘性能测试',
       '网络带宽测试',
+      'TCP 延迟测试',
       'Cloudflare Speedtest',
       'Apple CDN Speedtest',
       '路由追踪',
@@ -276,13 +278,21 @@ const posts = defineCollection({
           data.reviewType === 'dedicated'
             ? STANDARD_DEDICATED_SECTIONS
             : STANDARD_VPS_SECTIONS
-        ).filter(
-          (title) =>
-            !(
-              title === 'TCP 大包回程路由' &&
-              (data.benchVersion === '0.1.0' || data.benchVersion === '0.1.1')
-            ),
-        );
+        ).filter((title) => {
+          if (
+            title === 'TCP 大包回程路由' &&
+            isBenchVersionBefore(data.benchVersion!, '0.1.2')
+          ) {
+            return false;
+          }
+          if (
+            title === 'TCP 延迟测试' &&
+            isBenchVersionBefore(data.benchVersion!, '0.1.5')
+          ) {
+            return false;
+          }
+          return true;
+        });
         const presentSections = new Set(
           data.review.sections.map((section) => section.title),
         );

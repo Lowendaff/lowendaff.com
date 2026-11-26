@@ -1,6 +1,7 @@
 import { isIP } from 'node:net';
 import { z } from 'astro/zod';
 import {
+  isBenchVersionBefore,
   STANDARD_DEDICATED_SECTIONS,
   STANDARD_ROUTE_HEADERS,
   STANDARD_VPS_SECTIONS,
@@ -20,6 +21,7 @@ export const HANDLED_PLUGIN_IDS = new Set([
   'network.taier',
   'network.cloudflare',
   'network.inetspeed',
+  'network.tcping',
   'network.trace',
   'network.bgp',
   'ip.quality',
@@ -2469,6 +2471,112 @@ export function renderBenchReport(
     }
   }
 
+  // ## TCP 延迟测试 (network.tcping, v0.1.5+)
+  const tcpingOut = completedRuns['network.tcping'];
+  const tcpingTargets: AnyRecord[] = Array.isArray(tcpingOut?.targets)
+    ? tcpingOut!.targets
+    : [];
+  if (tcpingOut && tcpingTargets.length > 0) {
+    heading(2, 'TCP 延迟测试');
+    const choiceMap: Record<string, string> = {
+      china: '中国大陆常规',
+      'china-premium': '中国大陆优化',
+      global: '国际节点',
+      all: '全部节点',
+    };
+    const groupTitleMap: Record<string, string> = {
+      china: '中国大陆常规节点',
+      china_premium: '中国大陆优化线路',
+      global: '国际与公共节点',
+    };
+    const tcSet = tcpingOut.settings ?? {};
+    const groupLabels = Array.isArray(tcSet.groups)
+      ? tcSet.groups.map((g: string) => choiceMap[g] ?? g).join('、')
+      : '默认';
+    const measuredCnt = tcpingTargets.filter(
+      (t) => t.status === 'measured',
+    ).length;
+    const lossCnt = tcpingTargets.filter((t) => t.status === 'loss').length;
+    const failCnt = tcpingTargets.filter((t) => t.status === 'failed').length;
+    const tailParts = [
+      `${measuredCnt} 个完成`,
+      ...(lossCnt > 0 ? [`${lossCnt} 个全丢包`] : []),
+      ...(failCnt > 0 ? [`${failCnt} 个探测失败`] : []),
+    ];
+    para(
+      `非特权 TCP 握手延迟探测（每目标 ${tcSet.count ?? '—'} 次，范围：${groupLabels}${tcSet.all_targets ? ' · 全量目标' : ''}）：共 ${tcpingTargets.length} 条记录（${tailParts.join('，')}）。`,
+    );
+
+    const redactCellIps = (raw: string): string =>
+      raw
+        .replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, (m) => maskIpAddress(m) ?? m)
+        .replace(/\b(?:[0-9a-fA-F]{1,4}:){2,7}[0-9a-fA-F]{0,4}\b/g, (m) =>
+          isIP(m) === 6 ? (maskIpAddress(m) ?? m) : m,
+        );
+
+    for (const [isV6, proto] of [
+      [false, 'IPv4'],
+      [true, 'IPv6'],
+    ] as const) {
+      for (const grp of ['china', 'china_premium', 'global'] as const) {
+        const subset = tcpingTargets.filter(
+          (t) => Boolean(t.ipv6) === isV6 && t.group === grp,
+        );
+        if (subset.length === 0) continue;
+        heading(3, `${proto} · ${groupTitleMap[grp]}`);
+        table(
+          [
+            '节点',
+            '网络 / 端口',
+            '最小 / 均值（ms）',
+            '中位 / P95（ms）',
+            '最大 / 抖动（ms）',
+            '丢包 / 状态',
+          ],
+          subset.map((t) => {
+            const rawName = cnTargetName(String(t.name ?? ''));
+            const nodeLabel =
+              grp === 'global' && t.region && !rawName.includes(t.region)
+                ? `${t.region} · ${rawName}`
+                : rawName;
+            const netPort =
+              t.port !== undefined && t.port !== null
+                ? `AS${t.asn} · TCP ${t.port}`
+                : `AS${t.asn} · ${TAIER_OPS_CN[t.operator] ?? t.operator}`;
+            if (t.status === 'measured') {
+              return [
+                nodeLabel,
+                netPort,
+                `${val(t.min_ms)} / ${val(t.avg_ms)}`,
+                `${val(t.median_ms)} / ${val(t.p95_ms)}`,
+                `${val(t.max_ms)} / ${val(t.jitter_ms)}`,
+                `${val(t.loss_pct, 1)}%（${t.received}/${t.sent}）${t.used_backup ? ' · 备用' : ''}`,
+              ];
+            }
+            if (t.status === 'loss') {
+              return [
+                nodeLabel,
+                netPort,
+                null,
+                null,
+                null,
+                `100% 丢包（0/${t.sent}）${t.used_backup ? ' · 备用' : ''}`,
+              ];
+            }
+            return [
+              nodeLabel,
+              netPort,
+              null,
+              null,
+              null,
+              `失败（${redactCellIps(String(t.reason ?? '未知错误'))}）`,
+            ];
+          }),
+        );
+      }
+    }
+  }
+
   // ## 路由追踪
   if (traceV4.length > 0 || traceV6.length > 0) {
     heading(2, '路由追踪');
@@ -2590,10 +2698,25 @@ export function renderBenchReport(
   }
 
   // Compute objective omittedSections for the contract gate
-  const requiredSections =
+  const requiredSections = (
     reviewType === 'dedicated'
       ? STANDARD_DEDICATED_SECTIONS
-      : STANDARD_VPS_SECTIONS;
+      : STANDARD_VPS_SECTIONS
+  ).filter((secTitle) => {
+    if (
+      secTitle === 'TCP 大包回程路由' &&
+      isBenchVersionBefore(String(report.version ?? ''), '0.1.2')
+    ) {
+      return false;
+    }
+    if (
+      secTitle === 'TCP 延迟测试' &&
+      isBenchVersionBefore(String(report.version ?? ''), '0.1.5')
+    ) {
+      return false;
+    }
+    return true;
+  });
   const omittedSet = new Set<string>(editorial.omittedSections);
   for (const req of requiredSections) {
     if (!renderedSectionTitles.has(req)) {

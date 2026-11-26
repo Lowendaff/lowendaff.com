@@ -27,6 +27,7 @@ export const STANDARD_VPS_SECTIONS = [
   'IP 质量检测',
   '服务解锁测试',
   '网络带宽测试',
+  'TCP 延迟测试',
   '路由追踪',
   'TCP 大包回程路由',
 ] as const;
@@ -38,9 +39,23 @@ export const STANDARD_DEDICATED_SECTIONS = [
   'IP 质量检测',
   '服务解锁测试',
   '网络带宽测试',
+  'TCP 延迟测试',
   '路由追踪',
   'TCP 大包回程路由',
 ] as const;
+
+export function isBenchVersionBefore(
+  version: string,
+  target: `${number}.${number}.${number}`,
+): boolean {
+  const m = /^(\d+)\.(\d+)\.(\d+)/.exec(version.trim());
+  if (!m) return false;
+  const [maj, min, pat] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const [tMaj, tMin, tPat] = target.split('.').map(Number);
+  if (maj !== tMaj) return maj < tMaj!;
+  if (min !== tMin) return min < tMin!;
+  return pat < tPat!;
+}
 export const compatibilitySchema = z.object({
   sections: z.record(z.string(), identifier).default({}),
   tables: z.record(z.string(), identifier).default({}),

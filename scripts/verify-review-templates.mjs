@@ -98,6 +98,7 @@ try {
     assert(html.includes('data-route-explorer="return-route"'));
     assert(html.includes('data-route-explorer="return-tcp-route"'));
     assert(html.includes('data-review-tab="ip-quality"'));
+    assert(html.includes('data-review-tab="tcping"'));
     assert(html.includes('data-review-panels="unlock"'));
     assert(html.includes('ASN 类型'));
     assert(html.includes('解锁方式'));
@@ -285,6 +286,11 @@ try {
     'missing-standard-section',
     vpsTemplate.replace(/## IP 质量检测[\s\S]*?(?=## 服务解锁测试)/, ''),
     /Missing standard vps review section "IP 质量检测"/,
+  );
+  await rejectsArticle(
+    'missing-tcping-v015',
+    vpsTemplate.replace(/## TCP 延迟测试[\s\S]*?(?=## 路由追踪)/, ''),
+    /Missing standard vps review section "TCP 延迟测试"/,
   );
   await rejectsArticle(
     'missing-vm-telemetry',

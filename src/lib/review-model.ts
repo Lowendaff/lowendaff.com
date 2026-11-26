@@ -102,6 +102,7 @@ export function reviewModel(review: Review) {
       sections: [section('Apple CDN Speedtest')],
     },
     { id: 'regional', label: '地区节点', sections: [section('网络带宽测试')] },
+    { id: 'tcping', label: 'TCP 延迟', sections: [section('TCP 延迟测试')] },
   ];
   const routing: ReviewPanel[] = [
     {

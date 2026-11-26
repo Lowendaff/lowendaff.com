@@ -1,5 +1,5 @@
 {
-  "version": "0.1.4",
+  "version": "0.1.5",
   "environment": "KVM 虚拟机",
   "show_ip": true,
   "system": {
@@ -1084,12 +1084,109 @@
         ],
         "ipv6": []
       }
+    },
+    {
+      "id": "network.tcping",
+      "group": "network",
+      "title": "TCP latency",
+      "status": "completed",
+      "status_text": "done in 8.4 s",
+      "reason": null,
+      "started_seconds": 288.0,
+      "elapsed_seconds": 8.4,
+      "output": {
+        "settings": {
+          "groups": ["china", "china-premium", "global"],
+          "all_targets": false,
+          "count": 20
+        },
+        "targets": [
+          {
+            "id": "gd-ct",
+            "group": "china",
+            "region": "Guangdong",
+            "city": "Guangzhou",
+            "name": "Guangzhou Telecom",
+            "operator": "telecom",
+            "asn": 4134,
+            "ipv6": false,
+            "status": "measured",
+            "endpoint": "gd-ct.example.net",
+            "port": 80,
+            "resolved_ip": "113.96.20.1",
+            "used_backup": false,
+            "sent": 20,
+            "received": 20,
+            "loss_pct": 0.0,
+            "min_ms": 11.42,
+            "avg_ms": 12.15,
+            "median_ms": 11.98,
+            "p95_ms": 13.5,
+            "max_ms": 14.12,
+            "jitter_ms": 0.48
+          },
+          {
+            "id": "sh-cn2",
+            "group": "china_premium",
+            "region": "Shanghai",
+            "city": "Shanghai",
+            "name": "Shanghai Telecom CN2 GIA",
+            "operator": "telecom",
+            "asn": 4809,
+            "ipv6": false,
+            "status": "measured",
+            "endpoint": "sh-cn2.example.net",
+            "port": 443,
+            "resolved_ip": "59.43.130.8",
+            "used_backup": true,
+            "sent": 20,
+            "received": 19,
+            "loss_pct": 5.0,
+            "min_ms": 31.2,
+            "avg_ms": 32.04,
+            "median_ms": 31.88,
+            "p95_ms": 33.9,
+            "max_ms": 35.1,
+            "jitter_ms": 0.72
+          },
+          {
+            "id": "bj-cm",
+            "group": "china",
+            "region": "Beijing",
+            "city": "Beijing",
+            "name": "Beijing Mobile",
+            "operator": "mobile",
+            "asn": 9808,
+            "ipv6": false,
+            "status": "loss",
+            "endpoint": "bj-cm.example.net",
+            "port": 80,
+            "resolved_ip": "211.136.25.8",
+            "used_backup": false,
+            "sent": 20,
+            "received": 0,
+            "loss_pct": 100
+          },
+          {
+            "id": "sg-cf",
+            "group": "global",
+            "region": "SG",
+            "city": "Singapore",
+            "name": "Cloudflare Edge",
+            "operator": "other",
+            "asn": 13335,
+            "ipv6": false,
+            "status": "failed",
+            "reason": "bind failed on 198.51.100.42"
+          }
+        ]
+      }
     }
   ],
   "not_applicable": ["NUMA 跨节点内存", "SMART 磁盘健康"],
   "summary": {
-    "items": 12,
-    "completed": 12,
+    "items": 13,
+    "completed": 13,
     "skipped": 0,
     "failed": 0,
     "timed_out": 0,

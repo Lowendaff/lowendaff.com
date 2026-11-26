@@ -425,10 +425,60 @@ test('VPS v0.1.4 fixture renders all 9 standard sections, ECharts telemetry, v0.
   assert(rendered.mdx.includes('| ChatGPT | 不支持 | — | — | ProxyDetected |'));
   assert(rendered.mdx.includes('| Bahamut Anime | 可用 | HK | DNS | — |'));
 
-  // Verify 7-Zip & y-cruncher utilization, Cloudflare & Apple CDN split tables
+  // Verify 7-Zip & y-cruncher utilization, Cloudflare & Apple CDN split tables, and v0.1.5 TCP latency
   assert(rendered.mdx.includes('188%'));
   assert(rendered.mdx.includes('193.72'));
   assert(rendered.mdx.includes('worker\\_faults'));
+  assert(rendered.mdx.includes('## TCP 延迟测试'));
+  assert(rendered.mdx.includes('### IPv4 · 中国大陆常规节点'));
+  assert(rendered.mdx.includes('### IPv4 · 中国大陆优化线路'));
+  assert(rendered.mdx.includes('### IPv4 · 国际与公共节点'));
+  assert(
+    rendered.mdx.includes(
+      '| 广州电信 | AS4134 · TCP 80 | 11.42 / 12.15 | 11.98 / 13.50 | 14.12 / 0.48 | 0.0%（20/20） |',
+    ),
+  );
+  assert(rendered.mdx.includes('5.0%（19/20） · 备用'));
+  assert(rendered.mdx.includes('100% 丢包（0/20）'));
+  assert(rendered.mdx.includes('失败（bind failed on 198.51.\\*.\\*）'));
+  assert(!rendered.mdx.includes('113.96.20.1'));
+
+  // Verify v0.1.4 backward compatibility: no network.tcping does NOT add TCP 延迟测试 to omittedSections
+  const v014Report = structuredClone(vpsReport);
+  v014Report.version = '0.1.4';
+  v014Report.runs = v014Report.runs.filter((r) => r.id !== 'network.tcping');
+  const v014Rendered = renderBenchReport(
+    v014Report,
+    {
+      vendor: 'GoMami',
+      country: 'HK',
+      location: '香港',
+      geo: { city: '香港', latitude: 22.27832, longitude: 114.17469 },
+      publishedAt: '2026-11-25',
+      testedAt: '2026-11-25 18:06 CST',
+    },
+    { assetSlug: 'fixture-vps-v014' },
+  );
+  assert.deepEqual(v014Rendered.omittedSections, []);
+
+  // Verify v0.1.5 objective omission: skipping network.tcping on v0.1.5 records 'TCP 延迟测试' in omittedSections
+  const v015NoTcping = structuredClone(vpsReport);
+  v015NoTcping.runs = v015NoTcping.runs.filter(
+    (r) => r.id !== 'network.tcping',
+  );
+  const v015OmittedRendered = renderBenchReport(
+    v015NoTcping,
+    {
+      vendor: 'GoMami',
+      country: 'HK',
+      location: '香港',
+      geo: { city: '香港', latitude: 22.27832, longitude: 114.17469 },
+      publishedAt: '2026-11-25',
+      testedAt: '2026-11-25 18:06 CST',
+    },
+    { assetSlug: 'fixture-vps-v015-notcping' },
+  );
+  assert.deepEqual(v015OmittedRendered.omittedSections, ['TCP 延迟测试']);
 
   // Verify 6-column route headers, Netflix [Equinix Hong Kong], and TCP fragmentation note
   for (const secName of ['路由追踪', 'TCP 大包回程路由']) {
@@ -723,7 +773,7 @@ test('CLI review:import writes Prettier-clean MDX + BGP SVG and guards against a
     );
     const receipt = JSON.parse(stdout);
     assert.equal(receipt.draft, true);
-    assert.equal(receipt.benchVersion, '0.1.4');
+    assert.equal(receipt.benchVersion, '0.1.5');
     assert.deepEqual(receipt.assets, ['/archive-assets/cli-test/bgp-ipv4.svg']);
 
     const mdxContent = await readFile(outMdx, 'utf8');
