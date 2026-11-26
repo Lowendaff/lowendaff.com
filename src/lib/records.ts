@@ -1,6 +1,7 @@
 import type { CollectionEntry } from 'astro:content';
-import { postPath } from './posts';
-import { reviewTypeLabels } from './review-types';
+import { reviewTypeLabels } from './review-types.ts';
+
+const localPostPath = (permalink: string) => encodeURI(permalink);
 
 export const countryEmoji = (code: string) =>
   code === 'TW'
@@ -43,7 +44,7 @@ export function getRecords(posts: CollectionEntry<'posts'>[]) {
       href:
         data.kind === 'archive-reference'
           ? data.archiveSnapshot!
-          : postPath({ data }),
+          : localPostPath(data.permalink!),
       external: data.kind === 'archive-reference',
       merchant: data.vendor,
       countryTag: data.country || 'unspecified',

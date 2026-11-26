@@ -7,7 +7,61 @@ const { id, payload } = Astro.props;
 const parsed = JSON.parse(payload) as {
   interval_seconds: number;
   sample_count: number;
-  samples: Array<{ elapsed_seconds: number }>;
+  si_pct: {
+    avg: number;
+    p95: number;
+    max: number;
+    peak_elapsed_seconds: number;
+    peak_item?: string | null;
+    peak_title: string;
+  };
+  st_pct: {
+    avg: number;
+    p95: number;
+    max: number;
+    peak_elapsed_seconds: number;
+    peak_item?: string | null;
+    peak_title: string;
+  };
+  samples: Array<{
+    elapsed_seconds: number;
+    time: string;
+    item?: string | null;
+    title: string;
+    si_pct: number;
+    st_pct: number;
+  }>;
+};
+const round = (n: number, digits = 3) =>
+  Number.isFinite(n) ? Number(n.toFixed(digits)) : 0;
+const compactPayload = {
+  ...parsed,
+  si_pct: parsed.si_pct
+    ? {
+        ...parsed.si_pct,
+        avg: round(parsed.si_pct.avg, 3),
+        p95: round(parsed.si_pct.p95, 3),
+        max: round(parsed.si_pct.max, 3),
+        peak_elapsed_seconds: round(parsed.si_pct.peak_elapsed_seconds, 2),
+      }
+    : parsed.si_pct,
+  st_pct: parsed.st_pct
+    ? {
+        ...parsed.st_pct,
+        avg: round(parsed.st_pct.avg, 3),
+        p95: round(parsed.st_pct.p95, 3),
+        max: round(parsed.st_pct.max, 3),
+        peak_elapsed_seconds: round(parsed.st_pct.peak_elapsed_seconds, 2),
+      }
+    : parsed.st_pct,
+  samples: parsed.samples.map((s) => ({
+    elapsed_seconds: round(s.elapsed_seconds, 2),
+    time: s.time,
+    ...(s.item ? { item: s.item } : {}),
+    title: s.title,
+    si_pct: round(s.si_pct, 3),
+    st_pct: round(s.st_pct, 3),
+  })),
 };
 const maxSec = Math.max(
   0,
@@ -15,7 +69,7 @@ const maxSec = Math.max(
 );
 const totalRound = Math.round(maxSec);
 const durationLabel = `${String(Math.floor(totalRound / 60)).padStart(2, '0')}:${String(totalRound % 60).padStart(2, '0')}`;
-const safeJson = payload.replaceAll('</', '<\\/');
+const safeJson = JSON.stringify(compactPayload).replaceAll('</', '<\\/');
 ---
 
 <figure

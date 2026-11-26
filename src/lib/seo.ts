@@ -4,6 +4,7 @@ export const siteIdentity = {
   description:
     '全球 VPS 与独立服务器测试记录，涵盖硬件性能、三网回程、BGP 与服务解锁，提供测试条件和原始数据供读者核对。',
   logo: '/brand/lowendaff-avatar.jpg',
+  defaultOgImage: '/og/default.png',
   sameAs: ['https://github.com/Lowendaff', 'https://t.me/lowendaff_blog'],
 };
 
@@ -14,12 +15,23 @@ export interface ArticleMetadata {
   authorUrl?: string;
   tags?: string[];
   section?: string;
+  license?: string;
+  location?: string;
+  country?: string;
 }
 
 export interface Breadcrumb {
   name: string;
   path: string;
 }
+
+export interface ListEntry {
+  name: string;
+  path: string;
+}
+
+export const toIsoDateTimeCst = (date: string) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(date) ? `${date}T00:00:00+08:00` : date;
 
 export function structuredData({
   title,
@@ -28,6 +40,7 @@ export function structuredData({
   article,
   coverImage,
   breadcrumbs = [],
+  items = [],
 }: {
   title: string;
   description: string;
@@ -35,12 +48,14 @@ export function structuredData({
   article?: ArticleMetadata;
   coverImage?: string;
   breadcrumbs?: Breadcrumb[];
+  items?: ListEntry[];
 }) {
   const home = new URL('/', canonical).href;
   const publisher = `${home}#organization`;
   const website = `${home}#website`;
   const page = `${canonical.href}#webpage`;
   const breadcrumb = `${canonical.href}#breadcrumb`;
+  const itemListId = `${canonical.href}#itemlist`;
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -74,7 +89,9 @@ export function structuredData({
         ...(breadcrumbs.length ? { breadcrumb: { '@id': breadcrumb } } : {}),
         ...(article
           ? { mainEntity: { '@id': `${canonical.href}#article` } }
-          : {}),
+          : items.length
+            ? { mainEntity: { '@id': itemListId } }
+            : {}),
       },
       ...(article
         ? [
@@ -94,11 +111,44 @@ export function structuredData({
               publisher: { '@id': publisher },
               mainEntityOfPage: { '@id': page },
               inLanguage: 'zh-CN',
+              ...(article.license ? { license: article.license } : {}),
+              ...(article.location
+                ? {
+                    contentLocation: {
+                      '@type': 'Place',
+                      name: article.location,
+                      ...(article.country
+                        ? {
+                            address: {
+                              '@type': 'PostalAddress',
+                              addressCountry: article.country,
+                            },
+                          }
+                        : {}),
+                    },
+                  }
+                : {}),
               ...(article.section ? { articleSection: article.section } : {}),
               ...(article.tags?.length
                 ? { keywords: article.tags.join(', ') }
                 : {}),
               ...(coverImage ? { image: new URL(coverImage, home).href } : {}),
+            },
+          ]
+        : []),
+      ...(!article && items.length
+        ? [
+            {
+              '@type': 'ItemList',
+              '@id': itemListId,
+              itemListOrder: 'https://schema.org/ItemListOrderDescending',
+              numberOfItems: items.length,
+              itemListElement: items.map((entry, index) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                name: entry.name,
+                url: new URL(entry.path, home).href,
+              })),
             },
           ]
         : []),

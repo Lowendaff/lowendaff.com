@@ -4,7 +4,9 @@ import {
   structuredData,
   serializeJsonLd,
   markdownText,
+  toIsoDateTimeCst,
 } from '../src/lib/seo.ts';
+import { buildTopicHubs } from '../src/lib/topic-hubs.ts';
 
 test('Article graph links real authorship, dates, publisher, canonical page and breadcrumbs', () => {
   const canonical = new URL('https://lowendaff.com/reviews/example/');
@@ -74,4 +76,84 @@ test('AI index labels cannot introduce a second line or an unescaped link', () =
     markdownText('Vendor\n[link](x) <script>'),
     'Vendor \\[link\\](x) \\<script\\>',
   );
+});
+
+test('Article license, contentLocation, CST ISO datetime and directory ItemList stay truthful', () => {
+  assert.equal(toIsoDateTimeCst('2026-11-27'), '2026-11-27T00:00:00+08:00');
+  const articleGraph = structuredData({
+    title: 'Panama VPS',
+    description: 'Measured results',
+    canonical: new URL('https://lowendaff.com/reviews/panama/'),
+    article: {
+      publishedAt: '2026-11-27',
+      author: 'jam',
+      license: 'https://creativecommons.org/licenses/by/4.0/',
+      location: '巴拿马巴拿马城',
+      country: 'PA',
+    },
+  })['@graph'];
+  const postNode = articleGraph.find((item) => item['@type'] === 'BlogPosting');
+  assert.equal(
+    postNode.license,
+    'https://creativecommons.org/licenses/by/4.0/',
+  );
+  assert.equal(postNode.contentLocation.name, '巴拿马巴拿马城');
+  assert.equal(postNode.contentLocation.address.addressCountry, 'PA');
+
+  const listGraph = structuredData({
+    title: 'VPS 测评',
+    description: 'List',
+    canonical: new URL('https://lowendaff.com/vps/'),
+    items: [{ name: 'Panama VPS', path: '/reviews/panama/' }],
+  })['@graph'];
+  const listNode = listGraph.find((item) => item['@type'] === 'ItemList');
+  assert.equal(listNode.numberOfItems, 1);
+  assert.equal(
+    listNode.itemListElement[0].url,
+    'https://lowendaff.com/reviews/panama/',
+  );
+});
+
+test('Topic hubs enforce quality thresholds before emitting crawlable country or vendor pages', () => {
+  const makePost = (id, country, vendor, reviewType = 'vps') => ({
+    id,
+    data: {
+      kind: 'review',
+      draft: false,
+      reviewType,
+      title: `${vendor} ${country} VPS 测试记录`,
+      permalink: `/reviews/${id}-20261127/`,
+      description: '实测记录',
+      vendor,
+      country,
+      location: country,
+      geo: { city: country, latitude: 22.28, longitude: 114.17 },
+      publishedAt: '2026-11-27',
+    },
+  });
+
+  const single = buildTopicHubs([makePost('one', 'HK', 'GoMami')]);
+  assert.deepEqual(
+    single.typeHubs.map((h) => h.path),
+    ['/vps/'],
+  );
+  assert.equal(single.countryHubs.length, 0);
+  assert.equal(single.vendorHubs.length, 0);
+  assert.equal(single.countryHubHref('HK'), '/tags/?country=HK');
+  assert.equal(single.vendorHubHref('GoMami'), '/tags/?merchant=GoMami');
+
+  const multi = buildTopicHubs([
+    makePost('one', 'HK', 'GoMami'),
+    makePost('two', 'HK', 'GoMami'),
+  ]);
+  assert.deepEqual(
+    multi.countryHubs.map((h) => h.path),
+    ['/countries/hk/'],
+  );
+  assert.deepEqual(
+    multi.vendorHubs.map((h) => h.path),
+    ['/vendors/gomami/'],
+  );
+  assert.equal(multi.countryHubHref('HK'), '/countries/hk/');
+  assert.equal(multi.vendorHubHref('GoMami'), '/vendors/gomami/');
 });

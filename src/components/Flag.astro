@@ -29,13 +29,12 @@ const height = size;
     style={`width:${width}px;height:${height}px`}
     aria-hidden="true"
   >
-    <svg
+    <img
+      src={`/flags/${key}.svg`}
       width={width}
       height={height}
-      viewBox={`0 0 ${flagpack.width ?? 32} ${flagpack.height ?? 24}`}
-      aria-hidden="true"
-      focusable="false"
-      set:html={flag.body}
+      alt=""
+      decoding="async"
     />
   </span>
 ) : (

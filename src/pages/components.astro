@@ -6,6 +6,9 @@ import BenchmarkTerminal from '../components/mdx/BenchmarkTerminal.astro';
 import { getPublishedPosts } from '../lib/posts';
 import RouteTraceTable from '../components/mdx/RouteTraceTable.astro';
 import PromoCodeBox from '../components/mdx/PromoCodeBox.astro';
+import '../styles/editorial.css';
+import '../styles/compact.css';
+import '../styles/reading.css';
 const posts = await getPublishedPosts();
 const specPost = posts.find(({ data }) => data.showcase?.specs)?.data;
 const terminal = posts.find(({ data }) => data.showcase?.terminal)?.data

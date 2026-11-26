@@ -1,16 +1,33 @@
 import type { APIRoute } from 'astro';
 import { getPublishedPosts, postPath } from '../lib/posts';
+import { isExoticPost } from '../lib/exotic';
+import { buildTopicHubs } from '../lib/topic-hubs';
 import { escapeXml, siteIndexable } from '../lib/site';
+
+const latestPostDate = (
+  list: Awaited<ReturnType<typeof getPublishedPosts>>,
+): string | undefined =>
+  list
+    .map(({ data }) => data.updatedAt ?? data.publishedAt)
+    .sort()
+    .at(-1);
 
 export const GET: APIRoute = async ({ site }) => {
   const posts = siteIndexable ? await getPublishedPosts() : [];
+  const { allHubs } = buildTopicHubs(posts);
+  const latestAll = latestPostDate(posts);
+  const latestExotic = latestPostDate(posts.filter(isExoticPost));
   const entries = siteIndexable
     ? [
-        { path: '/', lastmod: undefined },
-        { path: '/exotic/', lastmod: undefined },
-        ...(posts.length ? [{ path: '/map/', lastmod: undefined }] : []),
-        ...(posts.length ? [{ path: '/tags/', lastmod: undefined }] : []),
+        { path: '/', lastmod: latestAll },
+        { path: '/exotic/', lastmod: latestExotic },
+        ...(posts.length ? [{ path: '/map/', lastmod: latestAll }] : []),
+        ...(posts.length ? [{ path: '/tags/', lastmod: latestAll }] : []),
         { path: '/ads/', lastmod: undefined },
+        ...allHubs.map((hub) => ({
+          path: hub.path,
+          lastmod: hub.lastmod || undefined,
+        })),
         ...posts.map(({ data }) => ({
           path: postPath({ data }),
           lastmod: data.updatedAt ?? data.publishedAt,

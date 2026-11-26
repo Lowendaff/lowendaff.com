@@ -152,6 +152,12 @@ for (const file of pages) {
     const article = graph.find((node) => node['@type'] === 'BlogPosting');
     assert(article, `${file}: article schema missing`);
     assert.equal(article.url, canonical);
+    assert(article.image, `${file}: BlogPosting.image missing`);
+    assert.equal(
+      article.license,
+      'https://creativecommons.org/licenses/by/4.0/',
+      `${file}: BlogPosting.license missing`,
+    );
     assert(
       article.dateModified >= article.datePublished,
       `${file}: article date order`,
@@ -168,6 +174,15 @@ for (const file of pages) {
 const rss = await read('rss.xml');
 const robots = await read('robots.txt');
 const llms = await read('llms.txt');
+const llmsFull = await read('llms-full.txt');
+const defaultOgBuf = await readFile(new URL('og/default.png', root));
+assert.equal(
+  defaultOgBuf.subarray(0, 8).toString('hex'),
+  '89504e470d0a1a0a',
+  'Default OG card must be a valid PNG',
+);
+assert.equal(defaultOgBuf.readUInt32BE(16), 1200, 'Default OG PNG width');
+assert.equal(defaultOgBuf.readUInt32BE(20), 630, 'Default OG PNG height');
 await assert.rejects(
   read('_redirects'),
   { code: 'ENOENT' },
@@ -197,6 +212,10 @@ assert.equal(
 );
 assert(!/priority|changefreq/.test(sitemap), 'No invented sitemap hints');
 assert(!llms.includes('/components/'), 'UI kit excluded from AI directory');
+assert(
+  !llmsFull.includes('/components/'),
+  'UI kit excluded from full AI corpus',
+);
 const reviewPages = pages.filter((path) => path.startsWith('reviews/'));
 assert.equal(
   (rss.match(/<item>/g) || []).length,

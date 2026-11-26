@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getPublishedPosts, postPath } from '../lib/posts';
+import { countryLabel } from '../lib/records';
+import { reviewTypeLabels } from '../lib/review-types';
 import { escapeXml as xml } from '../lib/site';
 
 export const GET: APIRoute = async ({ site }) => {
@@ -7,7 +9,22 @@ export const GET: APIRoute = async ({ site }) => {
   const items = posts
     .map(({ data }) => {
       const url = xml(new URL(postPath({ data }), site).href);
-      return `<item><title>${xml(data.title)}</title><link>${url}</link><guid isPermaLink="true">${url}</guid><description>${xml(data.description)}</description><pubDate>${new Date(`${data.publishedAt}T00:00:00+08:00`).toUTCString()}</pubDate></item>`;
+      const summary = data.verdict
+        ? `${data.description} 核心结论：${data.verdict}`
+        : data.description;
+      const categories = [
+        ...new Set(
+          [
+            reviewTypeLabels[data.reviewType],
+            data.country ? countryLabel(data.country) : '',
+            data.vendor,
+            ...data.tags,
+          ].filter(Boolean),
+        ),
+      ]
+        .map((cat) => `<category>${xml(cat)}</category>`)
+        .join('');
+      return `<item><title>${xml(data.title)}</title><link>${url}</link><guid isPermaLink="true">${url}</guid><description>${xml(summary)}</description>${categories}<pubDate>${new Date(`${data.publishedAt}T00:00:00+08:00`).toUTCString()}</pubDate></item>`;
     })
     .join('');
   return new Response(

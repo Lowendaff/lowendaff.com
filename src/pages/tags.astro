@@ -6,6 +6,7 @@ import Flag from '../components/Flag.astro';
 import RecordList from '../components/RecordList.astro';
 import ReviewTypeFilter from '../components/ReviewTypeFilter.astro';
 import { recordTags, countryLabel, getRecords } from '../lib/records';
+import '../styles/directory.css';
 const records = getRecords(await getCollection('posts'));
 const merchants = recordTags(records, 'merchant');
 const countries = recordTags(records, 'countryTag');
@@ -21,6 +22,10 @@ const maxCount = Math.max(
   active="tags"
   noindex={records.every((record) => record.external)}
   description="通过星空随机点阵与可自由拖拽的星云画板，按测评类型、商家与国家探索 LowEndAFF 的服务器实测记录。"
+  breadcrumbs={[
+    { name: '首页', path: '/' },
+    { name: '标签云', path: '/tags/' },
+  ]}
 >
   <div class="shell directory-page home-revision">
     <header class="directory-heading">

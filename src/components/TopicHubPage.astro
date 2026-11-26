@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from './Icon.astro';
+import Flag from './Flag.astro';
+import RecordList from './RecordList.astro';
+import type { TopicHub } from '../lib/topic-hubs';
+import { postPath } from '../lib/posts';
+import '../styles/directory.css';
+
+interface Props {
+  hub: TopicHub;
+  otherHubs?: TopicHub[];
+}
+
+const { hub, otherHubs = [] } = Astro.props;
+const activeNav = hub.kind === 'type' ? 'home' : 'tags';
+const items = hub.posts.map((post) => ({
+  name: post.data.title,
+  path: postPath(post),
+}));
+const cities = [
+  ...new Set(hub.posts.map(({ data }) => data.geo.city).filter(Boolean)),
+];
+const vendors = [
+  ...new Set(hub.posts.map(({ data }) => data.vendor).filter(Boolean)),
+];
+---
+
+<BaseLayout
+  title={hub.title}
+  seoTitle={hub.seoTitle}
+  description={hub.description}
+  active={activeNav}
+  breadcrumbs={[
+    { name: '首页', path: '/' },
+    ...(hub.kind !== 'type' ? [{ name: '标签云', path: '/tags/' }] : []),
+    { name: hub.title, path: hub.path },
+  ]}
+  items={items}
+>
+  <div class="shell directory-page home-revision">
+    <nav class="breadcrumb" aria-label="面包屑">
+      <a href="/">
+        <Icon name="book-2-line" size={14} />
+        <span>首页</span>
+      </a>
+      {hub.kind !== 'type' && (
+        <>
+          <Icon name="right-line" size={14} />
+          <a href="/tags/">标签云</a>
+        </>
+      )}
+      <Icon name="right-line" size={14} />
+      <span class="breadcrumb-current">{hub.title}</span>
+    </nav>
+
+    <header class="directory-heading">
+      <div>
+        <h1 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          {hub.countryCode && <Flag code={hub.countryCode} size={24} />}
+          <span>{hub.heading}</span>
+        </h1>
+        <p>{hub.lead}</p>
+        <p class="subtle-label" style="margin-top:8px;">
+          共 {hub.posts.length} 篇实测 · 覆盖 {cities.length} 座城市 ·{' '}
+          {vendors.length} 家服务商 · 最近更新 {hub.lastmod}
+        </p>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <a class="button secondary" href="/map/">
+          <Icon name="earth-2-line" size={16} />
+          测评地图
+        </a>
+        <a class="button secondary" href="/tags/">
+          <Icon name="tag-line" size={16} />
+          星云筛选
+        </a>
+      </div>
+    </header>
+
+    <RecordList
+      records={hub.records}
+      showTypeFilter={hub.kind !== 'type'}
+      showVerdict={true}
+    />
+
+    {otherHubs.length > 0 && (
+      <section
+        style="margin-top:36px;padding-top:24px;border-top:1px solid var(--border);"
+        aria-label="更多聚合专题"
+      >
+        <div class="section-heading">
+          <h2 style="font-size:16px;">更多测评专题</h2>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+          {otherHubs.map((other) => (
+            <a class="tag" href={other.path}>
+              {other.countryCode ? (
+                <Flag code={other.countryCode} size={13} />
+              ) : (
+                <Icon name="server-line" size={13} />
+              )}
+              <span>{other.title}</span>
+              <span class="mono">({other.posts.length})</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</BaseLayout>

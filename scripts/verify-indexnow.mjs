@@ -65,6 +65,22 @@ test('Chinese review URL migration retains old deletions and rejects ambiguous e
 
 test('strict configuration and canonical URL boundaries', () => {
   assert.deepEqual(validateConfig(config), config);
+  for (const hubUrl of [
+    `${home}vps/`,
+    `${home}dedicated/`,
+    `${home}countries/hk/`,
+    `${home}vendors/gomami/`,
+  ]) {
+    validateIndex(
+      {
+        schema: 1,
+        site: config.site,
+        indexable: true,
+        entries: { [hubUrl]: digest },
+      },
+      config.site,
+    );
+  }
   for (const indexNow of [
     { ...config.indexNow, key: 'bad' },
     { ...config.indexNow, endpoint: 'https://evil.example/indexnow' },
