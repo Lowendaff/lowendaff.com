@@ -176,7 +176,7 @@ export function buildRecommendations(
   inferredTopics.push({
     badge: '边缘网络延伸',
     title: '奇葩小国 · 冷门地区与稀有海缆图鉴',
-    subtitle: '对比常规热门机房与全球 42 处冷门自治域的路由差异',
+    subtitle: '对比常规热门机房与全球 44 处奇葩小国节点的路由差异',
     href: '/exotic/',
     icon: 'planet-line',
   });

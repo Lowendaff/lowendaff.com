@@ -6,7 +6,13 @@ import Flag from '../components/Flag.astro';
 import TelegramLogo from '../components/TelegramLogo.astro';
 import RecordList from '../components/RecordList.astro';
 import { getRecords } from '../lib/records';
-import { isExoticPost, EXOTIC_TERRITORIES, EXOTIC_ZONES } from '../lib/exotic';
+import {
+  isExoticPost,
+  EXOTIC_TERRITORIES,
+  EXOTIC_ZONES,
+  EXOTIC_SPECIAL_EPISODES,
+  type ExoticFilterId,
+} from '../lib/exotic';
 import { serializeJsonLd } from '../lib/seo';
 import '../styles/exotic.css';
 
@@ -15,22 +21,54 @@ const allPosts = (await getCollection('posts')).filter(
 );
 const exoticPosts = allPosts.filter(isExoticPost);
 const exoticRecords = getRecords(exoticPosts);
+
 const countByCode = new Map<string, number>();
 for (const post of exoticPosts) {
   const code = post.data.country;
   if (code) countByCode.set(code, (countByCode.get(code) || 0) + 1);
 }
-const countByZone = new Map<string, number>();
-for (const item of EXOTIC_TERRITORIES) {
-  countByZone.set(item.zone, (countByZone.get(item.zone) || 0) + 1);
+
+const latestRecordByCode = new Map<
+  string,
+  { href: string; title: string; vendor: string }
+>();
+for (const rec of exoticRecords) {
+  if (rec.country && !latestRecordByCode.has(rec.country)) {
+    latestRecordByCode.set(rec.country, {
+      href: rec.href,
+      title: rec.title,
+      vendor: rec.merchant,
+    });
+  }
 }
-const initial = EXOTIC_TERRITORIES[0];
+
+/** Float unlocked stamps to the front while preserving chronological episode order. */
+const territories = [...EXOTIC_TERRITORIES].sort(
+  (a, b) =>
+    Number((countByCode.get(b.code) || 0) > 0) -
+    Number((countByCode.get(a.code) || 0) > 0),
+);
+
+const countByFilter = new Map<ExoticFilterId, number>();
+countByFilter.set('all', territories.length);
+countByFilter.set(
+  'unlocked',
+  territories.filter((t) => (countByCode.get(t.code) || 0) > 0).length,
+);
+countByFilter.set('tier-t1', territories.filter((t) => t.tier === 'T1').length);
+for (const item of territories) {
+  countByFilter.set(item.zone, (countByFilter.get(item.zone) || 0) + 1);
+}
+
+const initial = territories[0];
+const initialCount = countByCode.get(initial.code) || 0;
+const initialRecord = latestRecordByCode.get(initial.code);
 ---
 
 <BaseLayout
   title="奇葩小国"
   active="exotic"
-  description="收录全球 42 处冷门国家、极地群岛、孤岛海缆与袖珍自治域（ASN）的 VPS 与独立服务器实测手记。"
+  description={`对照小约翰可汗《奇葩小国》第 01–53 期合集，收录全球 ${EXOTIC_TERRITORIES.length} 处冷门国家与地区的海底光缆、绕行路由与 VPS / 独立服务器实测图鉴。`}
   breadcrumbs={[
     { name: '首页', path: '/' },
     { name: '奇葩小国', path: '/exotic/' },
@@ -41,12 +79,14 @@ const initial = EXOTIC_TERRITORIES[0];
       <div class="exotic-hero-main">
         <span class="badge-pill">
           <Icon name="planet-line" size={14} />
-          <span>冷门地区 · 孤岛海缆 · 稀有自治域收藏馆</span>
+          <span>通辽宇宙集邮册 · 冷门海缆 · 稀有自治域实测</span>
         </span>
         <h1>奇葩小国</h1>
         <p>
-          跳出美西与港日新的常规航线，横跨六大边缘分区，专门记录那些极圈光缆站、海缆咽喉、双重内陆国与袖珍城邦
-          IP 的真实网络表现。
+          以小约翰可汗《奇葩小国》第 01–53
+          期合集为蓝本，跳出美西与港日新的常规航线，横跨四大分区梳理
+          {EXOTIC_TERRITORIES.length}
+          处国家与地区的海底光缆、跨洲路由与真实机房测试手记。
         </p>
       </div>
       <dl class="exotic-stats" aria-label="探索进度">
@@ -55,7 +95,7 @@ const initial = EXOTIC_TERRITORIES[0];
           <dd class="mono">{exoticRecords.length} 篇</dd>
         </div>
         <div>
-          <dt>全球奇葩领地图鉴</dt>
+          <dt>合集国家图鉴</dt>
           <dd class="mono">{EXOTIC_TERRITORIES.length} 处</dd>
         </div>
       </dl>
@@ -66,11 +106,12 @@ const initial = EXOTIC_TERRITORIES[0];
         <div>
           <h2 id="exotic-studio-title">
             <Icon name="compass-3-line" size={18} />
-            <span>全球冷门机房图鉴与盲盒罗盘</span>
+            <span>奇葩小国集邮册与盲盒罗盘</span>
           </h2>
           <p>
-            切换六大地理分区浏览 42
-            枚边缘节点邮票，或转动盲盒抽选下一站探险目标。
+            已点亮实测国家自动置顶；可按分区或购买难度筛选{' '}
+            {EXOTIC_TERRITORIES.length}
+            枚节点邮票，直达对应期数 B 站视频与本站实测报告。
           </p>
         </div>
         <button
@@ -79,14 +120,14 @@ const initial = EXOTIC_TERRITORIES[0];
           data-exotic-spin
         >
           <Icon name="magic-2-line" size={16} />
-          <span>随机抽一个冷门节点</span>
+          <span>随机抽一个奇葩小国</span>
         </button>
       </div>
 
       <div
         class="exotic-zone-tabs notion-view-tabs"
         role="tablist"
-        aria-label="奇葩地区地理分区"
+        aria-label="奇葩小国筛选视图"
       >
         {EXOTIC_ZONES.map((z, idx) => (
           <button
@@ -96,10 +137,16 @@ const initial = EXOTIC_TERRITORIES[0];
             aria-selected={idx === 0 ? 'true' : 'false'}
           >
             <span>{z.label}</span>
-            <span class="exotic-zone-count mono">
-              {z.id === 'all'
-                ? EXOTIC_TERRITORIES.length
-                : countByZone.get(z.id) || 0}
+            <span
+              class:list={[
+                'exotic-zone-count',
+                'mono',
+                z.id === 'unlocked' &&
+                  (countByFilter.get('unlocked') || 0) > 0 &&
+                  'is-unlocked',
+              ]}
+            >
+              {countByFilter.get(z.id) || 0}
             </span>
           </button>
         ))}
@@ -117,11 +164,16 @@ const initial = EXOTIC_TERRITORIES[0];
                   {initial.name} · {initial.city}
                 </h3>
                 <span class="exotic-code mono" data-exotic-code>
-                  ISO {initial.code} · {initial.tag}
+                  ISO {initial.code} · 奇葩小国 {initial.epBadge} ·{' '}
+                  {initial.tag}
                 </span>
               </div>
             </div>
-            <span class="exotic-rarity-pill" data-exotic-rarity>
+            <span
+              class="exotic-rarity-pill"
+              data-tier={initial.tier}
+              data-exotic-rarity
+            >
               {initial.rarity}
             </span>
           </div>
@@ -147,11 +199,37 @@ const initial = EXOTIC_TERRITORIES[0];
             {initial.note}
           </p>
 
+          <div class="exotic-episodes" data-exotic-episodes>
+            {initial.episodes.map((ep) => (
+              <a
+                class="exotic-ep-link"
+                href={`https://www.bilibili.com/video/${ep.bvid}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon name="bilibili-line" size={15} />
+                <span class="mono exotic-ep-num">【奇葩小国{ep.ep}】</span>
+                <span class="exotic-ep-title">{ep.title}</span>
+                <Icon name="arrow-right-up-line" size={13} />
+              </a>
+            ))}
+          </div>
+
           <div class="exotic-spotlight-footer">
-            <span class="subtle-label" data-exotic-status>
-              {(countByCode.get(initial.code) || 0) > 0
-                ? `本站已收录 ${countByCode.get(initial.code)} 篇该地区实测`
-                : '暂未收录实测样机 · 持续蹲守库存中'}
+            <span class="exotic-status-slot" data-exotic-status>
+              {initialCount > 0 && initialRecord ? (
+                <a class="exotic-unlocked-link" href={initialRecord.href}>
+                  <Icon name="check-circle-line" size={15} />
+                  <span>
+                    已点亮 {initialCount} 篇实测 · 查看 {initialRecord.vendor}{' '}
+                    测评
+                  </span>
+                </a>
+              ) : (
+                <span class="subtle-label">
+                  暂未收录实测样机 · 持续蹲守库存中
+                </span>
+              )}
             </span>
             <a
               class="exotic-nominate-link"
@@ -169,29 +247,34 @@ const initial = EXOTIC_TERRITORIES[0];
         <div
           class="exotic-stamp-grid"
           role="listbox"
-          aria-label="冷门机房地区集邮册"
+          aria-label="奇葩小国集邮册"
         >
-          {EXOTIC_TERRITORIES.map((item, idx) => {
+          {territories.map((item, idx) => {
             const count = countByCode.get(item.code) || 0;
             return (
               <button
                 type="button"
                 role="option"
-                class="exotic-stamp"
+                class:list={['exotic-stamp', count > 0 && 'has-posts']}
                 data-exotic-stamp={idx}
                 data-stamp-zone={item.zone}
+                data-stamp-tier={item.tier}
+                data-stamp-unlocked={count > 0 ? 'true' : 'false'}
                 aria-selected={idx === 0 ? 'true' : 'false'}
               >
                 <div class="exotic-stamp-top">
                   <Flag code={item.code} size={16} />
-                  <span class="mono exotic-stamp-iso">{item.code}</span>
+                  <span class="mono exotic-stamp-iso">
+                    {item.code} · {item.epBadge}
+                  </span>
                   <span
                     class:list={[
                       'exotic-stamp-badge',
                       count > 0 && 'is-unlocked',
                     ]}
+                    data-badge-tier={count > 0 ? undefined : item.tier}
                   >
-                    {count > 0 ? `${count} 篇` : '图鉴'}
+                    {count > 0 ? `${count} 篇` : item.tier}
                   </span>
                 </div>
                 <strong>{item.name}</strong>
@@ -204,7 +287,38 @@ const initial = EXOTIC_TERRITORIES[0];
           })}
         </div>
       </div>
+
+      <p class="exotic-special-note">
+        <span>
+          合集番外说明：无独立 ISO 代码与 RIR
+          自治域（ASN）的两期特辑未计入邮票总数——
+        </span>
+        {EXOTIC_SPECIAL_EPISODES.map((sp, i) => (
+          <>
+            {i > 0 && <span> · </span>}
+            <a
+              href={`https://www.bilibili.com/video/${sp.bvid}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              【奇葩小国{sp.ep}】{sp.title}
+            </a>
+          </>
+        ))}
+      </p>
     </section>
+
+    <template data-exotic-icons-tpl>
+      <span data-icon-bili>
+        <Icon name="bilibili-line" size={15} />
+      </span>
+      <span data-icon-ext>
+        <Icon name="arrow-right-up-line" size={13} />
+      </span>
+      <span data-icon-check>
+        <Icon name="check-circle-line" size={15} />
+      </span>
+    </template>
 
     {exoticRecords.length > 0 ? (
       <RecordList records={exoticRecords} />
@@ -217,7 +331,7 @@ const initial = EXOTIC_TERRITORIES[0];
         <p>
           凡属于主流枢纽以外的冷门国家/地区，或在文章 Frontmatter 中标记为
           <code>奇葩小国</code>、<code>冷门线路</code>
-          的实测记录，发布后都会自动归档至此。
+          的实测记录，发布后都会自动归档至此并点亮对应国家邮票。
         </p>
         <div class="exotic-empty-actions">
           <a class="button secondary" href="/">
@@ -236,10 +350,15 @@ const initial = EXOTIC_TERRITORIES[0];
       type="application/json"
       data-exotic-data
       set:html={serializeJsonLd(
-        EXOTIC_TERRITORIES.map((t) => ({
-          ...t,
-          count: countByCode.get(t.code) || 0,
-        })),
+        territories.map((t) => {
+          const rec = latestRecordByCode.get(t.code);
+          return {
+            ...t,
+            count: countByCode.get(t.code) || 0,
+            latestHref: rec?.href || '',
+            latestVendor: rec?.vendor || '',
+          };
+        }),
       )}
     />
   </div>
@@ -252,6 +371,8 @@ const initial = EXOTIC_TERRITORIES[0];
     ) as Array<{
       code: string;
       zone: string;
+      tier: string;
+      epBadge: string;
       name: string;
       city: string;
       tag: string;
@@ -259,7 +380,10 @@ const initial = EXOTIC_TERRITORIES[0];
       rttHint: string;
       cable: string;
       note: string;
+      episodes: Array<{ ep: string; bvid: string; title: string }>;
       count: number;
+      latestHref: string;
+      latestVendor: string;
     }>;
     const stamps = Array.from(
       root.querySelectorAll<HTMLButtonElement>('[data-exotic-stamp]'),
@@ -275,18 +399,48 @@ const initial = EXOTIC_TERRITORIES[0];
     const cableEl = root.querySelector<HTMLElement>('[data-exotic-cable]');
     const rttEl = root.querySelector<HTMLElement>('[data-exotic-rtt]');
     const noteEl = root.querySelector<HTMLElement>('[data-exotic-note]');
+    const episodesEl = root.querySelector<HTMLElement>(
+      '[data-exotic-episodes]',
+    );
     const statusEl = root.querySelector<HTMLElement>('[data-exotic-status]');
+    const iconTpl = root.querySelector<HTMLTemplateElement>(
+      '[data-exotic-icons-tpl]',
+    );
+
+    const cloneIcon = (sel: string) => {
+      const svg = iconTpl?.content.querySelector(`${sel} svg`);
+      return svg ? (svg.cloneNode(true) as SVGElement) : null;
+    };
 
     let current = 0;
     let activeZone = 'all';
     let spinning = false;
 
+    const matchesFilter = (item: (typeof data)[number], filter: string) => {
+      if (filter === 'all') return true;
+      if (filter === 'unlocked') return item.count > 0;
+      if (filter === 'tier-t1') return item.tier === 'T1';
+      return item.zone === filter;
+    };
+
     const getVisibleIndices = () =>
       data
-        .map((item, idx) =>
-          activeZone === 'all' || item.zone === activeZone ? idx : -1,
-        )
+        .map((item, idx) => (matchesFilter(item, activeZone) ? idx : -1))
         .filter((idx) => idx >= 0);
+
+    const applyZoneFilter = (filter: string) => {
+      activeZone = filter;
+      zoneTabs.forEach((t) =>
+        t.setAttribute(
+          'aria-selected',
+          String(t.dataset.exoticZone === filter),
+        ),
+      );
+      stamps.forEach((btn, idx) => {
+        const item = data[idx];
+        btn.hidden = item ? !matchesFilter(item, filter) : true;
+      });
+    };
 
     const selectTerritory = (index: number, scrollStamp = false) => {
       const item = data[index];
@@ -301,30 +455,66 @@ const initial = EXOTIC_TERRITORIES[0];
       const tpl = stamps[index]?.querySelector('.exotic-stamp-flag-tpl');
       if (flagSlot && tpl) flagSlot.innerHTML = tpl.innerHTML;
       if (titleEl) titleEl.textContent = `${item.name} · ${item.city}`;
-      if (codeEl) codeEl.textContent = `ISO ${item.code} · ${item.tag}`;
-      if (rarityEl) rarityEl.textContent = item.rarity;
+      if (codeEl) {
+        codeEl.textContent = `ISO ${item.code} · 奇葩小国 ${item.epBadge} · ${item.tag}`;
+      }
+      if (rarityEl) {
+        rarityEl.dataset.tier = item.tier;
+        rarityEl.textContent = item.rarity;
+      }
       if (cableEl) cableEl.textContent = item.cable;
       if (rttEl) rttEl.textContent = item.rttHint;
       if (noteEl) noteEl.textContent = item.note;
+
+      if (episodesEl) {
+        const links = item.episodes.map((ep) => {
+          const a = document.createElement('a');
+          a.className = 'exotic-ep-link';
+          a.href = `https://www.bilibili.com/video/${encodeURIComponent(ep.bvid)}/`;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          const biliSvg = cloneIcon('[data-icon-bili]');
+          if (biliSvg) a.append(biliSvg);
+          const num = document.createElement('span');
+          num.className = 'mono exotic-ep-num';
+          num.textContent = `【奇葩小国${ep.ep}】`;
+          const title = document.createElement('span');
+          title.className = 'exotic-ep-title';
+          title.textContent = ep.title;
+          a.append(num, title);
+          const extSvg = cloneIcon('[data-icon-ext]');
+          if (extSvg) a.append(extSvg);
+          return a;
+        });
+        episodesEl.replaceChildren(...links);
+      }
+
       if (statusEl) {
-        statusEl.textContent =
-          item.count > 0
-            ? `本站已收录 ${item.count} 篇该地区实测`
-            : '暂未收录实测样机 · 持续蹲守库存中';
+        if (item.count > 0 && item.latestHref) {
+          const a = document.createElement('a');
+          a.className = 'exotic-unlocked-link';
+          a.href = item.latestHref;
+          const checkSvg = cloneIcon('[data-icon-check]');
+          if (checkSvg) a.append(checkSvg);
+          const label = document.createElement('span');
+          label.textContent = item.latestVendor
+            ? `已点亮 ${item.count} 篇实测 · 查看 ${item.latestVendor} 测评`
+            : `已点亮 ${item.count} 篇实测 · 查看实测报告`;
+          a.append(label);
+          statusEl.replaceChildren(a);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'subtle-label';
+          span.textContent = '暂未收录实测样机 · 持续蹲守库存中';
+          statusEl.replaceChildren(span);
+        }
       }
     };
 
     zoneTabs.forEach((tab) => {
       tab.addEventListener('click', () => {
         if (spinning) return;
-        activeZone = tab.dataset.exoticZone || 'all';
-        zoneTabs.forEach((t) =>
-          t.setAttribute('aria-selected', String(t === tab)),
-        );
-        stamps.forEach((btn) => {
-          btn.hidden =
-            activeZone !== 'all' && btn.dataset.stampZone !== activeZone;
-        });
+        applyZoneFilter(tab.dataset.exoticZone || 'all');
         const pool = getVisibleIndices();
         if (pool.length && !pool.includes(current)) {
           selectTerritory(pool[0]);
@@ -339,8 +529,14 @@ const initial = EXOTIC_TERRITORIES[0];
     });
 
     spinBtn?.addEventListener('click', () => {
-      const pool = getVisibleIndices();
-      if (spinning || pool.length <= 1) return;
+      if (spinning) return;
+      let pool = getVisibleIndices();
+      if (pool.length <= 1 && data.length > 1) {
+        applyZoneFilter('all');
+        pool = getVisibleIndices();
+      }
+      if (pool.length <= 1) return;
+
       const reduced = window.matchMedia(
         '(prefers-reduced-motion: reduce)',
       ).matches;
