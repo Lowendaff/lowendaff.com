@@ -874,6 +874,79 @@
 }
 .review-doc-footer {
   margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.social-share {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.social-share--bar {
+  gap: 8px;
+}
+.social-share-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-right: 2px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-ui);
+}
+.share-btn[hidden] {
+  display: none;
+}
+.social-share--bar .share-btn {
+  min-height: var(--control-h-md);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+}
+.share-btn:hover,
+.share-btn:focus-visible {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.share-btn--twitter {
+  color: var(--text);
+  font-weight: 600;
+  border-color: var(--border-strong);
+}
+.share-btn--twitter:hover,
+.share-btn--twitter:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.share-copy-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.share-copy-status {
+  color: var(--accent);
+  font-weight: 500;
 }
 
 @media (max-width: 1100px) {
@@ -1000,6 +1073,10 @@
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
   }
+  .social-share--inline .share-btn {
+    min-height: 36px;
+    padding: 6px 12px;
+  }
 }
 @media print {
   .route-explorer [hidden] {
@@ -1008,7 +1085,9 @@
   .route-toolbar,
   .site-header,
   .review-sidebar,
-  .site-footer {
+  .site-footer,
+  .notion-prop-share,
+  .social-share {
     display: none !important;
   }
   .complete-review-grid {

@@ -12,6 +12,7 @@ import ArticleTopAds from '../components/ads/ArticleTopAds.astro';
 import ArticleBottomAds from '../components/ads/ArticleBottomAds.astro';
 import ArticleSidebarAds from '../components/ads/ArticleSidebarAds.astro';
 import Sponsors from '../components/archive/Sponsors.astro';
+import SocialShare from '../components/SocialShare.astro';
 import '../styles/editorial.css';
 import '../styles/compact.css';
 import '../styles/reading.css';
@@ -190,6 +191,22 @@ const chapterIcon: Record<string, string> = {
                 <dd class="notion-prop-verdict">{p.verdict}</dd>
               </div>
             )}
+            <div class="notion-prop-row notion-prop-share">
+              <dt>
+                <Icon name="share-forward-line" size={15} />
+                <span>社媒分享</span>
+              </dt>
+              <dd>
+                <SocialShare
+                  title={fullDisplayTitle}
+                  url={canonicalHref}
+                  verdict={p.verdict}
+                  description={p.description}
+                  price={p.price}
+                  variant="inline"
+                />
+              </dd>
+            </div>
           </dl>
         </header>
 
@@ -403,6 +420,14 @@ const chapterIcon: Record<string, string> = {
             <Icon name="arrow-left-line" size={16} />
             返回测试记录
           </a>
+          <SocialShare
+            title={fullDisplayTitle}
+            url={canonicalHref}
+            verdict={p.verdict}
+            description={p.description}
+            price={p.price}
+            variant="bar"
+          />
         </div>
       </article>
 

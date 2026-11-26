@@ -1,0 +1,81 @@
+---
+import Icon from './Icon.astro';
+import { buildShareLinks } from '../lib/share';
+
+interface Props {
+  title: string;
+  url: string;
+  verdict?: string;
+  description?: string;
+  price?: string;
+  variant?: 'inline' | 'bar';
+}
+
+const {
+  title,
+  url,
+  verdict,
+  description,
+  price,
+  variant = 'inline',
+} = Astro.props;
+
+const links = buildShareLinks({ title, url, verdict, description, price });
+const iconSize = variant === 'bar' ? 16 : 14;
+---
+
+<div
+  class:list={['social-share', `social-share--${variant}`]}
+  role="group"
+  aria-label="分享本文"
+>
+  {variant === 'bar' && <span class="social-share-label">分享本文</span>}
+  <a
+    class="share-btn share-btn--twitter"
+    href={links.twitterHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="分享本文至 Twitter（X）"
+  >
+    <Icon name="social-x-line" size={iconSize} />
+    <span>分享至 Twitter</span>
+  </a>
+  <a
+    class="share-btn"
+    href={links.telegramHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="分享本文至 Telegram"
+  >
+    <Icon name="telegram-line" size={iconSize} />
+    <span translate="no">Telegram</span>
+  </a>
+  <span class="share-copy-wrap">
+    <button
+      type="button"
+      class="share-btn"
+      data-copy={links.readableUrl}
+      aria-label="复制本文链接"
+    >
+      <Icon name="link-line" size={iconSize} />
+      <span>复制链接</span>
+    </button>
+    <small
+      class="subtle-label share-copy-status"
+      data-copy-status
+      aria-live="polite"
+    ></small>
+  </span>
+  <button
+    type="button"
+    class="share-btn"
+    data-native-share
+    data-share-title={links.shareTitle}
+    data-share-text={links.tweetText}
+    data-share-url={url}
+    hidden
+  >
+    <Icon name="share-forward-line" size={iconSize} />
+    <span>更多</span>
+  </button>
+</div>

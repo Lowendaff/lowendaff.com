@@ -7,6 +7,7 @@ import {
   toIsoDateTimeCst,
 } from '../src/lib/seo.ts';
 import { buildTopicHubs } from '../src/lib/topic-hubs.ts';
+import { buildShareLinks } from '../src/lib/share.ts';
 
 test('Article graph links real authorship, dates, publisher, canonical page and breadcrumbs', () => {
   const canonical = new URL('https://lowendaff.com/reviews/example/');
@@ -156,4 +157,32 @@ test('Topic hubs enforce quality thresholds before emitting crawlable country or
   );
   assert.equal(multi.countryHubHref('HK'), '/countries/hk/');
   assert.equal(multi.vendorHubHref('GoMami'), '/vendors/gomami/');
+});
+
+test('Social share links encode Twitter and Telegram intents safely and clamp long verdicts', () => {
+  const canonical = encodeURI(
+    'https://lowendaff.com/reviews/funom-越南胡志明市-vps-测试记录-20261127/',
+  );
+  const links = buildShareLinks({
+    title: '🇻🇳 Funom 越南胡志明市 VPS 测试记录',
+    url: canonical,
+    price: '$1.49 / 月',
+    verdict: `${'越南原生商业 IP 解锁 Netflix 与 YouTube Premium，移动直连 49ms，'.repeat(5)}#tag & ?x=1`,
+  });
+  assert.equal(links.shareTitle, 'Funom 越南胡志明市 VPS 测试记录');
+  assert.equal(
+    links.readableUrl,
+    'https://lowendaff.com/reviews/funom-越南胡志明市-vps-测试记录-20261127/',
+  );
+  const tw = new URL(links.twitterHref);
+  assert.equal(tw.origin + tw.pathname, 'https://twitter.com/intent/tweet');
+  assert.equal(tw.searchParams.get('url'), canonical);
+  const text = tw.searchParams.get('text') ?? '';
+  assert(text.startsWith('Funom 越南胡志明市 VPS 测试记录（$1.49 / 月） — '));
+  assert(text.endsWith('…'));
+  assert([...text].length <= 135);
+
+  const tg = new URL(links.telegramHref);
+  assert.equal(tg.origin + tg.pathname, 'https://t.me/share/url');
+  assert.equal(tg.searchParams.get('url'), canonical);
 });
