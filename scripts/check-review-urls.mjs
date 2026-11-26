@@ -19,6 +19,19 @@ if (reference && !/^0+$/.test(reference)) {
   if (!/^[a-zA-Z0-9_./-]+$/.test(reference) || reference.startsWith('-'))
     throw new Error('Invalid URL_BASE_REF');
   base = git('rev-parse', '--verify', `${reference}^{commit}`).trim();
+} else if (reference && /^0+$/.test(reference)) {
+  const target = process.env.URL_TARGET_TREE || 'HEAD';
+  for (const candidate of ['origin/main', 'refs/heads/main']) {
+    try {
+      const merged = git('merge-base', candidate, target).trim();
+      if (merged) {
+        base = merged;
+        break;
+      }
+    } catch {
+      // Repository has no main branch yet; fall back to empty-repository check.
+    }
+  }
 }
 const current = await readPosts();
 assertUniqueReviewUrls(current);

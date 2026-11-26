@@ -212,6 +212,28 @@ test('published URLs survive title/date changes and file renames, while URL rewr
   await f.write(edited);
   git(f.directory, 'mv', f.file, 'src/content/posts/renamed.mdx');
   run('check-review-urls.mjs', f.directory);
+
+  git(f.directory, 'branch', '-M', 'main');
+  commit(f.directory);
+  git(f.directory, 'checkout', '-qb', 'feat/new-branch');
+  run('check-review-urls.mjs', f.directory, [], {
+    CI: 'true',
+    URL_BASE_REF: '0000000000000000000000000000000000000000',
+    GITHUB_EVENT_NAME: 'push',
+  });
+  await writeFile(
+    path.join(f.directory, 'src/content/posts/renamed.mdx'),
+    edited.replace(address, '/reviews/other-20261110/'),
+  );
+  fails(
+    () =>
+      run('check-review-urls.mjs', f.directory, [], {
+        CI: 'true',
+        URL_BASE_REF: '0000000000000000000000000000000000000000',
+        GITHUB_EVENT_NAME: 'push',
+      }),
+    /immutable/,
+  );
 });
 
 test('existing content can receive a canonical URL without preserving a filename alias', async (t) => {
