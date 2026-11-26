@@ -78,20 +78,6 @@ export interface ExoticTerritory {
   episodes: ExoticEpisode[];
 }
 
-/** Special episodes without a standalone sovereign ISO / RIR ASN. */
-export const EXOTIC_SPECIAL_EPISODES: ExoticEpisode[] = [
-  {
-    ep: '06',
-    bvid: 'BV1ey4y1m7dc',
-    title: '花九块钱，买个公爵当当？（私人微国家特辑）',
-  },
-  {
-    ep: '37',
-    bvid: 'BV1HU4y1173x',
-    title: '亚洲人如何在欧洲建国？（南马鲁古流亡组织）',
-  },
-];
-
 /**
  * 44 canonical ISO countries/territories parsed from 小约翰可汗《奇葩小国》
  * season_id=665 (Episodes 01–53), ordered chronologically by debut episode.

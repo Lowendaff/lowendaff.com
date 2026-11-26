@@ -5,12 +5,11 @@ import Icon from '../components/Icon.astro';
 import Flag from '../components/Flag.astro';
 import TelegramLogo from '../components/TelegramLogo.astro';
 import RecordList from '../components/RecordList.astro';
-import { getRecords } from '../lib/records';
+import { countryLabel, getRecords, recordTags } from '../lib/records';
 import {
   isExoticPost,
   EXOTIC_TERRITORIES,
   EXOTIC_ZONES,
-  EXOTIC_SPECIAL_EPISODES,
   type ExoticFilterId,
 } from '../lib/exotic';
 import { serializeJsonLd } from '../lib/seo';
@@ -21,6 +20,13 @@ const allPosts = (await getCollection('posts')).filter(
 );
 const exoticPosts = allPosts.filter(isExoticPost);
 const exoticRecords = getRecords(exoticPosts);
+const exoticCountries = recordTags(exoticRecords, 'countryTag');
+
+const territoryNameByCode = new Map(
+  EXOTIC_TERRITORIES.map((t) => [t.code, t.name]),
+);
+const resolveCountryName = (code: string) =>
+  territoryNameByCode.get(code) || countryLabel(code);
 
 const countByCode = new Map<string, number>();
 for (const post of exoticPosts) {
@@ -109,9 +115,8 @@ const initialRecord = latestRecordByCode.get(initial.code);
             <span>奇葩小国集邮册与盲盒罗盘</span>
           </h2>
           <p>
-            已点亮实测国家自动置顶；可按分区或购买难度筛选{' '}
-            {EXOTIC_TERRITORIES.length}
-            枚节点邮票，直达对应期数 B 站视频与本站实测报告。
+            已点亮实测国家自动置顶；点击任意国家邮票可联动筛选下方测评列表，直达对应期数
+            B 站视频与实测报告。
           </p>
         </div>
         <button
@@ -257,6 +262,7 @@ const initialRecord = latestRecordByCode.get(initial.code);
                 role="option"
                 class:list={['exotic-stamp', count > 0 && 'has-posts']}
                 data-exotic-stamp={idx}
+                data-stamp-code={item.code}
                 data-stamp-zone={item.zone}
                 data-stamp-tier={item.tier}
                 data-stamp-unlocked={count > 0 ? 'true' : 'false'}
@@ -287,25 +293,6 @@ const initialRecord = latestRecordByCode.get(initial.code);
           })}
         </div>
       </div>
-
-      <p class="exotic-special-note">
-        <span>
-          合集番外说明：无独立 ISO 代码与 RIR
-          自治域（ASN）的两期特辑未计入邮票总数——
-        </span>
-        {EXOTIC_SPECIAL_EPISODES.map((sp, i) => (
-          <>
-            {i > 0 && <span> · </span>}
-            <a
-              href={`https://www.bilibili.com/video/${sp.bvid}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              【奇葩小国{sp.ep}】{sp.title}
-            </a>
-          </>
-        ))}
-      </p>
     </section>
 
     <template data-exotic-icons-tpl>
@@ -321,7 +308,65 @@ const initialRecord = latestRecordByCode.get(initial.code);
     </template>
 
     {exoticRecords.length > 0 ? (
-      <RecordList records={exoticRecords} />
+      <>
+        <div
+          class="exotic-country-filter"
+          role="group"
+          aria-label="按国家筛选奇葩小国测评"
+          data-tag-filters
+          hidden
+        >
+          <span class="exotic-country-filter-label">
+            <Icon name="filter-line" size={14} />
+            <span>按国家筛选</span>
+          </span>
+          <div class="exotic-country-chips">
+            <button
+              type="button"
+              class="exotic-country-chip"
+              data-country-all
+              aria-pressed="true"
+            >
+              <span>全部国家</span>
+              <span
+                class="mono exotic-country-chip-count"
+                data-country-all-count
+              >
+                {exoticRecords.length}
+              </span>
+            </button>
+            {exoticCountries.map(({ value, count }) => (
+              <button
+                type="button"
+                class="exotic-country-chip"
+                data-tag-kind="country"
+                data-tag-value={value}
+                data-tag-label={resolveCountryName(value)}
+                aria-pressed="false"
+              >
+                {value !== 'unspecified' && <Flag code={value} size={14} />}
+                <span>{resolveCountryName(value)}</span>
+                <span class="mono exotic-country-chip-count" data-tag-count>
+                  {count}
+                </span>
+              </button>
+            ))}
+            <button
+              type="button"
+              class="exotic-country-chip is-unlit-active"
+              data-unlit-country-pill
+              data-clear-tags
+              aria-pressed="true"
+              hidden
+            >
+              <span data-unlit-country-name></span>
+              <span class="mono exotic-country-chip-count">0</span>
+              <Icon name="close-line" size={13} />
+            </button>
+          </div>
+        </div>
+        <RecordList filters={true} records={exoticRecords} />
+      </>
     ) : (
       <section class="exotic-empty-vault panel" aria-labelledby="vault-title">
         <div class="exotic-empty-icon">
@@ -403,6 +448,12 @@ const initialRecord = latestRecordByCode.get(initial.code);
       '[data-exotic-episodes]',
     );
     const statusEl = root.querySelector<HTMLElement>('[data-exotic-status]');
+    const unlitPill = root.querySelector<HTMLButtonElement>(
+      '[data-unlit-country-pill]',
+    );
+    const unlitName = root.querySelector<HTMLElement>(
+      '[data-unlit-country-name]',
+    );
     const iconTpl = root.querySelector<HTMLTemplateElement>(
       '[data-exotic-icons-tpl]',
     );
@@ -414,6 +465,7 @@ const initialRecord = latestRecordByCode.get(initial.code);
 
     let current = 0;
     let activeZone = 'all';
+    let activeRecordCountry = '';
     let spinning = false;
 
     const matchesFilter = (item: (typeof data)[number], filter: string) => {
@@ -511,6 +563,49 @@ const initialRecord = latestRecordByCode.get(initial.code);
       }
     };
 
+    const setRecordCountryFilter = (code: string) => {
+      window.dispatchEvent(
+        new CustomEvent('set-record-country', { detail: { country: code } }),
+      );
+    };
+
+    const syncFromRecordFilter = (code: string) => {
+      activeRecordCountry = code;
+      if (code) {
+        const idx = data.findIndex((t) => t.code === code);
+        if (idx >= 0 && idx !== current) {
+          if (stamps[idx]?.hidden) applyZoneFilter('all');
+          selectTerritory(idx, true);
+        }
+      }
+      if (unlitPill && unlitName) {
+        const hasChip = Boolean(
+          root.querySelector(
+            `[data-tag-kind="country"][data-tag-value="${CSS.escape(code)}"]`,
+          ),
+        );
+        if (code && !hasChip) {
+          const item = data.find((t) => t.code === code);
+          unlitName.textContent = item ? item.name : code;
+          unlitPill.hidden = false;
+        } else {
+          unlitPill.hidden = true;
+        }
+      }
+    };
+
+    window.addEventListener('record-filter-change', (ev) => {
+      const detail = (ev as CustomEvent<{ country?: string }>).detail;
+      syncFromRecordFilter(detail?.country || '');
+    });
+
+    // Sync initial URL ?country= parameter if records.ts evaluated before this listener
+    const initialUrlCountry =
+      new URLSearchParams(location.search).get('country') || '';
+    if (initialUrlCountry) {
+      syncFromRecordFilter(initialUrlCountry);
+    }
+
     zoneTabs.forEach((tab) => {
       tab.addEventListener('click', () => {
         if (spinning) return;
@@ -524,7 +619,10 @@ const initialRecord = latestRecordByCode.get(initial.code);
 
     stamps.forEach((btn, idx) => {
       btn.addEventListener('click', () => {
-        if (!spinning) selectTerritory(idx);
+        if (spinning) return;
+        selectTerritory(idx);
+        const code = data[idx]?.code || '';
+        setRecordCountryFilter(activeRecordCountry === code ? '' : code);
       });
     });
 
@@ -545,8 +643,14 @@ const initialRecord = latestRecordByCode.get(initial.code);
         next = pool[(pool.indexOf(current) + 1) % pool.length];
       }
 
+      const finishSpin = (targetIdx: number) => {
+        selectTerritory(targetIdx, true);
+        const landed = data[targetIdx];
+        setRecordCountryFilter(landed && landed.count > 0 ? landed.code : '');
+      };
+
       if (reduced) {
-        selectTerritory(next, true);
+        finishSpin(next);
         return;
       }
 
@@ -557,7 +661,7 @@ const initialRecord = latestRecordByCode.get(initial.code);
         step++;
         if (step >= totalSteps) {
           spinning = false;
-          selectTerritory(next, true);
+          finishSpin(next);
           return;
         }
         const hop = pool[Math.floor(Math.random() * pool.length)];

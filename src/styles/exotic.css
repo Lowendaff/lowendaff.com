@@ -358,24 +358,78 @@
   line-height: 1.35;
 }
 
-.exotic-special-note {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: var(--muted);
+.exotic-country-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
 }
-.exotic-special-note a {
+.exotic-country-filter[hidden] {
+  display: none;
+}
+.exotic-country-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.exotic-country-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.exotic-country-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 5px 11px;
+  border-radius: var(--radius-md);
+  background: var(--canvas);
+  border: 1px solid var(--border);
   color: var(--text-secondary);
-  text-decoration: underline;
-  text-decoration-color: var(--border-strong);
-  text-underline-offset: 3px;
+  font-size: 13px;
+  font-weight: 500;
   transition: var(--transition-ui);
 }
-.exotic-special-note a:hover {
-  color: var(--accent);
-  text-decoration-color: var(--accent);
+.exotic-country-chip[hidden] {
+  display: none;
+}
+.exotic-country-chip:hover {
+  background: var(--subtle);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.exotic-country-chip[aria-pressed='true'] {
+  background: var(--sticker-blue-bg);
+  border-color: var(--accent);
+  color: var(--sticker-blue-fg);
+  font-weight: 600;
+}
+.exotic-country-chip.is-unlit-active {
+  background: var(--sticker-orange-bg);
+  border-color: var(--sticker-orange-fg);
+  color: var(--sticker-orange-fg);
+}
+.exotic-country-chip-count {
+  font-size: 11.5px;
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  background: var(--subtle);
+  color: var(--muted);
+}
+.exotic-country-chip[aria-pressed='true'] .exotic-country-chip-count {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  color: currentColor;
 }
 
 .exotic-empty-vault {

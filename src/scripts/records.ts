@@ -11,6 +11,9 @@ if (root) {
   const chips = [
     ...document.querySelectorAll<HTMLButtonElement>('[data-tag-kind]'),
   ];
+  const allCountriesButtons = [
+    ...document.querySelectorAll<HTMLButtonElement>('[data-country-all]'),
+  ];
   const previous = root.querySelector<HTMLButtonElement>('[data-page-prev]');
   const next = root.querySelector<HTMLButtonElement>('[data-page-next]');
   const tabs = [
@@ -30,6 +33,12 @@ if (root) {
       (chip) =>
         chip.dataset.tagKind === kind && chip.dataset.tagValue === value,
     );
+  const validCountry = (value: string) =>
+    valid('country', value) ||
+    Boolean(
+      value &&
+      document.querySelector(`[data-stamp-code="${CSS.escape(value)}"]`),
+    );
   const restore = () => {
     const params = new URLSearchParams(location.search);
     const requestedType = params.get('type');
@@ -42,7 +51,7 @@ if (root) {
         ? params.get('merchant') || ''
         : '';
     country =
-      filters && valid('country', params.get('country') || '')
+      filters && validCountry(params.get('country') || '')
         ? params.get('country') || ''
         : '';
     const requestedPage = Number(params.get('page') || 1);
@@ -85,6 +94,14 @@ if (root) {
     rows.forEach((row) => {
       row.hidden = !visible.has(row);
     });
+    const typeTotalCount = rows.filter(
+      (row) => !reviewType || row.dataset.type === reviewType,
+    ).length;
+    allCountriesButtons.forEach((button) => {
+      button.setAttribute('aria-pressed', String(!country));
+      const badge = button.querySelector('[data-country-all-count]');
+      if (badge) badge.textContent = String(typeTotalCount);
+    });
     let activeMerchantNodes = 0;
     let activeCountryNodes = 0;
     chips.forEach((chip) => {
@@ -108,6 +125,8 @@ if (root) {
         chip.hidden =
           (category !== 'all' && kind !== category) ||
           (!selected && typeMatches === 0);
+      } else {
+        chip.hidden = !selected && typeMatches === 0;
       }
       const count = chip.querySelector('[data-tag-count]');
       if (count)
@@ -193,6 +212,11 @@ if (root) {
     if (page > 1) url.searchParams.set('page', String(page));
     if (url.href !== location.href)
       history[mode === 'push' ? 'pushState' : 'replaceState'](null, '', url);
+    window.dispatchEvent(
+      new CustomEvent('record-filter-change', {
+        detail: { country, merchant, reviewType },
+      }),
+    );
   };
   const focusRecords = () => {
     const title = root.querySelector<HTMLElement>('#reviews-title');
@@ -259,6 +283,23 @@ if (root) {
       render('push');
     }),
   );
+  allCountriesButtons.forEach((button) =>
+    button.addEventListener('click', () => {
+      if (!country) return;
+      country = '';
+      page = 1;
+      render('push');
+    }),
+  );
+  window.addEventListener('set-record-country', (event) => {
+    const nextCountry =
+      (event as CustomEvent<{ country?: string }>).detail?.country || '';
+    const resolved = filters && validCountry(nextCountry) ? nextCountry : '';
+    if (country === resolved) return;
+    country = resolved;
+    page = 1;
+    render('push');
+  });
   document
     .querySelectorAll<HTMLButtonElement>(
       '[data-reset-filters], [data-clear-tags]',
