@@ -117,6 +117,8 @@ export const benchEditorialSchema = z.object({
   tags: z.array(z.string().trim().min(1)).default([]),
   affiliate: z.boolean().default(false),
   purchaseUrl: z.url().optional(),
+  tosUrl: z.url().optional(),
+  aupUrl: z.url().optional(),
   price: z.string().trim().min(1).optional(),
   coupon: z.string().trim().min(1).optional(),
   terms: z.string().trim().min(1).optional(),
@@ -1028,6 +1030,13 @@ export function renderBenchReport(
   };
 
   // Optional ## 买
+  const policyLinks = [
+    editorial.tosUrl ? `[服务条款（ToS）](${editorial.tosUrl})` : null,
+    editorial.aupUrl ? `[合理使用政策（AUP）](${editorial.aupUrl})` : null,
+  ].filter(Boolean);
+  const policyLine =
+    policyLinks.length > 0 ? `商家条款：${policyLinks.join(' · ')}` : null;
+
   if (editorial.plans && editorial.plans.length > 0) {
     heading(2, '买');
     const hasPort = editorial.plans.some((p) => Boolean(p.port));
@@ -1060,6 +1069,7 @@ export function renderBenchReport(
       ]),
     );
     if (editorial.planNotes) para(editorial.planNotes);
+    if (policyLine) para(policyLine);
     if (editorial.affiliate) {
       para('这是推广链接，通过该链接购买，本站可能获得佣金。');
     }
@@ -1086,6 +1096,7 @@ export function renderBenchReport(
     table(['套餐项目', '商家标称配置与费用'], offerRows);
     para(`[前往 ${editorial.vendor} 购买此套餐](${editorial.purchaseUrl})`);
     if (offer.notes) para(offer.notes);
+    if (policyLine) para(policyLine);
     if (editorial.affiliate) {
       para('这是推广链接，通过该链接购买，本站可能获得佣金。');
     }
@@ -1476,7 +1487,11 @@ export function renderBenchReport(
   }
 
   // ## CPU 性能测试
-  if (Object.keys(cpuDone).length > 0) {
+  const cpuRaw = completedRuns['cpu.bench'] ?? null;
+  if (
+    Object.keys(cpuDone).length > 0 ||
+    cpuRaw?.geekbench?.status === 'failed'
+  ) {
     heading(2, 'CPU 性能测试');
     if (cpuDone.geekbench?.scores) {
       const gb = cpuDone.geekbench;
@@ -1492,6 +1507,21 @@ export function renderBenchReport(
       }
       if (sc.url) {
         para(`[查看本次 Geekbench 成绩](${sc.url})`);
+      }
+    } else if (cpuRaw?.geekbench?.status === 'failed') {
+      const gbFail = cpuRaw.geekbench;
+      const swapGib = gbFail.partial?.memory?.Swapped?.gib;
+      heading(3, 'Geekbench');
+      if (gbFail.failure === 'OutOfMemory') {
+        para(
+          swapGib
+            ? `本轮因内存不足（OutOfMemory，工具已启用 ${swapGib} GiB 临时 swap）未能完成跑分。`
+            : '本轮因内存不足（OutOfMemory）未能完成跑分。',
+        );
+      } else {
+        const reason =
+          typeof gbFail.failure === 'string' ? gbFail.failure : '执行异常';
+        para(`本轮未能完成跑分（${reason}）。`);
       }
     }
 
@@ -1819,7 +1849,12 @@ export function renderBenchReport(
               done.write_iops,
             ];
           }
-          return [t.block_size, '测试失败', null, '测试失败', null];
+          const timedOutSecs = t.outcome?.Failed?.Tool?.TimedOut?.secs;
+          const failLabel =
+            typeof timedOutSecs === 'number'
+              ? `超时（${timedOutSecs} s）`
+              : '测试失败';
+          return [t.block_size, failLabel, null, failLabel, null];
         }),
       );
     }

@@ -299,6 +299,8 @@ test('VPS v0.1.4 fixture renders all 9 standard sections, ECharts telemetry, v0.
       testedAt: '2026-11-25 18:06 CST',
       tags: ['EPYC', '三网优化'],
       affiliate: true,
+      tosUrl: 'https://gomami.io/tos',
+      aupUrl: 'https://gomami.io/aup',
       plans: [
         {
           name: '🌋HKG.Turin.Mini',
@@ -356,6 +358,11 @@ test('VPS v0.1.4 fixture renders all 9 standard sections, ECharts telemetry, v0.
   );
   const titles = parsed.sections.map((s) => s.title);
   assert(titles.includes('买'));
+  assert(
+    rendered.mdx.includes(
+      '商家条款：[服务条款（ToS）](https://gomami.io/tos) · [合理使用政策（AUP）](https://gomami.io/aup)',
+    ),
+  );
   const buyTable = parsed.sections
     .find((s) => s.title === '买')
     .blocks.find((b) => b.type === 'table');
@@ -475,6 +482,44 @@ test('VPS v0.1.4 fixture renders all 9 standard sections, ECharts telemetry, v0.
     legacyRendered.mdx.includes('| 使用场景分类 | 住宅宽带（Residential） |'),
   );
   assert(legacyRendered.mdx.includes('| 服务 | 状态 | 区域 | 检测备注 |'));
+
+  // Low-memory VPS fallback: Geekbench OOM & fio TimedOut render transparent notes instead of silent omission
+  const oomReport = structuredClone(vpsReport);
+  oomReport.runs.find((r) => r.id === 'cpu.bench').output.geekbench = {
+    status: 'failed',
+    failure: 'OutOfMemory',
+    partial: {
+      memory: { Swapped: { need: 2147483648, available: 824840192, gib: 2 } },
+      first_to_go: null,
+      scores: null,
+      uploads: [],
+      swap_left: null,
+    },
+  };
+  oomReport.runs.find((r) => r.id === 'disk.fio').output.tests[3] = {
+    block_size: '1m',
+    outcome: { Failed: { Tool: { TimedOut: { secs: 35, nanos: 0 } } } },
+  };
+  const oomRendered = renderBenchReport(
+    oomReport,
+    {
+      vendor: 'VIAFACIL',
+      country: 'AR',
+      location: '阿根廷布宜诺斯艾利斯',
+      geo: { city: '布宜诺斯艾利斯', latitude: -34.6037, longitude: -58.3816 },
+      publishedAt: '2026-11-27',
+      testedAt: '2026-11-27 01:19 CST',
+    },
+    { assetSlug: 'fixture-oom' },
+  );
+  assert(
+    oomRendered.mdx.includes(
+      '本轮因内存不足（OutOfMemory，工具已启用 2 GiB 临时 swap）未能完成跑分。',
+    ),
+  );
+  assert(
+    oomRendered.mdx.includes('| 1m | 超时（35 s） | — | 超时（35 s） | — |'),
+  );
 });
 
 test('Dedicated v0.1.4 fixture renders SMBIOS slots/EDAC/BMC, RAID array+passthrough, ZFS, SMART TB+CRC, multi-NIC Bond/PCIe, v0.1.4 IP/unlock, and TCP routes', async () => {
