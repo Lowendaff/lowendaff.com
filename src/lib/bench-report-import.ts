@@ -1292,8 +1292,17 @@ export function renderBenchReport(
         : cpuInfo.aes === false
           ? 'AES 指令集未开启'
           : 'AES 状态未知';
-    const disk0 = storInfo.disks?.[0];
-    const fs0 = storInfo.filesystems?.[0];
+    const fs0 =
+      storInfo.filesystems?.find((f: AnyRecord) => f.mount_point === '/') ??
+      storInfo.filesystems?.[0];
+    const disk0 =
+      (Array.isArray(fs0?.disks) && fs0.disks.length > 0
+        ? storInfo.disks?.find((d: AnyRecord) => fs0.disks.includes(d.name))
+        : undefined) ??
+      storInfo.disks?.find(
+        (d: AnyRecord) => Array.isArray(d.uses) && d.uses.includes('/'),
+      ) ??
+      storInfo.disks?.[0];
     const diskFsSummary =
       disk0 && fs0
         ? `${disk0.name}（${disk0.model ?? '虚拟磁盘'}，${disk0.interface}，${gbDec(disk0.size_bytes)}） / ${fs0.fs_type}（总计 ${gbDec(fs0.total_bytes)}，已用 ${gbDec(fs0.used_bytes)}，可用 ${gbDec(fs0.available_bytes)}）`

@@ -455,6 +455,39 @@
 [data-review-panels='speed'] .data-table table:has(thead tr > th:nth-child(5)) {
   min-width: 600px;
 }
+@media (min-width: 960px) {
+  [data-review-panels='speed']
+    .data-table
+    table:has(thead tr > th:nth-child(6):last-child) {
+    font-size: 12.5px;
+  }
+  [data-review-panels='speed']
+    .data-table
+    table:has(thead tr > th:nth-child(6):last-child)
+    th,
+  [data-review-panels='speed']
+    .data-table
+    table:has(thead tr > th:nth-child(6):last-child)
+    td {
+    padding: 8px 9px;
+  }
+  [data-review-panels='speed']
+    .data-table
+    table:has(thead tr > th:nth-child(6):last-child)
+    tbody
+    > tr
+    > :first-child,
+  [data-review-panels='speed']
+    .data-table
+    table:has(thead tr > th:nth-child(6):last-child)
+    tbody
+    > tr
+    > :last-child {
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+}
 [data-review-panels='unlock'] .data-table td:last-child {
   white-space: normal;
   word-break: normal;
