@@ -1,62 +1,66 @@
 import assert from 'node:assert/strict';
-import { readFile, writeFile, unlink } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
+import { readFile, rm, unlink, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { parse } from 'yaml';
+import {
+  astroBin,
+  cloneIsolatedWorkspace,
+  createIsolatedWorkspace,
+  defaultWorkerCount,
+  execFileAsync,
+  repoRoot,
+} from './isolated-workspace.mjs';
 
-const root = new URL('../', import.meta.url);
-const created = [];
-const file = (path) => new URL(path, root);
-const read = async (path) => {
-  const source = await readFile(file(path), 'utf8');
+const readSource = async (relPath) => {
+  const source = await readFile(join(repoRoot, relPath), 'utf8');
   // Authors must fill coordinates; only integration fixtures replace the blanks.
-  return path.startsWith('templates/reviews/')
+  return relPath.startsWith('templates/reviews/')
     ? source
         .replace('latitude: null', 'latitude: 34.05')
         .replace('longitude: null', 'longitude: -118.24')
     : source;
 };
-const build = () =>
-  execFileSync('npm', ['run', 'build'], {
-    cwd: root,
-    env: { ...process.env, PUBLIC_SITE_INDEXABLE: 'false' },
-    stdio: 'pipe',
-    maxBuffer: 8 * 1024 * 1024,
-  });
-async function add(name, body, includeUrl = true) {
-  const path = file(`src/content/posts/template-check-${name}.mdx`);
-  if (includeUrl && !/^permalink:/m.test(body))
-    body = body.replace(
+
+const withDefaultPermalink = (name, body, includeUrl = true) => {
+  if (includeUrl && !/^permalink:/m.test(body)) {
+    return body.replace(
       /^---\n/,
       `---\npermalink: '/reviews/template-check-${name}-20261108/'\n`,
     );
-  await writeFile(path, body, { flag: 'wx' });
-  created.push(path);
-  return path;
-}
-async function rejectsArticle(name, body, expected, includeUrl = true) {
-  const path = await add(name, body, includeUrl);
-  try {
-    assert.throws(build, (error) => {
-      const output = String(error.stdout) + String(error.stderr);
-      assert.match(output, new RegExp(`template-check-${name}`));
-      assert.match(output, expected);
-      return true;
-    });
-    console.log(`PASS: rejected ${name} with a source diagnostic.`);
-  } finally {
-    await unlink(path);
-    created.splice(created.indexOf(path), 1);
   }
-}
+  return body;
+};
+
+const tempDirs = [];
 try {
+  const baseDir = await createIsolatedWorkspace('lowendaff-templates-base-');
+  tempDirs.push(baseDir);
+
+  const positiveDir = await cloneIsolatedWorkspace(
+    baseDir,
+    'lowendaff-templates-pos-',
+  );
+  tempDirs.push(positiveDir);
+
+  const addPositive = async (name, body, includeUrl = true) => {
+    const filePath = join(
+      positiveDir,
+      `src/content/posts/template-check-${name}.mdx`,
+    );
+    await writeFile(filePath, withDefaultPermalink(name, body, includeUrl), {
+      flag: 'wx',
+    });
+  };
+
   for (const name of ['vps', 'dedicated-server']) {
-    const template = await read(`templates/reviews/${name}.mdx`);
+    const template = await readSource(`templates/reviews/${name}.mdx`);
     assert.equal(parse(template.split('---')[1]).draft, true);
-    await add(name, template.replace('draft: true', 'draft: false'));
-    await add(`${name}-draft`, template);
+    await addPositive(name, template.replace('draft: true', 'draft: false'));
+    await addPositive(`${name}-draft`, template);
   }
-  const vpsTemplate = await read('templates/reviews/vps.mdx');
-  const dedicated = await read('templates/reviews/dedicated-server.mdx');
+  const vpsTemplate = await readSource('templates/reviews/vps.mdx');
+  const dedicated = await readSource('templates/reviews/dedicated-server.mdx');
   const header = dedicated
     .slice(0, dedicated.indexOf('\n## 买'))
     .replace('draft: true', 'draft: false')
@@ -76,22 +80,36 @@ try {
       "testedAt: '待填写测试日期、时段与时区'",
       "testedAt: '2026-11-08 12:00 UTC'",
     );
-  await add(
+
+  await addPositive(
     'minimal',
     `${header}\n## 系统信息\n\n### dmidecode\n\n\`\`\`text\nRAW_TEMPLATE_SENTINEL <script>alert(1)</script> {unexecuted}\n\`\`\`\n`,
   );
-  await add(
+  await addPositive(
     'raw-network',
     `${header}\n## 服务解锁测试\n\n### IPv6\n\n#### AIGC\n\n\`\`\`text\nRAW_UNLOCK_SENTINEL\n\`\`\`\n\n## 路由追踪\n\n### 中国境内目标\n\n#### 北京电信 (IPv6)\n\n\`\`\`text\nRAW_ROUTE_SENTINEL\n\`\`\`\n`,
   );
   // Missing image is tested as rendering syntax only, never shipped as an article.
-  await add(
+  await addPositive(
     'images',
     `${header}\n## 系统信息\n\n![Topology](/archive-assets/template-check-topology.png)\n\n## BGP 透视\n\n### IPv6\n\n![IPv6 BGP](/archive-assets/template-check-bgp.png)\n`,
   );
-  build();
+
+  execFileSync('npm', ['run', 'build'], {
+    cwd: positiveDir,
+    env: {
+      ...process.env,
+      ASTRO_TELEMETRY_DISABLED: '1',
+      PUBLIC_SITE_INDEXABLE: 'false',
+    },
+    stdio: 'pipe',
+    maxBuffer: 8 * 1024 * 1024,
+  });
+
+  const readDist = (relPath) => readFile(join(positiveDir, relPath), 'utf8');
+
   for (const name of ['vps', 'dedicated-server']) {
-    const html = await read(
+    const html = await readDist(
       `dist/reviews/template-check-${name}-20261108/index.html`,
     );
     assert(html.includes('class="full-review"'));
@@ -114,11 +132,11 @@ try {
       assert(html.includes('data-component="BenchmarkTerminal"'));
     }
     await assert.rejects(
-      read(`dist/reviews/template-check-${name}-draft-20261108/index.html`),
+      readDist(`dist/reviews/template-check-${name}-draft-20261108/index.html`),
       { code: 'ENOENT' },
     );
   }
-  const minimal = await read(
+  const minimal = await readDist(
     'dist/reviews/template-check-minimal-20261108/index.html',
   );
   for (const id of ['purchase', 'unlock', 'speed', 'routing']) {
@@ -134,13 +152,13 @@ try {
   assert(!terminal.includes('<script>'));
   assert(terminal.includes('{unexecuted}'));
   assert(minimal.includes('独立服务器 测试记录'));
-  const raw = await read(
+  const raw = await readDist(
     'dist/reviews/template-check-raw-network-20261108/index.html',
   );
   assert(
     raw.includes('RAW_UNLOCK_SENTINEL') && raw.includes('RAW_ROUTE_SENTINEL'),
   );
-  const images = await read(
+  const images = await readDist(
     'dist/reviews/template-check-images-20261108/index.html',
   );
   assert(images.includes('src="/archive-assets/template-check-topology.png"'));
@@ -152,30 +170,46 @@ try {
     'sitemap.xml',
     'llms.txt',
   ]) {
-    assert(!(await read(`dist/${path}`)).includes('template-check-vps-draft'));
     assert(
-      !(await read(`dist/${path}`)).includes(
+      !(await readDist(`dist/${path}`)).includes('template-check-vps-draft'),
+    );
+    assert(
+      !(await readDist(`dist/${path}`)).includes(
         'template-check-dedicated-server-draft',
       ),
     );
   }
-  // Exercise the actual build gate, not a separate CI-only schema.
+
+  // Exercise the actual Astro build gate (not a separate CI-only schema) across
+  // bounded parallel isolated workers so negative checks remain O(1) as real
+  // published articles grow.
   const validBody = '\n## 系统信息\n\nValidation fixture.\n';
+  await writeFile(
+    join(baseDir, 'src/content/posts/template-check-vps.mdx'),
+    withDefaultPermalink('vps', header + validBody, true),
+    { flag: 'wx' },
+  );
+
+  const negativeCases = [];
+  const queueRejection = (name, body, expected, includeUrl = true) => {
+    negativeCases.push({ name, body, expected, includeUrl });
+  };
+
   for (const draft of [false, true]) {
-    await rejectsArticle(
+    queueRejection(
       `missing-url-${draft ? 'draft' : 'published'}`,
       header.replace('draft: false', `draft: ${draft}`) + validBody,
       /Missing permalink/,
       false,
     );
   }
-  await rejectsArticle(
+  queueRejection(
     'bad-url-date',
     header.replace(/^---\n/, "---\npermalink: '/reviews/test-20260229/'\n") +
       validBody,
     /normalized-title/,
   );
-  await rejectsArticle(
+  queueRejection(
     'duplicate-url',
     header.replace(
       /^---\n/,
@@ -183,7 +217,7 @@ try {
     ) + validBody,
     /Duplicate review URL/,
   );
-  await rejectsArticle(
+  queueRejection(
     'unsupported-redirect',
     header.replace(
       /^---\n/,
@@ -191,7 +225,7 @@ try {
     ) + validBody,
     /redirectFrom/,
   );
-  await rejectsArticle(
+  queueRejection(
     'unsupported-original-url',
     header.replace(
       /^---\n/,
@@ -201,39 +235,39 @@ try {
   );
   for (const draft of [false, true]) {
     const sample = header.replace('draft: false', `draft: ${draft}`);
-    await rejectsArticle(
+    queueRejection(
       `missing-geo-${draft}`,
       sample.replace(/^geo:\n(?:[ \t]+.*\n)+/m, '') + validBody,
       /geo/,
     );
-    await rejectsArticle(
+    queueRejection(
       `missing-longitude-${draft}`,
       sample.replace(/^  longitude:.*\n/m, '') + validBody,
       /longitude/,
     );
-    await rejectsArticle(
+    queueRejection(
       `invalid-latitude-${draft}`,
       sample.replace(/^  latitude:.*$/m, '  latitude: 91') + validBody,
       /latitude/,
     );
   }
-  await rejectsArticle(
+  queueRejection(
     'missing-title',
     header.replace(/^title:.*\n/m, '') + validBody,
     /title/,
   );
-  await rejectsArticle(
+  queueRejection(
     'bad-type',
     header.replace('reviewType: dedicated', 'reviewType: physical') + validBody,
     /reviewType/,
   );
-  await rejectsArticle(
+  queueRejection(
     'bad-date',
     header.replace(/^publishedAt:.*$/m, "publishedAt: '2026-13-40'") +
       validBody,
     /publishedAt/,
   );
-  await rejectsArticle(
+  queueRejection(
     'bad-updated-date',
     header.replace(
       /^publishedAt:.*$/m,
@@ -241,17 +275,17 @@ try {
     ) + validBody,
     /updatedAt/,
   );
-  await rejectsArticle(
+  queueRejection(
     'empty-description',
     header.replace(/^description:.*$/m, "description: ' '") + validBody,
     /description/,
   );
-  await rejectsArticle(
+  queueRejection(
     'bad-yaml',
     header.replace(/^title:.*$/m, 'title: [unfinished') + validBody,
     /YAML|flow collection/i,
   );
-  await rejectsArticle(
+  queueRejection(
     'bad-section',
     `${header}\n## 意外的顶级章节\n\nThis must fail.\n`,
     /Unsupported review section/,
@@ -259,14 +293,14 @@ try {
   const raggedTable =
     '\n## 系统信息\n\n| Item | Result |\n| --- | --- |\n| Missing result |\n';
   for (const draft of [false, true]) {
-    await rejectsArticle(
+    queueRejection(
       `bad-table-${draft ? 'draft' : 'published'}`,
       header.replace('draft: false', `draft: ${draft}`) + raggedTable,
       /\.mdx:\d+:.*header width/,
     );
   }
   for (const draft of [false, true]) {
-    await rejectsArticle(
+    queueRejection(
       `bad-mdx-${draft ? 'draft' : 'published'}`,
       header
         .replace('format: review-markdown', 'format: mdx')
@@ -274,7 +308,7 @@ try {
       /Unexpected|Expected|MDX/i,
     );
   }
-  await rejectsArticle(
+  queueRejection(
     'bad-route-headers',
     vpsTemplate.replace(
       /#### 北京电信 163 AS4134 \(IPv4\)[\s\S]*?(?=#### 上海联通)/,
@@ -282,27 +316,27 @@ try {
     ),
     /standard 6-column headers/,
   );
-  await rejectsArticle(
+  queueRejection(
     'missing-standard-section',
     vpsTemplate.replace(/## IP 质量检测[\s\S]*?(?=## 服务解锁测试)/, ''),
     /Missing standard vps review section "IP 质量检测"/,
   );
-  await rejectsArticle(
+  queueRejection(
     'missing-tcping-v015',
     vpsTemplate.replace(/## TCP 延迟测试[\s\S]*?(?=## 路由追踪)/, ''),
     /Missing standard vps review section "TCP 延迟测试"/,
   );
-  await rejectsArticle(
+  queueRejection(
     'missing-vm-telemetry',
     vpsTemplate.replace(/```vm-cpu-telemetry[\s\S]*?```\n\n/, ''),
     /vm-cpu-telemetry/,
   );
-  await rejectsArticle(
+  queueRejection(
     'missing-dedicated-disk-health',
     dedicated.replace(/### SMART 与健康状态[\s\S]*?(?=### fio)/, ''),
     /disk-health/,
   );
-  await rejectsArticle(
+  queueRejection(
     'stale-omitted-section',
     vpsTemplate.replace(
       /^(benchVersion: .*\n)/m,
@@ -310,7 +344,7 @@ try {
     ),
     /omittedSections lists "系统信息"/,
   );
-  await rejectsArticle(
+  queueRejection(
     'placeholder-leak',
     header.replace(
       /^---\n/,
@@ -319,7 +353,7 @@ try {
     /template placeholders/,
     false,
   );
-  await rejectsArticle(
+  queueRejection(
     'missing-local-asset',
     header.replace(
       /^---\n/,
@@ -329,10 +363,68 @@ try {
     /missing local asset/,
     false,
   );
+
+  const workerCount = defaultWorkerCount(negativeCases.length, 4);
+  const workerDirs = await Promise.all(
+    Array.from({ length: workerCount }, () =>
+      cloneIsolatedWorkspace(baseDir, 'lowendaff-templates-neg-'),
+    ),
+  );
+  tempDirs.push(...workerDirs);
+
+  let nextIdx = 0;
+  const logs = new Array(negativeCases.length);
+  await Promise.all(
+    workerDirs.map(async (workerDir) => {
+      while (nextIdx < negativeCases.length) {
+        const idx = nextIdx++;
+        const item = negativeCases[idx];
+        const fixturePath = join(
+          workerDir,
+          `src/content/posts/template-check-${item.name}.mdx`,
+        );
+        await writeFile(
+          fixturePath,
+          withDefaultPermalink(item.name, item.body, item.includeUrl),
+          { flag: 'wx' },
+        );
+        try {
+          let failedOutput = null;
+          try {
+            await execFileAsync(process.execPath, [astroBin, 'build'], {
+              cwd: workerDir,
+              env: {
+                ...process.env,
+                ASTRO_TELEMETRY_DISABLED: '1',
+                PUBLIC_SITE_INDEXABLE: 'false',
+              },
+              maxBuffer: 8 * 1024 * 1024,
+            });
+          } catch (error) {
+            failedOutput =
+              String(error.stdout ?? '') + String(error.stderr ?? '');
+          }
+          assert.notEqual(
+            failedOutput,
+            null,
+            `Expected astro build to reject ${item.name}`,
+          );
+          assert.match(failedOutput, new RegExp(`template-check-${item.name}`));
+          assert.match(failedOutput, item.expected);
+          logs[idx] = `PASS: rejected ${item.name} with a source diagnostic.`;
+        } finally {
+          await unlink(fixturePath).catch(() => {});
+        }
+      }
+    }),
+  );
+
+  for (const line of logs) console.log(line);
   console.log(
     'PASS: both templates, product titles, optional sections/TOC, raw output escaping, route/unlock output, local image markup, draft exclusion, YAML/schema/Markdown/MDX rejection.',
   );
 } finally {
-  for (const path of created) await unlink(path);
-  build();
+  await Promise.all(
+    tempDirs.map((dir) => rm(dir, { recursive: true, force: true })),
+  );
 }

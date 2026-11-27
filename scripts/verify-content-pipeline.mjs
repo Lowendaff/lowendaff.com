@@ -1,15 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile, writeFile, unlink } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
+import { readFile, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { createIsolatedWorkspace } from './isolated-workspace.mjs';
 
-const root = new URL('../', import.meta.url);
-const created = [];
-const build = (indexable) =>
-  execFileSync('npm', ['run', 'build'], {
-    cwd: root,
-    env: { ...process.env, PUBLIC_SITE_INDEXABLE: String(indexable) },
-    stdio: 'pipe',
-  });
 const content = (draft) => `---
 permalink: '/reviews/pipeline-verification-${draft ? 'draft' : 'published'}-20261101/'
 title: 'Pipeline verification ${draft ? 'draft' : 'published'}'
@@ -31,20 +25,34 @@ This paragraph must render through the MDX collection.
 
 <VpsSpecCard specs={[{ label: 'Fixture CPU', value: '1 vCPU' }]} />
 `;
+
+let workDir;
 try {
+  workDir = await createIsolatedWorkspace('lowendaff-pipeline-');
+  const build = (indexable) =>
+    execFileSync('npm', ['run', 'build'], {
+      cwd: workDir,
+      env: {
+        ...process.env,
+        ASTRO_TELEMETRY_DISABLED: '1',
+        PUBLIC_SITE_INDEXABLE: String(indexable),
+      },
+      stdio: 'pipe',
+      maxBuffer: 8 * 1024 * 1024,
+    });
+
   for (const draft of [false, true]) {
-    const file = new URL(
+    const file = join(
+      workDir,
       `src/content/posts/pipeline-verification-${draft ? 'draft' : 'published'}.mdx`,
-      root,
     );
     await writeFile(file, content(draft), { flag: 'wx' });
-    created.push(file);
   }
   build(true);
   const article = await readFile(
-    new URL(
+    join(
+      workDir,
       'dist/reviews/pipeline-verification-published-20261101/index.html',
-      root,
     ),
     'utf8',
   );
@@ -61,7 +69,7 @@ try {
     'sitemap.xml',
     'llms.txt',
   ]) {
-    const html = await readFile(new URL(`dist/${file}`, root), 'utf8');
+    const html = await readFile(join(workDir, `dist/${file}`), 'utf8');
     assert(
       html.includes('pipeline-verification-published'),
       `${file}: new post missing`,
@@ -73,26 +81,26 @@ try {
   }
   await assert.rejects(
     readFile(
-      new URL(
+      join(
+        workDir,
         'dist/reviews/pipeline-verification-draft-20261101/index.html',
-        root,
       ),
     ),
     { code: 'ENOENT' },
   );
   console.log(
     execFileSync('node', ['scripts/verify-release.mjs', '--indexable'], {
-      cwd: root,
+      cwd: workDir,
       encoding: 'utf8',
     }),
   );
-  const sitemap = await readFile(new URL('dist/sitemap.xml', root), 'utf8');
+  const sitemap = await readFile(join(workDir, 'dist/sitemap.xml'), 'utf8');
   assert(sitemap.includes('<lastmod>2026-11-09</lastmod>'));
   assert(article.includes('2026-11-09 更新'));
   build(false);
   console.log(
     execFileSync('node', ['scripts/verify-release.mjs'], {
-      cwd: root,
+      cwd: workDir,
       encoding: 'utf8',
       env: { ...process.env, PUBLIC_SITE_INDEXABLE: 'false' },
     }),
@@ -101,6 +109,5 @@ try {
     'PASS: native MDX, component rendering, TOC, directory, RSS, sitemap and draft exclusion.',
   );
 } finally {
-  for (const file of created) await unlink(file);
-  build(false);
+  if (workDir) await rm(workDir, { recursive: true, force: true });
 }

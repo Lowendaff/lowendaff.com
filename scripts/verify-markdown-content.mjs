@@ -1,25 +1,21 @@
 import assert from 'node:assert/strict';
-import { readFile, writeFile, readdir, mkdir, rm, cp } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
-import { parse, stringify } from 'yaml';
+import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { parse as parseHtml } from 'parse5';
-
-const root = new URL('../', import.meta.url);
-const originals = new Map();
-const created = [];
-const temporaryContent = [];
+import { parse, stringify } from 'yaml';
+import {
+  astroBin,
+  cloneIsolatedWorkspace,
+  createIsolatedWorkspace,
+  defaultWorkerCount,
+  execFileAsync,
+  repoRoot,
+} from './isolated-workspace.mjs';
 const articlePath = 'src/content/posts/markdown-verification.mdx';
 const sponsorPath = 'src/content/sponsors/markdown-fixture.md';
 const results = [];
-const file = (path) => new URL(path, root);
-const read = (path) => readFile(file(path), 'utf8');
-const build = () =>
-  execFileSync('npm', ['run', 'build'], {
-    cwd: root,
-    env: { ...process.env, PUBLIC_SITE_INDEXABLE: 'false' },
-    stdio: 'pipe',
-    maxBuffer: 8 * 1024 * 1024,
-  });
+
 const unpack = (text) => {
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
   assert(match);
@@ -27,35 +23,46 @@ const unpack = (text) => {
 };
 const pack = ({ data, body = '' }) =>
   `---\n${stringify(data, { lineWidth: 0 }).replace(/^publishedAt: (\d{4}-\d{2}-\d{2})$/m, "publishedAt: '$1'")}---\n${body}`;
-async function edit(path, change, changeBody = (body) => body) {
-  if (!originals.has(path)) originals.set(path, await read(path));
-  const content = unpack(originals.get(path));
-  change(content.data);
-  content.body = changeBody(content.body);
-  await writeFile(file(path), pack(content));
-}
-async function restore() {
-  for (const [path, text] of originals) await writeFile(file(path), text);
-}
-async function reject(path, change, message) {
-  await edit(path, change);
-  let failure;
-  try {
-    build();
-  } catch (error) {
-    failure = String(error.stdout) + String(error.stderr);
-  }
-  await restore();
-  assert(failure?.includes(message), `Expected rejection: ${message}`);
-  results.push({ check: message, pass: true });
-}
-async function scenario(name) {
-  const path = `/tmp/lowendaff-content-scenarios/${name}`;
-  await mkdir(path, { recursive: true });
-  await cp(file('dist/index.html'), `${path}/index.html`);
-}
+
+const tempDirs = [];
 try {
-  // Test content is synthetic and temporary; never edit published articles.
+  const workDir = await createIsolatedWorkspace('lowendaff-markdown-');
+  tempDirs.push(workDir);
+
+  const originals = new Map();
+  const created = [];
+  const file = (relPath) => join(workDir, relPath);
+  const read = (relPath) => readFile(file(relPath), 'utf8');
+  const build = () =>
+    execFileSync('npm', ['run', 'build'], {
+      cwd: workDir,
+      env: {
+        ...process.env,
+        ASTRO_TELEMETRY_DISABLED: '1',
+        PUBLIC_SITE_INDEXABLE: 'false',
+      },
+      stdio: 'pipe',
+      maxBuffer: 8 * 1024 * 1024,
+    });
+
+  async function edit(relPath, change, changeBody = (body) => body) {
+    if (!originals.has(relPath)) originals.set(relPath, await read(relPath));
+    const content = unpack(originals.get(relPath));
+    change(content.data);
+    content.body = changeBody(content.body);
+    await writeFile(file(relPath), pack(content));
+  }
+  async function restore() {
+    for (const [relPath, text] of originals)
+      await writeFile(file(relPath), text);
+  }
+  async function scenario(name) {
+    const path = `/tmp/lowendaff-content-scenarios/${name}`;
+    await mkdir(path, { recursive: true });
+    await cp(file('dist/index.html'), `${path}/index.html`);
+  }
+
+  // Test content is synthetic and isolated; never edit published articles.
   const metadata = {
     kind: 'review',
     format: 'review-markdown',
@@ -106,10 +113,8 @@ Synthetic fixture; never published.
   await writeFile(file(articlePath), pack({ data: metadata, body }), {
     flag: 'wx',
   });
-  temporaryContent.push(file(articlePath));
-  const reference = file('src/content/posts/markdown-reference.mdx');
   await writeFile(
-    reference,
+    file('src/content/posts/markdown-reference.mdx'),
     pack({
       data: {
         kind: 'archive-reference',
@@ -125,7 +130,6 @@ Synthetic fixture; never published.
     }),
     { flag: 'wx' },
   );
-  temporaryContent.push(reference);
   await writeFile(
     file(sponsorPath),
     pack({
@@ -141,73 +145,119 @@ Synthetic fixture; never published.
     }),
     { flag: 'wx' },
   );
-  temporaryContent.push(file(sponsorPath));
-  await reject(
-    'src/content/ads/home/dmit.md',
-    (data) => {
-      data.placements = ['invalid-slot'];
-    },
-    'placements',
+
+  const rejectCases = [
+    [
+      'src/content/ads/home/dmit.md',
+      (data) => {
+        data.placements = ['invalid-slot'];
+      },
+      'placements',
+    ],
+    [
+      'src/content/ads/home/dmit.md',
+      (data) => {
+        data.url = 'javascript:alert(1)';
+      },
+      'HTTP(S)',
+    ],
+    [
+      sponsorPath,
+      (data) => {
+        data.logo = 'missing-test.svg';
+      },
+      'Missing sponsor SVG',
+    ],
+    [
+      articlePath,
+      (data) => {
+        data.format = 'mdx';
+        data.review = {
+          id: 'markdown-verification',
+          legacyAnchors: {},
+          sections: [
+            {
+              id: 'fixture-system',
+              title: '系统信息',
+              level: 2,
+              line: 1,
+              blocks: [
+                {
+                  type: 'table',
+                  id: 'fixture-route',
+                  headings: [],
+                  line: 2,
+                  headers: ['Name', 'Result'],
+                  rows: [['missing-cell']],
+                },
+              ],
+            },
+          ],
+        };
+      },
+      'header width',
+    ],
+    [
+      articlePath,
+      (data) => {
+        data.showcase.route.tableId = 'missing-table';
+      },
+      'reference a table',
+    ],
+  ];
+
+  const workerDirs = await Promise.all(
+    Array.from({ length: defaultWorkerCount(rejectCases.length, 4) }, () =>
+      cloneIsolatedWorkspace(workDir, 'lowendaff-markdown-neg-'),
+    ),
   );
-  await reject(
-    'src/content/ads/home/dmit.md',
-    (data) => {
-      data.url = 'javascript:alert(1)';
-    },
-    'HTTP(S)',
-  );
-  await reject(
-    sponsorPath,
-    (data) => {
-      data.logo = 'missing-test.svg';
-    },
-    'Missing sponsor SVG',
-  );
-  await reject(
-    articlePath,
-    (data) => {
-      data.format = 'mdx';
-      data.review = {
-        id: 'markdown-verification',
-        legacyAnchors: {},
-        sections: [
-          {
-            id: 'fixture-system',
-            title: '系统信息',
-            level: 2,
-            line: 1,
-            blocks: [
-              {
-                type: 'table',
-                id: 'fixture-route',
-                headings: [],
-                line: 2,
-                headers: ['Name', 'Result'],
-                rows: [['missing-cell']],
+  tempDirs.push(...workerDirs);
+
+  let nextIdx = 0;
+  const rejectResults = new Array(rejectCases.length);
+  await Promise.all(
+    workerDirs.map(async (negDir) => {
+      while (nextIdx < rejectCases.length) {
+        const idx = nextIdx++;
+        const [relPath, change, message] = rejectCases[idx];
+        const targetFile = join(negDir, relPath);
+        const origText = await readFile(targetFile, 'utf8');
+        const parsed = unpack(origText);
+        change(parsed.data);
+        await writeFile(targetFile, pack(parsed));
+        try {
+          let failure;
+          try {
+            await execFileAsync(process.execPath, [astroBin, 'build'], {
+              cwd: negDir,
+              env: {
+                ...process.env,
+                ASTRO_TELEMETRY_DISABLED: '1',
+                PUBLIC_SITE_INDEXABLE: 'false',
               },
-            ],
-          },
-        ],
-      };
-    },
-    'header width',
+              maxBuffer: 8 * 1024 * 1024,
+            });
+          } catch (error) {
+            failure = String(error.stdout ?? '') + String(error.stderr ?? '');
+          }
+          assert(failure?.includes(message), `Expected rejection: ${message}`);
+          rejectResults[idx] = { check: message, pass: true };
+        } finally {
+          await writeFile(targetFile, origText);
+        }
+      }
+    }),
   );
-  await reject(
-    articlePath,
-    (data) => {
-      data.showcase.route.tableId = 'missing-table';
-    },
-    'reference a table',
-  );
+  results.push(...rejectResults);
 
   await edit(
     articlePath,
     (data) => {
       data.title = 'MDX_PIPELINE_TITLE';
     },
-    (body) => {
-      assert(body.includes('888.77') && body.includes('151.11 ms'));
-      return body
+    (b) => {
+      assert(b.includes('888.77') && b.includes('151.11 ms'));
+      return b
         .replace(
           'Synthetic fixture; never published.',
           '[Fixture video](https://www.bilibili.com/video/BV1P3411W7dj/)',
@@ -272,8 +322,6 @@ Synthetic fixture; never published.
   for (const html of [home, article])
     assert(html.includes('MDX_PIPELINE_TITLE'));
   assert(article.includes('MDX_PIPELINE_BENCHMARK'));
-  // A video must be an immediate reading surface even without client JS.
-  // Template contents deliberately aren't part of this rendered node traversal.
   const descendants = (node) => [
     node,
     ...(node.childNodes ?? []).flatMap(descendants),
@@ -413,22 +461,23 @@ Synthetic fixture; never published.
     check: 'one-ad and zero-ad builds, zero-sponsor empty state',
     pass: true,
   });
+
+  await cp(file('dist/_astro'), '/tmp/lowendaff-content-scenarios/_astro', {
+    recursive: true,
+  });
+  await cp(file('public/brand'), '/tmp/lowendaff-content-scenarios/brand', {
+    recursive: true,
+  });
+  const evidence = process.argv[2] ?? 'test-results/markdown';
+  const evidenceDir = join(repoRoot, evidence);
+  await mkdir(evidenceDir, { recursive: true });
+  await writeFile(
+    join(evidenceDir, 'markdown-contracts.json'),
+    JSON.stringify(results, null, 2) + '\n',
+  );
+  console.log(JSON.stringify(results, null, 2));
 } finally {
-  for (const path of created) await rm(path);
-  await restore();
-  for (const path of temporaryContent) await rm(path);
-  build();
+  await Promise.all(
+    tempDirs.map((dir) => rm(dir, { recursive: true, force: true })),
+  );
 }
-await cp(file('dist/_astro'), '/tmp/lowendaff-content-scenarios/_astro', {
-  recursive: true,
-});
-await cp(file('public/brand'), '/tmp/lowendaff-content-scenarios/brand', {
-  recursive: true,
-});
-const evidence = process.argv[2] ?? 'test-results/markdown';
-await mkdir(file(evidence), { recursive: true });
-await writeFile(
-  file(`${evidence}/markdown-contracts.json`),
-  JSON.stringify(results, null, 2) + '\n',
-);
-console.log(JSON.stringify(results, null, 2));
