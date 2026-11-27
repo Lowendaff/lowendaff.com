@@ -331,17 +331,6 @@
 }
 .full-review .data-table {
   margin: 14px 0;
-  border-radius: var(--radius-md);
-  background: var(--surface);
-}
-.full-review .data-table table {
-  font-size: var(--table-size);
-  line-height: 1.6;
-}
-.full-review .data-table th,
-.full-review .data-table td {
-  padding: 9px 14px;
-  text-align: left;
 }
 .full-review .data-table caption {
   font-size: 13px;

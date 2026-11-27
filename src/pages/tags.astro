@@ -192,6 +192,8 @@ const maxCount = Math.max(
   </div>
 </BaseLayout>
 <script>
+  import { isDarkActive, onThemeChange } from '../lib/ui-client';
+
   const stage = document.querySelector<HTMLElement>('[data-cloud-stage]');
   const plane = document.querySelector<HTMLElement>('[data-cloud-plane]');
   const starCanvas =
@@ -225,9 +227,9 @@ const maxCount = Math.max(
       alpha: 0.28 + rand() * 0.58,
     }));
 
-    const drawStarfield = () => {
+    const drawStarfield = (stageRect?: DOMRectReadOnly) => {
       if (!starCanvas) return;
-      const rect = stage.getBoundingClientRect();
+      const rect = stageRect ?? stage.getBoundingClientRect();
       const w = Math.max(Math.round(rect.width), 300);
       const h = Math.max(Math.round(rect.height), 220);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -240,10 +242,7 @@ const maxCount = Math.max(
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
 
-      const isDark =
-        document.documentElement.dataset.theme === 'dark' ||
-        (document.documentElement.dataset.theme !== 'light' &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches);
+      const isDark = isDarkActive();
 
       const baseRgb = isDark ? '176, 182, 194' : '132, 126, 118';
       const accentRgb = isDark ? '98, 174, 240' : '0, 117, 222';
@@ -297,9 +296,9 @@ const maxCount = Math.max(
       }
     };
 
-    const applyStagePan = () => {
+    const applyStagePan = (stageRect?: DOMRectReadOnly) => {
       plane.style.transform = `translate3d(${panX}px, ${panY}px, 0)`;
-      drawStarfield();
+      drawStarfield(stageRect);
     };
 
     const placeNode = (node: HTMLButtonElement, x: number, y: number) => {
@@ -309,13 +308,20 @@ const maxCount = Math.max(
     };
 
     const layoutCloud = () => {
+      // Read geometry before mutating styles/canvas to avoid forced synchronous reflow.
+      const rect = stage.getBoundingClientRect();
+      const visible = nodes.filter((n) => !n.hidden);
+      const measured = visible.map((node) => ({
+        node,
+        w: node.offsetWidth || 124,
+        h: node.offsetHeight || 44,
+      }));
+
       panX = 0;
       panY = 0;
-      applyStagePan();
+      applyStagePan(rect);
 
-      const visible = nodes.filter((n) => !n.hidden);
-      if (!visible.length) return;
-      const rect = stage.getBoundingClientRect();
+      if (!measured.length) return;
       const width = Math.max(rect.width || 680, 280);
       const height = Math.max(rect.height || 300, 220);
       const cx = width / 2;
@@ -330,14 +336,12 @@ const maxCount = Math.max(
         h: number;
       }> = [];
 
-      visible.forEach((node, index) => {
-        const w = node.offsetWidth || 124;
-        const h = node.offsetHeight || 44;
-        if (visible.length === 1) {
+      measured.forEach(({ node, w, h }, index) => {
+        if (measured.length === 1) {
           boxes.push({ node, x: cx - w / 2, y: cy - h / 2, w, h });
           return;
         }
-        if (visible.length === 2) {
+        if (measured.length === 2) {
           const offset = index === 0 ? -w - 18 : 18;
           const yShift = index === 0 ? -14 : 14;
           boxes.push({
@@ -502,33 +506,19 @@ const maxCount = Math.max(
     stage.addEventListener('pointerup', endPan);
     stage.addEventListener('pointercancel', endPan);
 
+    let layoutRaf = 0;
+    const scheduleLayout = () => {
+      if (layoutRaf) return;
+      layoutRaf = window.requestAnimationFrame(() => {
+        layoutRaf = 0;
+        layoutCloud();
+      });
+    };
+
     resetBtn?.addEventListener('click', () => layoutCloud());
-    window.addEventListener('tag-cloud-relayout', () =>
-      window.requestAnimationFrame(layoutCloud),
-    );
-    new MutationObserver(drawStarfield).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme', 'data-appearance'],
-    });
-    window
-      .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', drawStarfield);
-
-    let resizeRaf = 0;
-    window.addEventListener(
-      'resize',
-      () => {
-        if (!resizeRaf)
-          resizeRaf = window.requestAnimationFrame(() => {
-            resizeRaf = 0;
-            layoutCloud();
-          });
-      },
-      { passive: true },
-    );
-
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(layoutCloud);
-    });
+    window.addEventListener('tag-cloud-relayout', scheduleLayout);
+    onThemeChange(() => drawStarfield());
+    window.addEventListener('resize', scheduleLayout, { passive: true });
+    scheduleLayout();
   }
 </script>

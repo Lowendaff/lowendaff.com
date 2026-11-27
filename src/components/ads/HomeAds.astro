@@ -52,14 +52,3 @@ const products = await getAds('homeFeaturedAds');
     </div>
   </section>
 )}
-<script>
-  // Shuffle sponsor cards once on load so every partner gets equal first-row visibility.
-  document.querySelectorAll<HTMLElement>('[data-home-ads]').forEach((grid) => {
-    const cards = Array.from(grid.children);
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
-    }
-    grid.append(...cards);
-  });
-</script>

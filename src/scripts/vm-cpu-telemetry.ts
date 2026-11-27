@@ -9,6 +9,7 @@ import {
   TooltipComponent,
 } from 'echarts/components';
 import { SVGRenderer } from 'echarts/renderers';
+import { isDarkActive, onThemeChange } from '../lib/ui-client';
 
 use([
   LineChart,
@@ -144,13 +145,6 @@ function escapeHtml(text: string): string {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;');
-}
-
-function isDarkActive(): boolean {
-  const explicit = document.documentElement.dataset.theme;
-  if (explicit === 'dark') return true;
-  if (explicit === 'light') return false;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 function buildBands(samples: TelemetrySample[], maxSec: number) {
@@ -635,14 +629,7 @@ let globalListenersBound = false;
 function ensureGlobalListeners() {
   if (globalListenersBound || typeof window === 'undefined') return;
   globalListenersBound = true;
-  const themeObserver = new MutationObserver(() => refreshAll());
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme', 'data-appearance'],
-  });
-  window
-    .matchMedia('(prefers-color-scheme: dark)')
-    .addEventListener('change', () => refreshAll());
+  onThemeChange(() => refreshAll());
   window
     .matchMedia('(prefers-reduced-motion: reduce)')
     .addEventListener('change', () => refreshAll());

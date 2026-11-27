@@ -4,6 +4,7 @@ import Flag from './Flag.astro';
 import ReviewTypeFilter from './ReviewTypeFilter.astro';
 import HomeFeedCarousel from './ads/HomeFeedCarousel.astro';
 import { getRecords } from '../lib/records';
+import { stripLeadingFlags } from '../lib/title-clean';
 interface Props {
   filters?: boolean;
   showTypeFilter?: boolean;
@@ -25,9 +26,7 @@ const dateFormat = new Intl.DateTimeFormat('zh-CN', {
   timeZone: 'UTC',
 });
 const cleanTitle = (raw: string) =>
-  raw
-    .replace(/^(?:\p{Regional_Indicator}{2}\s*)+/u, '')
-    .replace('（CN2）', 'CN2');
+  stripLeadingFlags(raw).replace('（CN2）', 'CN2');
 ---
 
 <section

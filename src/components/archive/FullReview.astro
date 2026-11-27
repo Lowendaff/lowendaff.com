@@ -15,9 +15,13 @@ const hints: Record<string, string> = {
   routing: '先选方向，再选运营商与城市。',
 };
 const verdict = model.section('评');
+const hasLegacyAnchors = Object.keys(review.legacyAnchors).length > 0;
 ---
 
-<script is:inline define:vars={{ aliases: review.legacyAnchors }}>
+{hasLegacyAnchors && <script
+  is:inline
+  define:vars={{ aliases: review.legacyAnchors }}
+>
   // WordPress used percent-encoded TOC IDs; normalize before tab enhancement.
   (() => {
     const restore = () => {
@@ -37,7 +41,7 @@ const verdict = model.section('评');
     restore();
     window.addEventListener('hashchange', restore);
   })();
-</script>
+</script>}
 <div class="full-review">
   {model.navigation.some((item) => item.id === 'purchase') && (
     <section
@@ -108,24 +112,3 @@ const verdict = model.section('评');
       ),
   )}
 </div>
-<script>
-  // Retire former expand-all URLs without changing selected tabs or targets.
-  const url = new URL(location.href);
-  let changed = url.searchParams.has('view');
-  url.searchParams.delete('view');
-  for (const key of ['return-route', 'return-tcp-route', 'outbound-route']) {
-    const value = url.searchParams.get(key);
-    if (value?.endsWith(':all')) {
-      url.searchParams.set(key, value.slice(0, -4));
-      changed = true;
-    }
-  }
-  if (url.hash === '#offer' || url.hash === '#overview') {
-    url.hash = 'purchase';
-    changed = true;
-    requestAnimationFrame(() =>
-      document.getElementById('purchase')?.scrollIntoView(),
-    );
-  }
-  if (changed) history.replaceState(null, '', url);
-</script>

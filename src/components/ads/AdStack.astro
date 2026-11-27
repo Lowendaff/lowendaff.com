@@ -52,14 +52,3 @@ const { placement, ads } = Astro.props;
     </div>
   </aside>
 )}
-<script>
-  // Shuffle each placement once on load. Keep every creative visible and DOM/tab order aligned.
-  document.querySelectorAll<HTMLElement>('[data-ad-stack]').forEach((stack) => {
-    const creatives = Array.from(stack.children);
-    for (let i = creatives.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [creatives[i], creatives[j]] = [creatives[j], creatives[i]];
-    }
-    stack.append(...creatives);
-  });
-</script>

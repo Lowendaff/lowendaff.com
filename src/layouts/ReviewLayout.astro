@@ -6,6 +6,7 @@ import Flag from '../components/Flag.astro';
 import { reviewModel } from '../lib/review-model';
 import { reviewTypeLabels } from '../lib/review-types';
 import { postPath } from '../lib/posts';
+import { stripLeadingFlags } from '../lib/title-clean';
 import { buildRecommendations } from '../lib/related-posts';
 import { buildTopicHubs } from '../lib/topic-hubs';
 import ArticleTopAds from '../components/ads/ArticleTopAds.astro';
@@ -28,7 +29,7 @@ const navigation = review
   : headings
       .filter((h) => h.depth === 2)
       .map((h) => ({ id: h.slug, label: h.text }));
-const cleanTitle = p.title.replace(/^(?:\p{Regional_Indicator}{2}\s*)+/u, '');
+const cleanTitle = stripLeadingFlags(p.title);
 const fullDisplayTitle = cleanTitle.endsWith('测试记录')
   ? cleanTitle
   : `${cleanTitle} ${reviewTypeLabels[p.reviewType]} 测试记录`;
@@ -438,184 +439,6 @@ const chapterIcon: Record<string, string> = {
     </div>
   </div>
   <script>
-    const toc = document.querySelector<HTMLElement>('.article-toc');
-    const mobileToc = document.querySelector<HTMLDetailsElement>('.mobile-toc');
-    const tocLinks = Array.from(
-      document.querySelectorAll<HTMLAnchorElement>(
-        '.article-toc a[data-toc-id]',
-      ),
-    );
-    const mobileLinks = Array.from(
-      document.querySelectorAll<HTMLAnchorElement>(
-        '.mobile-toc a[data-toc-id]',
-      ),
-    );
-    const sections = tocLinks
-      .map((link) => {
-        const id = link.dataset.tocId ?? '';
-        const el = id ? document.getElementById(id) : null;
-        return el ? { id, el } : null;
-      })
-      .filter((item): item is { id: string; el: HTMLElement } => item !== null);
-
-    if (sections.length > 0) {
-      let currentId = '';
-      let rafId = 0;
-      let lockedId = '';
-      let lockTargetY = 0;
-      let lockUntil = 0;
-      let pinnedId = '';
-      let pinnedScrollY = -1;
-
-      const getStickyOffset = () => {
-        const headerH =
-          document.querySelector<HTMLElement>('.site-header')?.offsetHeight ??
-          60;
-        const tocH = toc && toc.offsetParent ? toc.offsetHeight : 0;
-        return headerH + tocH + 12;
-      };
-
-      const setActive = (id: string) => {
-        if (!id || id === currentId) return;
-        currentId = id;
-        for (const link of tocLinks) {
-          if (link.dataset.tocId === id) {
-            link.setAttribute('aria-current', 'true');
-            if (toc && toc.scrollWidth > toc.clientWidth) {
-              const targetLeft =
-                link.offsetLeft - toc.clientWidth / 2 + link.offsetWidth / 2;
-              toc.scrollTo({
-                left: Math.max(0, targetLeft),
-                behavior: 'smooth',
-              });
-            }
-          } else {
-            link.removeAttribute('aria-current');
-          }
-        }
-        for (const link of mobileLinks) {
-          if (link.dataset.tocId === id) {
-            link.setAttribute('aria-current', 'true');
-          } else {
-            link.removeAttribute('aria-current');
-          }
-        }
-      };
-
-      const scrollToSection = (id: string, pushHash: boolean) => {
-        const target = sections.find((s) => s.id === id);
-        if (!target) return;
-        if (mobileToc?.open) mobileToc.open = false;
-
-        const stickyOffset = getStickyOffset();
-        const rawTop =
-          window.scrollY + target.el.getBoundingClientRect().top - stickyOffset;
-        const maxScroll = Math.max(
-          0,
-          document.documentElement.scrollHeight - window.innerHeight,
-        );
-        const destY = Math.max(0, Math.min(Math.round(rawTop), maxScroll));
-
-        lockedId = id;
-        lockTargetY = destY;
-        lockUntil = performance.now() + 1100;
-        pinnedId = id;
-        pinnedScrollY = destY;
-        setActive(id);
-
-        if (pushHash) {
-          const next = new URL(window.location.href);
-          next.hash = id;
-          history.pushState(null, '', next);
-        }
-
-        const reduced = window.matchMedia(
-          '(prefers-reduced-motion: reduce)',
-        ).matches;
-        window.scrollTo({
-          top: destY,
-          behavior: reduced ? 'instant' : 'smooth',
-        });
-      };
-
-      const updateOnScroll = () => {
-        rafId = 0;
-        const now = performance.now();
-        if (lockedId && now < lockUntil) {
-          if (Math.abs(window.scrollY - lockTargetY) <= 3) {
-            lockedId = '';
-          } else {
-            setActive(lockedId);
-            return;
-          }
-        } else if (lockedId) {
-          lockedId = '';
-        }
-
-        if (pinnedId && Math.abs(window.scrollY - pinnedScrollY) <= 12) {
-          setActive(pinnedId);
-          return;
-        }
-        pinnedId = '';
-
-        const threshold = getStickyOffset() + 24;
-        let active = sections[0].id;
-        for (const section of sections) {
-          if (section.el.getBoundingClientRect().top <= threshold) {
-            active = section.id;
-          }
-        }
-        if (
-          window.scrollY > 40 &&
-          window.innerHeight + window.scrollY >=
-            document.documentElement.scrollHeight - 16
-        ) {
-          active = sections[sections.length - 1].id;
-        }
-        setActive(active);
-      };
-
-      const requestUpdate = () => {
-        if (!rafId) rafId = window.requestAnimationFrame(updateOnScroll);
-      };
-
-      const clearProgrammaticLock = () => {
-        lockedId = '';
-        pinnedId = '';
-      };
-
-      for (const link of [...tocLinks, ...mobileLinks]) {
-        link.addEventListener('click', (event) => {
-          const id = link.dataset.tocId;
-          if (!id) return;
-          event.preventDefault();
-          scrollToSection(id, true);
-        });
-      }
-
-      window.addEventListener('wheel', clearProgrammaticLock, {
-        passive: true,
-      });
-      window.addEventListener('touchmove', clearProgrammaticLock, {
-        passive: true,
-      });
-      window.addEventListener('scroll', requestUpdate, { passive: true });
-      window.addEventListener('resize', requestUpdate, { passive: true });
-      window.addEventListener('hashchange', () => {
-        const hashId = decodeURIComponent(window.location.hash.slice(1));
-        if (sections.some((s) => s.id === hashId)) {
-          scrollToSection(hashId, false);
-        } else {
-          requestUpdate();
-        }
-      });
-
-      const initialHash = decodeURIComponent(window.location.hash.slice(1));
-      if (sections.some((s) => s.id === initialHash)) {
-        window.requestAnimationFrame(() => scrollToSection(initialHash, false));
-      } else {
-        updateOnScroll();
-      }
-    }
+    import '../scripts/review-ui';
   </script>
 </BaseLayout>

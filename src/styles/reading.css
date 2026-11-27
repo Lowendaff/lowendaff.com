@@ -14,11 +14,14 @@
   background: var(--accent);
 }
 .review-revision .review-body [id] {
-  scroll-margin-top: 0;
+  scroll-margin-top: 116px;
 }
 @media (max-width: 900px) {
   .article-toc {
     display: none;
+  }
+  .review-revision .review-body [id] {
+    scroll-margin-top: 72px;
   }
 }
 @media print {

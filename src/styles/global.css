@@ -1076,97 +1076,6 @@ table,
   border-top: 1px solid var(--border);
 }
 
-.kit-heading {
-  padding-block: 36px 28px;
-}
-.kit-heading h1 {
-  font-size: clamp(30px, 3vw, 40px);
-  line-height: 1.22;
-  margin: 0;
-}
-.kit-section {
-  margin-bottom: 44px;
-}
-.kit-section > h2,
-.kit-two > div > h2 {
-  margin-bottom: 20px;
-}
-.token-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
-}
-.token-swatch {
-  min-width: 0;
-}
-.token-swatch > div {
-  height: 72px;
-  border-radius: var(--radius-md);
-  margin-bottom: 10px;
-  border: 1px solid var(--border);
-}
-.token-swatch strong {
-  font-size: 13px;
-}
-.token-swatch code {
-  display: block;
-  color: var(--muted);
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
-.kit-two {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-}
-.kit-two > div {
-  min-width: 0;
-}
-.kit-type {
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-}
-.kit-type .kit-type-sample {
-  font-size: clamp(24px, 2.25vw, 32px);
-  font-weight: 700;
-  line-height: 1.35;
-  color: var(--text);
-  text-wrap: balance;
-}
-.kit-empty {
-  padding-block: 20px;
-  color: var(--muted);
-  border-block: 1px solid var(--border);
-}
-.kit-type p {
-  color: var(--muted);
-  margin-top: 12px;
-}
-.state-chip-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.state-chip {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  background: var(--subtle);
-  border: 1px solid var(--border);
-}
-.state-chip.success {
-  color: var(--success);
-}
-.state-chip.warning {
-  color: var(--warning);
-}
-.state-chip.danger {
-  color: var(--danger);
-}
 .empty-table {
   padding: 18px;
   font-size: 13px;
@@ -1199,9 +1108,6 @@ table,
   }
   .spec-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-  .token-grid {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 @media (max-width: 760px) {
@@ -1367,13 +1273,6 @@ table,
   .route-caption > span:last-child {
     margin-left: 0;
     width: 100%;
-  }
-  .token-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-  .kit-two {
-    grid-template-columns: 1fr;
   }
   .promo-card {
     padding: var(--space-md);

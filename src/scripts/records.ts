@@ -3,6 +3,7 @@ import {
   reviewTypeLabels,
   type ReviewType,
 } from '../lib/review-types';
+import { bindRovingTabs } from '../lib/ui-client';
 const root = document.querySelector<HTMLElement>('[data-record-list]');
 if (root) {
   const PAGE_SIZE = 20;
@@ -79,12 +80,52 @@ if (root) {
         panel.hidden = panel.dataset.tagPanel !== category;
       });
     const resultLink = document.querySelector('[data-tag-results]');
-    const matches = rows.filter(
-      (row) =>
-        (!reviewType || row.dataset.type === reviewType) &&
-        (!merchant || row.dataset.merchant === merchant) &&
-        (!country || row.dataset.region === country),
-    );
+    const matches: HTMLElement[] = [];
+    let typeTotalCount = 0;
+    let crossMerchantTotal = 0;
+    let crossCountryTotal = 0;
+    const typeByMerchant = new Map<string, number>();
+    const typeByCountry = new Map<string, number>();
+    const crossMerchantCount = new Map<string, number>();
+    const crossCountryCount = new Map<string, number>();
+    for (const row of rows) {
+      if (reviewType && row.dataset.type !== reviewType) continue;
+      typeTotalCount++;
+      const rowMerchant = row.dataset.merchant;
+      const rowRegion = row.dataset.region;
+      if (rowMerchant !== undefined) {
+        typeByMerchant.set(
+          rowMerchant,
+          (typeByMerchant.get(rowMerchant) ?? 0) + 1,
+        );
+      }
+      if (rowRegion !== undefined) {
+        typeByCountry.set(rowRegion, (typeByCountry.get(rowRegion) ?? 0) + 1);
+      }
+      const matchesMerchant = !merchant || rowMerchant === merchant;
+      const matchesCountry = !country || rowRegion === country;
+      if (matchesCountry) {
+        crossMerchantTotal++;
+        if (rowMerchant !== undefined) {
+          crossMerchantCount.set(
+            rowMerchant,
+            (crossMerchantCount.get(rowMerchant) ?? 0) + 1,
+          );
+        }
+      }
+      if (matchesMerchant) {
+        crossCountryTotal++;
+        if (rowRegion !== undefined) {
+          crossCountryCount.set(
+            rowRegion,
+            (crossCountryCount.get(rowRegion) ?? 0) + 1,
+          );
+        }
+      }
+      if (matchesMerchant && matchesCountry) {
+        matches.push(row);
+      }
+    }
     if (resultLink) resultLink.textContent = `查看 ${matches.length} 条记录`;
     const pages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
     page = Math.min(page, pages);
@@ -94,9 +135,6 @@ if (root) {
     rows.forEach((row) => {
       row.hidden = !visible.has(row);
     });
-    const typeTotalCount = rows.filter(
-      (row) => !reviewType || row.dataset.type === reviewType,
-    ).length;
     allCountriesButtons.forEach((button) => {
       button.setAttribute('aria-pressed', String(!country));
       const badge = button.querySelector('[data-country-all-count]');
@@ -110,13 +148,8 @@ if (root) {
       const selected =
         value === (kind === 'merchant' ? merchant : country) && Boolean(value);
       chip.setAttribute('aria-pressed', String(selected));
-      const typeMatches = rows.filter(
-        (row) =>
-          (!reviewType || row.dataset.type === reviewType) &&
-          (kind === 'merchant'
-            ? row.dataset.merchant === value
-            : row.dataset.region === value),
-      ).length;
+      const typeMatches =
+        (kind === 'merchant' ? typeByMerchant : typeByCountry).get(value) ?? 0;
       if (typeMatches > 0) {
         if (kind === 'merchant') activeMerchantNodes++;
         else activeCountryNodes++;
@@ -129,18 +162,17 @@ if (root) {
         chip.hidden = !selected && typeMatches === 0;
       }
       const count = chip.querySelector('[data-tag-count]');
-      if (count)
-        count.textContent = String(
-          rows.filter(
-            (row) =>
-              (!reviewType || row.dataset.type === reviewType) &&
-              (kind === 'merchant'
-                ? (!country || row.dataset.region === country) &&
-                  (!value || row.dataset.merchant === value)
-                : (!merchant || row.dataset.merchant === merchant) &&
-                  (!value || row.dataset.region === value)),
-          ).length,
-        );
+      if (count) {
+        const filteredCount =
+          kind === 'merchant'
+            ? value
+              ? (crossMerchantCount.get(value) ?? 0)
+              : crossMerchantTotal
+            : value
+              ? (crossCountryCount.get(value) ?? 0)
+              : crossCountryTotal;
+        count.textContent = String(filteredCount);
+      }
     });
     const tabCounts: Record<string, number> = {
       all: activeMerchantNodes + activeCountryNodes,
@@ -237,42 +269,16 @@ if (root) {
     page = 1;
     render('push');
   };
-  typeButtons.forEach((button, index) => {
+  typeButtons.forEach((button) => {
     button.addEventListener('click', () => selectType(button));
-    button.addEventListener('keydown', (event) => {
-      const target =
-        event.key === 'ArrowRight'
-          ? (index + 1) % typeButtons.length
-          : event.key === 'ArrowLeft'
-            ? (index - 1 + typeButtons.length) % typeButtons.length
-            : event.key === 'Home'
-              ? 0
-              : event.key === 'End'
-                ? typeButtons.length - 1
-                : -1;
-      if (target < 0) return;
-      event.preventDefault();
-      selectType(typeButtons[target]);
-      typeButtons[target].focus({ preventScroll: true });
-    });
   });
-  tabs.forEach((tab, index) => {
+  bindRovingTabs(typeButtons, (_, button) => selectType(button), {
+    preventScroll: true,
+  });
+  tabs.forEach((tab) => {
     tab.addEventListener('click', () => selectTab(tab));
-    tab.addEventListener('keydown', (event) => {
-      const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
-      if (!keys.includes(event.key)) return;
-      event.preventDefault();
-      const target =
-        event.key === 'Home'
-          ? 0
-          : event.key === 'End'
-            ? tabs.length - 1
-            : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) %
-              tabs.length;
-      selectTab(tabs[target]);
-      tabs[target].focus();
-    });
   });
+  bindRovingTabs(tabs, (_, tab) => selectTab(tab));
   chips.forEach((chip) =>
     chip.addEventListener('click', () => {
       const value = chip.dataset.tagValue || '';

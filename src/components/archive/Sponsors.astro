@@ -48,16 +48,3 @@ for (const sponsor of sponsors) {
     </div>
   </section>
 )}
-<script>
-  // Shuffle sponsor directory independently on load while preserving DOM & keyboard tab order.
-  document
-    .querySelectorAll<HTMLElement>('[data-sponsor-grid]')
-    .forEach((grid) => {
-      const items = Array.from(grid.children);
-      for (let i = items.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [items[i], items[j]] = [items[j], items[i]];
-      }
-      grid.append(...items);
-    });
-</script>

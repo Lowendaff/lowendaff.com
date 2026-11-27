@@ -5,6 +5,7 @@ import {
   type ReviewPlace,
 } from '../lib/review-map-client.ts';
 import { isReviewType } from '../lib/review-types.ts';
+import { bindRovingTabs } from '../lib/ui-client.ts';
 import type { createReviewGlobe } from './review-globe';
 
 export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
@@ -299,27 +300,16 @@ export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
     globe?.resetHome();
   });
 
-  typeButtons.forEach((button, index) => {
+  typeButtons.forEach((button) => {
     button.addEventListener('click', () =>
       chooseType(parseType(button.dataset.mapType ?? null)),
     );
-    button.addEventListener('keydown', (event) => {
-      const target =
-        event.key === 'ArrowRight'
-          ? (index + 1) % typeButtons.length
-          : event.key === 'ArrowLeft'
-            ? (index - 1 + typeButtons.length) % typeButtons.length
-            : event.key === 'Home'
-              ? 0
-              : event.key === 'End'
-                ? typeButtons.length - 1
-                : -1;
-      if (target < 0) return;
-      event.preventDefault();
-      chooseType(parseType(typeButtons[target].dataset.mapType ?? null));
-      typeButtons[target].focus({ preventScroll: true });
-    });
   });
+  bindRovingTabs(
+    typeButtons,
+    (_, button) => chooseType(parseType(button.dataset.mapType ?? null)),
+    { preventScroll: true },
+  );
 
   regionButtons.forEach((button) => {
     const id = button.dataset.mapSelect!;
