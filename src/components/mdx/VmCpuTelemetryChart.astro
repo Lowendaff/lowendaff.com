@@ -34,8 +34,28 @@ const parsed = JSON.parse(payload) as {
 };
 const round = (n: number, digits = 3) =>
   Number.isFinite(n) ? Number(n.toFixed(digits)) : 0;
+const stages: Array<[string | null, string]> = [];
+const stageIndexMap = new Map<string, number>();
+const rows = parsed.samples.map((s) => {
+  const item = s.item ?? null;
+  const key = `${item ?? ''}\u0000${s.title}`;
+  let stageIdx = stageIndexMap.get(key);
+  if (stageIdx === undefined) {
+    stageIdx = stages.length;
+    stages.push([item, s.title]);
+    stageIndexMap.set(key, stageIdx);
+  }
+  return [
+    round(s.elapsed_seconds, 2),
+    s.time,
+    stageIdx,
+    round(s.si_pct, 3),
+    round(s.st_pct, 3),
+  ] as const;
+});
 const compactPayload = {
-  ...parsed,
+  interval_seconds: parsed.interval_seconds,
+  sample_count: parsed.sample_count,
   si_pct: parsed.si_pct
     ? {
         ...parsed.si_pct,
@@ -54,14 +74,8 @@ const compactPayload = {
         peak_elapsed_seconds: round(parsed.st_pct.peak_elapsed_seconds, 2),
       }
     : parsed.st_pct,
-  samples: parsed.samples.map((s) => ({
-    elapsed_seconds: round(s.elapsed_seconds, 2),
-    time: s.time,
-    ...(s.item ? { item: s.item } : {}),
-    title: s.title,
-    si_pct: round(s.si_pct, 3),
-    st_pct: round(s.st_pct, 3),
-  })),
+  stages,
+  rows,
 };
 const maxSec = Math.max(
   0,
@@ -112,7 +126,7 @@ const safeJson = JSON.stringify(compactPayload).replaceAll('</', '<\\/');
 </figure>
 
 <script>
-  import '../../scripts/vm-cpu-telemetry';
+  import '../../scripts/vm-cpu-telemetry-loader';
 </script>
 
 <style>

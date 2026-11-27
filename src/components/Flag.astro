@@ -6,9 +6,10 @@ interface Props {
   code?: string;
   size?: number;
   class?: string;
+  eager?: boolean;
 }
 
-const { code = '', size = 18, class: className } = Astro.props;
+const { code = '', size = 18, class: className, eager = false } = Astro.props;
 const normalized = code.trim().toLowerCase();
 const aliases: Record<string, string> = {
   uk: 'gb-ukm',
@@ -34,6 +35,7 @@ const height = size;
       width={width}
       height={height}
       alt=""
+      loading={eager ? undefined : 'lazy'}
       decoding="async"
     />
   </span>

@@ -3,7 +3,7 @@ import {
   type FilteredReviewPlace,
   type MapReviewFilter,
   type ReviewPlace,
-} from '../lib/review-map.ts';
+} from '../lib/review-map-client.ts';
 import { isReviewType } from '../lib/review-types.ts';
 import type { createReviewGlobe } from './review-globe';
 

@@ -8,6 +8,13 @@ export default defineConfig({
   site: 'https://lowendaff.com',
   output: 'static',
   trailingSlash: 'always',
+  prefetch: { defaultStrategy: 'hover' },
   integrations: [mdx()],
-  vite: { plugins: [siteFontSubsets(), tailwindcss()] },
+  vite: {
+    plugins: [siteFontSubsets(), tailwindcss()],
+    build: {
+      assetsInlineLimit: (filePath) =>
+        filePath.endsWith('.woff2') ? false : undefined,
+    },
+  },
 });

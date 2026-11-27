@@ -1,12 +1,27 @@
+import { getCollection } from 'astro:content';
 import type { APIRoute } from 'astro';
 import flagpack from '@iconify-json/flagpack/icons.json';
+import { EXOTIC_TERRITORIES } from '../../lib/exotic';
 
 const icons = flagpack.icons as Record<string, { body: string }>;
+const aliases: Record<string, string> = {
+  uk: 'gb-ukm',
+  gb: 'gb-ukm',
+};
 
-export function getStaticPaths() {
-  return Object.keys(icons)
-    .filter((key) => /^[a-z0-9-]+$/.test(key))
-    .map((key) => ({ params: { key } }));
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const needed = new Set<string>();
+  const register = (raw?: string) => {
+    const normalized = (raw ?? '').trim().toLowerCase();
+    const key = aliases[normalized] ?? normalized;
+    if (key && /^[a-z0-9-]+$/.test(key) && icons[key]) {
+      needed.add(key);
+    }
+  };
+  for (const post of posts) register(post.data.country);
+  for (const item of EXOTIC_TERRITORIES) register(item.code);
+  return [...needed].sort().map((key) => ({ params: { key } }));
 }
 
 export const GET: APIRoute = ({ params }) => {

@@ -13,6 +13,24 @@ export function globePoint(
   ];
 }
 
+/** Decode delta-encoded integer coordinate streams ([x0, y0, dx1, dy1, ...]) or pass raw pairs through. */
+export function decodeGeographicArc(
+  arc: number[][] | number[],
+  scale?: number,
+): number[][] {
+  if (!scale || Array.isArray(arc[0])) return arc as number[][];
+  const flat = arc as number[];
+  const points: number[][] = [];
+  let x = 0;
+  let y = 0;
+  for (let i = 0; i < flat.length; i += 2) {
+    x += flat[i];
+    y += flat[i + 1];
+    points.push([x / scale, y / scale]);
+  }
+  return points;
+}
+
 /** Unwrap open paths without inventing an edge across the date line. */
 export function unwrapGeographicLine(line: number[][]): number[][] {
   const result: number[][] = [];

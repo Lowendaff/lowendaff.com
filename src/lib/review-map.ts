@@ -1,6 +1,25 @@
 import { z } from 'astro/zod';
 import { comparePostOrder } from './post-sort.ts';
-import type { ReviewType } from './review-types';
+import type { ReviewType } from './review-types.ts';
+import {
+  filterReviewPlaces,
+  reviewPlaceHref,
+  reviewPlaceId,
+  type FilteredReviewPlace,
+  type MapArticle,
+  type MapReviewFilter,
+  type ReviewPlace,
+} from './review-map-client.ts';
+
+export {
+  filterReviewPlaces,
+  reviewPlaceHref,
+  reviewPlaceId,
+  type FilteredReviewPlace,
+  type MapArticle,
+  type MapReviewFilter,
+  type ReviewPlace,
+};
 
 /** City-level reference coordinates, never a datacenter's exact address. */
 export const reviewGeoSchema = z
@@ -11,51 +30,6 @@ export const reviewGeoSchema = z
   })
   .strict();
 
-export interface MapArticle {
-  title: string;
-  href: string;
-  vendor: string;
-  country: string;
-  location: string;
-  date: string;
-  testedAt?: string;
-  pinned?: boolean;
-  reviewType: ReviewType;
-}
-export interface ReviewPlace {
-  id: string;
-  city: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-  articles: MapArticle[];
-}
-export type MapReviewFilter = 'all' | ReviewType;
-export type FilteredReviewPlace = ReviewPlace & {
-  count: number;
-};
-
-export function filterReviewPlaces(
-  places: ReviewPlace[],
-  type: MapReviewFilter = 'all',
-): FilteredReviewPlace[] {
-  const filtered: FilteredReviewPlace[] = [];
-  for (const place of places) {
-    const articles =
-      type === 'all'
-        ? place.articles
-        : place.articles.filter((article) => article.reviewType === type);
-    if (!articles.length) continue;
-    filtered.push({
-      ...place,
-      articles,
-      count: articles.length,
-    });
-  }
-  return filtered.sort(
-    (a, b) => b.count - a.count || a.city.localeCompare(b.city, 'zh-CN'),
-  );
-}
 interface MapPost {
   data: {
     title: string;
@@ -71,22 +45,6 @@ interface MapPost {
     draft: boolean;
     geo: z.infer<typeof reviewGeoSchema>;
   };
-}
-
-export function reviewPlaceId(country: string, city: string) {
-  return `${country.toLowerCase()}-${city.trim().normalize('NFKC').toLowerCase()}`;
-}
-
-export function reviewPlaceHref(
-  country: string,
-  city: string,
-  reviewType: ReviewType,
-) {
-  const params = new URLSearchParams({
-    type: reviewType,
-    place: reviewPlaceId(country, city),
-  });
-  return `/map/?${params.toString()}`;
 }
 
 export function buildReviewMap(posts: MapPost[]) {

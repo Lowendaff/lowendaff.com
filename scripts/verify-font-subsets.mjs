@@ -8,6 +8,7 @@ import {
   charactersInRange,
   collectCharacters,
   createFontOverrides,
+  formatUnicodeRange,
 } from './site-font-subsets.mjs';
 
 const require = createRequire(import.meta.url);
@@ -26,6 +27,10 @@ test('Source character collection refreshes after content changes, including sup
     assert.deepEqual(
       charactersInRange(['A', '东', '🇯'], 'U+4E00-9FFF,U+1F1EF'),
       ['东', '🇯'],
+    );
+    assert.equal(
+      formatUnicodeRange(['0', '1', '2', 'A', '中']),
+      'U+30-32,U+41,U+4e2d',
     );
   } finally {
     await rm(directory, { recursive: true, force: true });

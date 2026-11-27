@@ -6,9 +6,10 @@ interface Props {
   logo?: string;
   logoDark?: string;
   size?: 'sm' | 'md' | 'dir';
+  eager?: boolean;
 }
 
-const { name, logo, logoDark, size = 'md' } = Astro.props;
+const { name, logo, logoDark, size = 'md', eager = false } = Astro.props;
 
 // Optical height calibration per brand silhouette (equalizes cap-height & visual area
 // across ultra-wide wordmarks like PoloCloud/EVOXT and tall-mark logos like Mejiro/MyHBD/ISIF).
@@ -60,6 +61,7 @@ const maxW = size === 'md' ? Math.round(spec.maxW * 1.12) : spec.maxW;
       class:list={['brand-logo', logoDark && 'brand-logo-light']}
       src={logo}
       alt={name}
+      loading={eager && !logoDark ? undefined : 'lazy'}
       decoding="async"
     />
     {logoDark && (
@@ -68,6 +70,7 @@ const maxW = size === 'md' ? Math.round(spec.maxW * 1.12) : spec.maxW;
         src={logoDark}
         alt=""
         aria-hidden="true"
+        loading="lazy"
         decoding="async"
       />
     )}

@@ -9,6 +9,7 @@ import {
 } from '../src/lib/review-map.ts';
 import { initReviewMap } from '../src/scripts/review-map.ts';
 import {
+  decodeGeographicArc,
   globePoint,
   unwrapGeographicLine,
   unwrapLandRing,
@@ -163,6 +164,31 @@ test('Antarctica closes at the south pole instead of covering other continents',
     [180, -90],
     [-180, -90],
   ]);
+});
+
+test('decodeGeographicArc decodes delta-quantized flat streams and preserves raw pairs', () => {
+  const decoded = decodeGeographicArc(
+    [-18000, -8000, 9000, 500, 9000, 300],
+    100,
+  );
+  assert.deepEqual(decoded, [
+    [-180, -80],
+    [-90, -75],
+    [0, -72],
+  ]);
+  assert.deepEqual(
+    decodeGeographicArc(
+      [
+        [114.17, 22.28],
+        [106.63, 10.82],
+      ],
+      undefined,
+    ),
+    [
+      [114.17, 22.28],
+      [106.63, 10.82],
+    ],
+  );
 });
 
 function createMapHarness(places, initialUrl = 'https://lowendaff.com/map/') {

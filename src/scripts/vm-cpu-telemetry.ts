@@ -47,6 +47,43 @@ interface TelemetryPayload {
   samples: TelemetrySample[];
 }
 
+interface RawCompactPayload {
+  interval_seconds: number;
+  sample_count: number;
+  si_pct: MetricSummary;
+  st_pct: MetricSummary;
+  samples?: TelemetrySample[];
+  stages?: Array<[string | null, string]>;
+  rows?: Array<[number, string, number, number, number]>;
+}
+
+function normalizePayload(raw: RawCompactPayload): TelemetryPayload {
+  if (Array.isArray(raw.samples)) {
+    return raw as TelemetryPayload;
+  }
+  const stages = raw.stages ?? [];
+  const samples: TelemetrySample[] = (raw.rows ?? []).map(
+    ([elapsed_seconds, time, stageIdx, si_pct, st_pct]) => {
+      const stage = stages[stageIdx] ?? [null, ''];
+      return {
+        elapsed_seconds,
+        time,
+        ...(stage[0] ? { item: stage[0] } : {}),
+        title: stage[1],
+        si_pct,
+        st_pct,
+      };
+    },
+  );
+  return {
+    interval_seconds: raw.interval_seconds,
+    sample_count: raw.sample_count,
+    si_pct: raw.si_pct,
+    st_pct: raw.st_pct,
+    samples,
+  };
+}
+
 interface ZoomRange {
   start: number;
   end: number;
@@ -593,85 +630,11 @@ function refreshAll() {
   });
 }
 
-export function initVmCpuTelemetryCharts() {
-  document
-    .querySelectorAll<HTMLElement>('[data-vm-telemetry-root]')
-    .forEach((root) => {
-      const mount = root.querySelector<HTMLElement>(
-        '[data-vm-telemetry-chart]',
-      );
-      const script = root.querySelector<HTMLScriptElement>(
-        'script[data-vm-telemetry-json]',
-      );
-      const resetBtn = root.querySelector<HTMLButtonElement>(
-        '[data-vm-telemetry-reset]',
-      );
-      if (!mount || !script || instances.has(mount)) return;
-      const payload = JSON.parse(
-        script.textContent || '{}',
-      ) as TelemetryPayload;
-      if (!Array.isArray(payload.samples) || payload.samples.length === 0)
-        return;
+let globalListenersBound = false;
 
-      const chart = init(mount, null, { renderer: 'svg' });
-      const zoom: ZoomRange = { start: 0, end: 100 };
-      const rec: InstanceRecord = { chart, payload, zoom, resetBtn };
-      const dark = isDarkActive();
-      const reducedMotion = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches;
-      const initialWidth = mount.clientWidth || 720;
-      chart.setOption(
-        buildOption(payload, dark, initialWidth < 520, reducedMotion, zoom),
-      );
-      instances.set(mount, rec);
-
-      chart.on('datazoom', () => {
-        const opt = chart.getOption() as {
-          dataZoom?: Array<{ start?: number; end?: number }>;
-        };
-        const dz = opt.dataZoom?.[0];
-        if (dz) {
-          rec.zoom.start = dz.start ?? 0;
-          rec.zoom.end = dz.end ?? 100;
-          syncResetButton(rec);
-        }
-      });
-
-      resetBtn?.addEventListener('click', () => {
-        rec.zoom.start = 0;
-        rec.zoom.end = 100;
-        chart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
-        syncResetButton(rec);
-      });
-
-      let lastNarrow = initialWidth < 520;
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const w = entry.contentRect.width;
-          if (w <= 0) continue;
-          const narrow = w < 520;
-          if (narrow !== lastNarrow) {
-            lastNarrow = narrow;
-            chart.setOption(
-              buildOption(
-                payload,
-                isDarkActive(),
-                narrow,
-                window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-                rec.zoom,
-              ),
-            );
-          }
-          chart.resize();
-        }
-      });
-      ro.observe(mount);
-    });
-}
-
-if (typeof window !== 'undefined') {
-  initVmCpuTelemetryCharts();
+function ensureGlobalListeners() {
+  if (globalListenersBound || typeof window === 'undefined') return;
+  globalListenersBound = true;
   const themeObserver = new MutationObserver(() => refreshAll());
   themeObserver.observe(document.documentElement, {
     attributes: true,
@@ -683,4 +646,81 @@ if (typeof window !== 'undefined') {
   window
     .matchMedia('(prefers-reduced-motion: reduce)')
     .addEventListener('change', () => refreshAll());
+}
+
+export function mountVmCpuTelemetryRoot(root: HTMLElement) {
+  ensureGlobalListeners();
+  const mount = root.querySelector<HTMLElement>('[data-vm-telemetry-chart]');
+  const script = root.querySelector<HTMLScriptElement>(
+    'script[data-vm-telemetry-json]',
+  );
+  const resetBtn = root.querySelector<HTMLButtonElement>(
+    '[data-vm-telemetry-reset]',
+  );
+  if (!mount || !script || instances.has(mount)) return;
+  const payload = normalizePayload(
+    JSON.parse(script.textContent || '{}') as RawCompactPayload,
+  );
+  if (!Array.isArray(payload.samples) || payload.samples.length === 0) return;
+
+  const chart = init(mount, null, { renderer: 'svg' });
+  const zoom: ZoomRange = { start: 0, end: 100 };
+  const rec: InstanceRecord = { chart, payload, zoom, resetBtn };
+  const dark = isDarkActive();
+  const reducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)',
+  ).matches;
+  const initialWidth = mount.clientWidth || 720;
+  chart.setOption(
+    buildOption(payload, dark, initialWidth < 520, reducedMotion, zoom),
+  );
+  instances.set(mount, rec);
+
+  chart.on('datazoom', () => {
+    const opt = chart.getOption() as {
+      dataZoom?: Array<{ start?: number; end?: number }>;
+    };
+    const dz = opt.dataZoom?.[0];
+    if (dz) {
+      rec.zoom.start = dz.start ?? 0;
+      rec.zoom.end = dz.end ?? 100;
+      syncResetButton(rec);
+    }
+  });
+
+  resetBtn?.addEventListener('click', () => {
+    rec.zoom.start = 0;
+    rec.zoom.end = 100;
+    chart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+    syncResetButton(rec);
+  });
+
+  let lastNarrow = initialWidth < 520;
+  const ro = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const w = entry.contentRect.width;
+      if (w <= 0) continue;
+      const narrow = w < 520;
+      if (narrow !== lastNarrow) {
+        lastNarrow = narrow;
+        chart.setOption(
+          buildOption(
+            payload,
+            isDarkActive(),
+            narrow,
+            window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+            rec.zoom,
+          ),
+        );
+      }
+      chart.resize();
+    }
+  });
+  ro.observe(mount);
+}
+
+export function initVmCpuTelemetryCharts() {
+  document
+    .querySelectorAll<HTMLElement>('[data-vm-telemetry-root]')
+    .forEach((root) => mountVmCpuTelemetryRoot(root));
 }

@@ -217,14 +217,16 @@ const groups = groupNames.map((name) => ({
       restore();
       render(false);
 
-      // Hidden route records are measured again when their panel becomes visible.
+      // Only observe the single currently visible route table per explorer.
       const scrollFrames = new Map<HTMLElement, HTMLElement>();
+      const boundScroll = new WeakSet<HTMLElement>();
       const pending = new Set<HTMLElement>();
       let frameRequest = 0;
       const measure = () => {
         frameRequest = 0;
         pending.forEach((viewport) => {
-          const frame = scrollFrames.get(viewport)!;
+          const frame = scrollFrames.get(viewport);
+          if (!frame) return;
           const visible = viewport.clientWidth > 0 && viewport.clientHeight > 0;
           frame.dataset.scrollLeft = String(visible && viewport.scrollLeft > 1);
           frame.dataset.scrollRight = String(
@@ -263,17 +265,50 @@ const groups = groupNames.map((name) => ({
           if (viewport) schedule(viewport);
         });
       });
-      root
-        .querySelectorAll<HTMLElement>('[data-route-table]')
-        .forEach((frame) => {
-          const viewport = frame.querySelector<HTMLElement>('.data-table')!;
-          scrollFrames.set(viewport, frame);
+      const syncActiveObserver = () => {
+        resizeObserver.disconnect();
+        const activePanel = panels[selected];
+        if (!activePanel || activePanel.hidden) return;
+        const activeVal = selectors[selected]?.dataset.value;
+        const activeRecord = activePanel.querySelector<HTMLElement>(
+          `[data-route-record="${CSS.escape(activeVal || '0')}"]`,
+        );
+        const frame =
+          activeRecord?.querySelector<HTMLElement>('[data-route-table]');
+        const viewport = frame?.querySelector<HTMLElement>('.data-table');
+        const table = viewport?.querySelector('table');
+        if (!frame || !viewport || !table) return;
+        scrollFrames.set(viewport, frame);
+        if (!boundScroll.has(viewport)) {
+          boundScroll.add(viewport);
           viewport.addEventListener('scroll', () => schedule(viewport), {
             passive: true,
           });
-          resizeObserver.observe(viewport);
-          resizeObserver.observe(viewport.querySelector('table')!);
-          schedule(viewport);
+        }
+        resizeObserver.observe(viewport);
+        resizeObserver.observe(table);
+        schedule(viewport);
+      };
+      tabs.forEach((tab) =>
+        tab.addEventListener('click', () => syncActiveObserver()),
+      );
+      tabs.forEach((tab) =>
+        tab.addEventListener('keydown', () =>
+          queueMicrotask(syncActiveObserver),
+        ),
+      );
+      selectors.forEach((select) =>
+        select.addEventListener('route-select', () => syncActiveObserver()),
+      );
+      const parentPanel = root.closest<HTMLElement>('[data-review-panel]');
+      if (parentPanel) {
+        new MutationObserver(() => {
+          if (!parentPanel.hidden) syncActiveObserver();
+        }).observe(parentPanel, {
+          attributes: true,
+          attributeFilter: ['hidden'],
         });
+      }
+      syncActiveObserver();
     });
 </script>

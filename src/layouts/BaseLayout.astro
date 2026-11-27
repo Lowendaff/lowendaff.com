@@ -364,6 +364,11 @@ const navItems = [
     <script>
       const mobileNav =
         document.querySelector<HTMLDetailsElement>('.mobile-nav');
+      document
+        .querySelectorAll<HTMLLinkElement>('link[data-deferred-fonts]')
+        .forEach((link) => {
+          link.media = 'all';
+        });
       mobileNav?.addEventListener('toggle', () => {
         mobileNav
           .querySelector('summary')

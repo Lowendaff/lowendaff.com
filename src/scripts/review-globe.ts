@@ -13,6 +13,7 @@ import {
 } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
+  decodeGeographicArc,
   globePoint,
   unwrapGeographicLine,
   unwrapLandRing,
@@ -59,11 +60,18 @@ export async function createReviewGlobe(
     });
     if (!response.ok) throw new Error('无法加载地理轮廓');
     const geography = (await response.json()) as {
-      land: number[][][][];
-      borders: number[][][];
+      scale?: number;
+      land: (number[][] | number[])[][];
+      borders: (number[][] | number[])[];
     };
-    land = geography.land.map((polygon) => polygon.map(unwrapLandRing));
-    borders = geography.borders.map(unwrapGeographicLine);
+    land = geography.land.map((polygon) =>
+      polygon.map((ring) =>
+        unwrapLandRing(decodeGeographicArc(ring, geography.scale)),
+      ),
+    );
+    borders = geography.borders.map((line) =>
+      unwrapGeographicLine(decodeGeographicArc(line, geography.scale)),
+    );
   } catch (error) {
     renderer.dispose();
     canvas.remove();

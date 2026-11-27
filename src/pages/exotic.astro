@@ -162,7 +162,7 @@ const initialRecord = latestRecordByCode.get(initial.code);
           <div class="exotic-spotlight-top">
             <div class="exotic-spotlight-place">
               <span class="exotic-flag-slot" data-exotic-flag>
-                <Flag code={initial.code} size={24} />
+                <Flag code={initial.code} size={24} eager />
               </span>
               <div>
                 <h3 data-exotic-title>
@@ -285,9 +285,6 @@ const initialRecord = latestRecordByCode.get(initial.code);
                 </div>
                 <strong>{item.name}</strong>
                 <small>{item.tag}</small>
-                <span class="exotic-stamp-flag-tpl" hidden>
-                  <Flag code={item.code} size={24} />
-                </span>
               </button>
             );
           })}
@@ -397,12 +394,17 @@ const initialRecord = latestRecordByCode.get(initial.code);
       set:html={serializeJsonLd(
         territories.map((t) => {
           const rec = latestRecordByCode.get(t.code);
-          return {
-            ...t,
-            count: countByCode.get(t.code) || 0,
-            latestHref: rec?.href || '',
-            latestVendor: rec?.vendor || '',
-          };
+          return [
+            t.city,
+            t.rarity,
+            t.rttHint,
+            t.cable,
+            t.note,
+            t.episodes.map((ep) => [ep.ep, ep.bvid, ep.title]),
+            countByCode.get(t.code) || 0,
+            rec?.href || '',
+            rec?.vendor || '',
+          ];
         }),
       )}
     />
@@ -411,28 +413,52 @@ const initialRecord = latestRecordByCode.get(initial.code);
 <script>
   const root = document.querySelector<HTMLElement>('[data-exotic-page]');
   if (root) {
-    const data = JSON.parse(
-      root.querySelector('[data-exotic-data]')?.textContent || '[]',
-    ) as Array<{
-      code: string;
-      zone: string;
-      tier: string;
-      epBadge: string;
-      name: string;
-      city: string;
-      tag: string;
-      rarity: string;
-      rttHint: string;
-      cable: string;
-      note: string;
-      episodes: Array<{ ep: string; bvid: string; title: string }>;
-      count: number;
-      latestHref: string;
-      latestVendor: string;
-    }>;
     const stamps = Array.from(
       root.querySelectorAll<HTMLButtonElement>('[data-exotic-stamp]'),
     );
+    const rawRows = JSON.parse(
+      root.querySelector('[data-exotic-data]')?.textContent || '[]',
+    ) as Array<
+      [
+        string,
+        string,
+        string,
+        string,
+        string,
+        Array<[string, string, string]>,
+        number,
+        string,
+        string,
+      ]
+    >;
+    const data = stamps.map((btn, idx) => {
+      const row = rawRows[idx];
+      const code = btn.dataset.stampCode || '';
+      const isoText =
+        btn.querySelector('.exotic-stamp-iso')?.textContent?.trim() || '';
+      const epBadge = isoText.split('·')[1]?.trim() || '';
+      return {
+        code,
+        zone: btn.dataset.stampZone || '',
+        tier: btn.dataset.stampTier || '',
+        epBadge,
+        name: btn.querySelector('strong')?.textContent?.trim() || code,
+        tag: btn.querySelector('small')?.textContent?.trim() || '',
+        city: row?.[0] || '',
+        rarity: row?.[1] || '',
+        rttHint: row?.[2] || '',
+        cable: row?.[3] || '',
+        note: row?.[4] || '',
+        episodes: (row?.[5] || []).map(([ep, bvid, title]) => ({
+          ep,
+          bvid,
+          title,
+        })),
+        count: row?.[6] || 0,
+        latestHref: row?.[7] || '',
+        latestVendor: row?.[8] || '',
+      };
+    });
     const zoneTabs = Array.from(
       root.querySelectorAll<HTMLButtonElement>('[data-exotic-zone]'),
     );
@@ -504,8 +530,29 @@ const initialRecord = latestRecordByCode.get(initial.code);
       if (scrollStamp) {
         stamps[index]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
-      const tpl = stamps[index]?.querySelector('.exotic-stamp-flag-tpl');
-      if (flagSlot && tpl) flagSlot.innerHTML = tpl.innerHTML;
+      const srcBadge = stamps[index]?.querySelector<HTMLElement>(
+        '.flag-badge, .flag-fallback',
+      );
+      if (flagSlot && srcBadge) {
+        const cloned = srcBadge.cloneNode(true) as HTMLElement;
+        if (cloned.classList.contains('flag-badge')) {
+          cloned.style.width = '32px';
+          cloned.style.height = '24px';
+          const img = cloned.querySelector('img');
+          if (img) {
+            img.width = 32;
+            img.height = 24;
+            img.removeAttribute('loading');
+          }
+        } else {
+          const svg = cloned.querySelector('svg');
+          if (svg) {
+            svg.setAttribute('width', '24');
+            svg.setAttribute('height', '24');
+          }
+        }
+        flagSlot.replaceChildren(cloned);
+      }
       if (titleEl) titleEl.textContent = `${item.name} · ${item.city}`;
       if (codeEl) {
         codeEl.textContent = `ISO ${item.code} · 奇葩小国 ${item.epBadge} · ${item.tag}`;

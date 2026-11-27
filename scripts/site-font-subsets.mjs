@@ -48,6 +48,26 @@ export function charactersInRange(characters, unicodeRange) {
   );
 }
 
+export function formatUnicodeRange(characters) {
+  const codes = characters.map((c) => c.codePointAt(0));
+  const parts = [];
+  for (let i = 0; i < codes.length;) {
+    const start = codes[i];
+    let end = start;
+    while (i + 1 < codes.length && codes[i + 1] === end + 1) {
+      i++;
+      end = codes[i];
+    }
+    parts.push(
+      start === end
+        ? `U+${start.toString(16)}`
+        : `U+${start.toString(16)}-${end.toString(16)}`,
+    );
+    i++;
+  }
+  return parts.join(',');
+}
+
 export async function createFontOverrides(css, characters, cacheDirectory) {
   await mkdir(cacheDirectory, { recursive: true });
   const overrides = [];
@@ -72,9 +92,7 @@ export async function createFontOverrides(css, characters, cacheDirectory) {
     const output = join(cacheDirectory, `noto-site-${hash}.woff2`);
     await writeFile(output, subset);
     const url = relative(dirname(sourceFontCss), output).split('\\').join('/');
-    const subsetRange = needed
-      .map((character) => `U+${character.codePointAt(0).toString(16)}`)
-      .join(',');
+    const subsetRange = formatUnicodeRange(needed);
     overrides.push(face.replace(file, url).replace(range, subsetRange));
   }
   // Later faces win for covered characters. Keep every original face as a
