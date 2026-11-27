@@ -137,6 +137,23 @@
   table:has(thead tr > th:nth-child(5)) {
   min-width: 580px;
 }
+@media (min-width: 960px) {
+  [data-review-panels='hardware']
+    .data-table
+    table:has(thead tr > th:nth-child(6)) {
+    font-size: 12.5px;
+  }
+  [data-review-panels='hardware']
+    .data-table
+    table:has(thead tr > th:nth-child(6))
+    th,
+  [data-review-panels='hardware']
+    .data-table
+    table:has(thead tr > th:nth-child(6))
+    td {
+    padding: 8px 10px;
+  }
+}
 .review-revision .route-explorer .data-table {
   max-height: 420px;
   overflow: auto;

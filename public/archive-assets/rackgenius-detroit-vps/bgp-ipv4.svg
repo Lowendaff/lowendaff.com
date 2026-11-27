@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 584 712" width="584" height="712">
+  <rect width="584" height="712" rx="8" fill="#0b1220"/>
+  <line x1="116.0" y1="18" x2="116.0" y2="712" stroke="#1e293b" stroke-width="1" opacity="0.8"/>
+  <text x="116.0" y="13" fill="#94a3b8" font-family="ui-monospace,monospace" font-size="10" text-anchor="middle">origin</text>
+  <line x1="292.0" y1="18" x2="292.0" y2="712" stroke="#1e293b" stroke-width="1" opacity="0.8"/>
+  <text x="292.0" y="13" fill="#94a3b8" font-family="ui-monospace,monospace" font-size="10" text-anchor="middle">1</text>
+  <line x1="468.0" y1="18" x2="468.0" y2="712" stroke="#1e293b" stroke-width="1" opacity="0.8"/>
+  <text x="468.0" y="13" fill="#94a3b8" font-family="ui-monospace,monospace" font-size="10" text-anchor="middle">2</text>
+  <path d="M176.0,249.4 C204.0,249.4 204.0,326.3 232.0,326.3" fill="none" stroke="#64748b" stroke-width="3.70" opacity="0.45"/>
+  <path d="M352.0,226.7 C380.0,226.7 380.0,50.0 408.0,50.0" fill="none" stroke="#64748b" stroke-width="1.79" opacity="0.45"/>
+  <path d="M352.0,226.7 C380.0,226.7 380.0,98.0 408.0,98.0" fill="none" stroke="#64748b" stroke-width="2.00" opacity="0.45"/>
+  <path d="M352.0,226.7 C380.0,226.7 380.0,146.0 408.0,146.0" fill="none" stroke="#64748b" stroke-width="2.29" opacity="0.45"/>
+  <path d="M352.0,226.7 C380.0,226.7 380.0,242.0 408.0,242.0" fill="none" stroke="#64748b" stroke-width="3.60" opacity="0.45"/>
+  <path d="M352.0,226.7 C380.0,226.7 380.0,290.0 408.0,290.0" fill="none" stroke="#64748b" stroke-width="2.29" opacity="0.45"/>
+  <path d="M352.0,226.7 C380.0,226.7 380.0,338.0 408.0,338.0" fill="none" stroke="#64748b" stroke-width="2.00" opacity="0.45"/>
+  <path d="M352.0,326.3 C380.0,326.3 380.0,386.0 408.0,386.0" fill="none" stroke="#64748b" stroke-width="1.50" opacity="0.45"/>
+  <path d="M352.0,326.3 C380.0,326.3 380.0,434.0 408.0,434.0" fill="none" stroke="#64748b" stroke-width="1.50" opacity="0.45"/>
+  <path d="M352.0,326.3 C380.0,326.3 380.0,482.0 408.0,482.0" fill="none" stroke="#64748b" stroke-width="2.00" opacity="0.45"/>
+  <path d="M352.0,326.3 C380.0,326.3 380.0,530.0 408.0,530.0" fill="none" stroke="#64748b" stroke-width="2.16" opacity="0.45"/>
+  <path d="M352.0,326.3 C380.0,326.3 380.0,578.0 408.0,578.0" fill="none" stroke="#64748b" stroke-width="2.00" opacity="0.45"/>
+  <path d="M352.0,326.3 C380.0,326.3 380.0,626.0 408.0,626.0" fill="none" stroke="#64748b" stroke-width="1.79" opacity="0.45"/>
+  <path d="M352.0,326.3 C380.0,326.3 380.0,674.0 408.0,674.0" fill="none" stroke="#64748b" stroke-width="1.50" opacity="0.45"/>
+  <path d="M176.0,249.4 C204.0,249.4 204.0,226.7 232.0,226.7" fill="none" stroke="#38bdf8" stroke-width="4.50" opacity="0.9"/>
+  <path d="M352.0,226.7 C380.0,226.7 380.0,194.0 408.0,194.0" fill="none" stroke="#38bdf8" stroke-width="4.50" opacity="0.9"/>
+  <g>
+    <rect x="56.0" y="232.4" width="120" height="34" rx="5" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2"/>
+    <text x="116.0" y="246.4" fill="#f8fafc" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS32002</text>
+    <text x="116.0" y="259.4" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">RackGenius</text>
+  </g>
+  <g>
+    <rect x="232.0" y="209.7" width="120" height="34" rx="5" fill="#0f172a" stroke="#64748b" stroke-width="1.4"/>
+    <text x="292.0" y="223.7" fill="#f1f5f9" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS12129</text>
+    <text x="292.0" y="236.7" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">123.Net</text>
+  </g>
+  <g>
+    <rect x="232.0" y="309.3" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="292.0" y="323.3" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS3257 &#x2605;</text>
+    <text x="292.0" y="336.3" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">GTT</text>
+  </g>
+  <g>
+    <rect x="408.0" y="33.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="47.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS3356 &#x2605;</text>
+    <text x="468.0" y="60.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Lumen</text>
+  </g>
+  <g>
+    <rect x="408.0" y="81.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="95.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS174 &#x2605;</text>
+    <text x="468.0" y="108.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Cogent</text>
+  </g>
+  <g>
+    <rect x="408.0" y="129.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="143.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS1299 &#x2605;</text>
+    <text x="468.0" y="156.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Arelion</text>
+  </g>
+  <g>
+    <rect x="408.0" y="177.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="191.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS6939 &#x2605;</text>
+    <text x="468.0" y="204.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Hurricane</text>
+  </g>
+  <g>
+    <rect x="408.0" y="225.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="239.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS6461 &#x2605;</text>
+    <text x="468.0" y="252.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Zayo</text>
+  </g>
+  <g>
+    <rect x="408.0" y="273.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="287.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS2914 &#x2605;</text>
+    <text x="468.0" y="300.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">NTT</text>
+  </g>
+  <g>
+    <rect x="408.0" y="321.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="335.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS6453 &#x2605;</text>
+    <text x="468.0" y="348.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Tata</text>
+  </g>
+  <g>
+    <rect x="408.0" y="369.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="383.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS12956 &#x2605;</text>
+    <text x="468.0" y="396.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Telxius</text>
+  </g>
+  <g>
+    <rect x="408.0" y="417.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="431.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS5511 &#x2605;</text>
+    <text x="468.0" y="444.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Orange</text>
+  </g>
+  <g>
+    <rect x="408.0" y="465.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="479.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS6830 &#x2605;</text>
+    <text x="468.0" y="492.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Liberty Global</text>
+  </g>
+  <g>
+    <rect x="408.0" y="513.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="527.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS3491 &#x2605;</text>
+    <text x="468.0" y="540.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">PCCW</text>
+  </g>
+  <g>
+    <rect x="408.0" y="561.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="575.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS3320 &#x2605;</text>
+    <text x="468.0" y="588.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">DTAG</text>
+  </g>
+  <g>
+    <rect x="408.0" y="609.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="623.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS6762 &#x2605;</text>
+    <text x="468.0" y="636.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">Sparkle</text>
+  </g>
+  <g>
+    <rect x="408.0" y="657.0" width="120" height="34" rx="5" fill="#0f172a" stroke="#10b981" stroke-width="2.4"/>
+    <text x="468.0" y="671.0" fill="#34d399" font-family="ui-monospace,monospace" font-size="11" font-weight="700" text-anchor="middle" dominant-baseline="middle">AS7018 &#x2605;</text>
+    <text x="468.0" y="684.0" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">AT&amp;T</text>
+  </g>
+</svg>

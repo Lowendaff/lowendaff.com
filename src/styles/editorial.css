@@ -401,6 +401,41 @@
   th {
   font-weight: 600;
 }
+.purchase-details
+  .data-table
+  table:has(thead tr > th:nth-child(7):last-child)
+  tbody
+  td:nth-child(6) {
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+@media (max-width: 959px) {
+  .purchase-details
+    .data-table
+    table:has(thead tr > th:nth-child(7):last-child)
+    tbody
+    td:nth-child(6) {
+    min-width: 176px;
+  }
+}
+@media (min-width: 960px) {
+  .purchase-details
+    .data-table
+    table:has(thead tr > th:nth-child(7):last-child) {
+    font-size: 12.5px;
+  }
+  .purchase-details
+    .data-table
+    table:has(thead tr > th:nth-child(7):last-child)
+    th,
+  .purchase-details
+    .data-table
+    table:has(thead tr > th:nth-child(7):last-child)
+    td {
+    padding: 9px 9px;
+  }
+}
 .table-cell-link {
   display: inline-flex;
   align-items: center;
@@ -482,10 +517,16 @@
     table:has(thead tr > th:nth-child(6):last-child)
     tbody
     > tr
+    > :nth-child(2),
+  [data-review-panels='speed']
+    .data-table
+    table:has(thead tr > th:nth-child(6):last-child)
+    tbody
+    > tr
     > :last-child {
     white-space: normal;
     word-break: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 }
 [data-review-panels='unlock'] .data-table td:last-child {

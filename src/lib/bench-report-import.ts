@@ -122,6 +122,7 @@ export const benchEditorialSchema = z.object({
   purchaseUrl: z.url().optional(),
   tosUrl: z.url().optional(),
   aupUrl: z.url().optional(),
+  privacyUrl: z.url().optional(),
   price: z.string().trim().min(1).optional(),
   coupon: z.string().trim().min(1).optional(),
   terms: z.string().trim().min(1).optional(),
@@ -1036,6 +1037,9 @@ export function renderBenchReport(
   const policyLinks = [
     editorial.tosUrl ? `[服务条款（ToS）](${editorial.tosUrl})` : null,
     editorial.aupUrl ? `[合理使用政策（AUP）](${editorial.aupUrl})` : null,
+    editorial.privacyUrl
+      ? `[隐私政策（Privacy Policy）](${editorial.privacyUrl})`
+      : null,
   ].filter(Boolean);
   const policyLine =
     policyLinks.length > 0 ? `商家条款：${policyLinks.join(' · ')}` : null;
