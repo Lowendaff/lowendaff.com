@@ -56,7 +56,7 @@ async function verifyGlobeMotion(page) {
     await p.waitForTimeout(2300);
     await verify('clearing selection continues spin', true);
     await p.emulateMedia({ reducedMotion: 'reduce' });
-    await verify('reduced motion pauses', false);
+    await verify('Windows reduced motion keeps ambient spin', true);
     if (results.some((result) => !result.passed)) {
       throw new Error(JSON.stringify(results));
     }

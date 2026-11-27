@@ -740,9 +740,11 @@ export async function createReviewGlobe(
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
+  // Do not gate slow ambient spin on prefers-reduced-motion: Windows maps
+  // OS window-animation / "best performance" / RDP settings to reduce, which
+  // otherwise freezes the globe completely on Windows desktops.
   function canSpin(now = performance.now()) {
     return (
-      !reducedMotion.matches &&
       !pointerOverGlobe() &&
       !paused &&
       !pointers.size &&
@@ -801,7 +803,7 @@ export async function createReviewGlobe(
     const delta =
       previousFrame === undefined
         ? 0
-        : Math.min((now - previousFrame) / 1000, 0.05);
+        : Math.max(0, Math.min((now - previousFrame) / 1000, 0.05));
     previousFrame = now;
     const spinning = canSpin(wallNow);
     if (spinning) {
@@ -829,7 +831,7 @@ export async function createReviewGlobe(
           flight.toDistance,
         );
         flight = undefined;
-        if (!reducedMotion.matches && !paused) {
+        if (!paused) {
           holdUntil = wallNow + 1100;
           scheduleHoldWakeup(1120);
         }
@@ -964,7 +966,7 @@ export async function createReviewGlobe(
           ? distance <= MIN_DISTANCE + 0.02
           : distance >= MAX_DISTANCE - 0.02;
 
-    if (flight || dampingActive || canSpin()) requestDraw();
+    if (flight || dampingActive || canSpin(wallNow)) requestDraw();
     else previousFrame = undefined;
   }
 
@@ -977,6 +979,10 @@ export async function createReviewGlobe(
     'pointermove',
     (event) => {
       if (event.pointerType === 'touch') return;
+      if (event.pointerType === 'mouse' && event.buttons === 0) {
+        pointers.delete(event.pointerId);
+        activeCanvasPointers.delete(event.pointerId);
+      }
       pointer = {
         x: event.clientX,
         y: event.clientY,
@@ -994,6 +1000,14 @@ export async function createReviewGlobe(
     'pointerout',
     (event) => {
       if (event.relatedTarget !== null || event.pointerType === 'touch') return;
+      pointer = undefined;
+      requestDraw();
+    },
+    { signal: events.signal },
+  );
+  document.documentElement.addEventListener(
+    'mouseleave',
+    () => {
       pointer = undefined;
       requestDraw();
     },
@@ -1018,8 +1032,18 @@ export async function createReviewGlobe(
   stage.addEventListener(
     'pointerdown',
     (event) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
       keyboardNavigation = false;
       pointers.add(event.pointerId);
+      requestDraw();
+    },
+    { signal: events.signal },
+  );
+  stage.addEventListener(
+    'contextmenu',
+    () => {
+      pointers.clear();
+      activeCanvasPointers.clear();
       requestDraw();
     },
     { signal: events.signal },
@@ -1029,6 +1053,7 @@ export async function createReviewGlobe(
       type,
       (event) => {
         pointers.delete(event.pointerId);
+        if (event.pointerType !== 'mouse') pointer = undefined;
         requestDraw();
       },
       { signal: events.signal },
