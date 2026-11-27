@@ -6,7 +6,7 @@ reviewType: 'vps'
 draft: false
 permalink: '/reviews/starrydns-日本大阪-vps-测试记录-20261128/'
 title: 'StarryDNS 日本大阪 VPS 测试记录'
-description: '实测机器为老牌商家 StarryDNS 日本大阪黑五折扣款 JP-KVM-1GB（1 vCPU AMD EPYC-Milan、1 GB 内存、20+20 GB 存储，常规价 $10/月、$100/年）。APNIC 大阪原生双栈商业 IP 欺诈双 0 分且原生解锁日区主流流媒体，但实测 IPv4 端口受限约 115–121 Mbps、IPv6 严重拥塞丢包，整体网络不及预期。'
+description: '实测机器为老牌商家 StarryDNS 2026 黑五限量特惠日本大阪款 BF2026-1（1 vCPU AMD EPYC-Milan、1 GB 内存、20GB SSD、1TB@100Mbps，码后 $20/年，黑五库存大概率已售罄）。大阪原生商业 IP 解锁日区流媒体、IPv4 跑满标称 100M，但高重传、对华无直连且 IPv6 严重拥塞丢包，整体不及预期。'
 author: 'jam'
 publishedAt: '2026-11-28'
 testedAt: '2026-11-28 04:19 CST'
@@ -18,38 +18,41 @@ geo:
   latitude: 34.6937
   longitude: 135.5023
 categories: ['VPS 测评']
-tags: ['日本', '原生IP', '双栈', 'EPYC', '流媒体解锁']
+tags: ['日本', '原生IP', '双栈', 'EPYC', '流媒体解锁', '黑五特价']
 affiliate: false
-purchaseUrl: 'https://my.starrydns.com/index.php?rp=/store/japan-vps'
-price: '$10.00 / 月起（年付 $100 / 年；本次实测机为黑五折扣款）'
+purchaseUrl: 'https://my.starrydns.com/index.php?rp=%2Fstore%2Fpromotion%2Fbf2026-1&utm_source=lowendaff'
+price: '$20.00 / 年起（黑五限量款可能已售罄；常规款 $10 / 月起）'
+coupon: 'LEB2026BF'
 terms: '首单 VPS 享 3 天退款保障（流量耗尽、被攻击封禁或违反 AUP 除外）；被 DDoS 攻击将黑洞封堵 24 小时，严禁公开代理、BT/P2P、Tor 与长期跑满资源'
-verdict: '早在 2015–2016 年就接触过的老牌商家 StarryDNS，但这台黑五折扣日本大阪 VPS 实际表现不如预期：虽然 EPYC-Milan 单核与 NVMe 磁盘底子扎实，且分配双 0 分欺诈的 APNIC 大阪原生双栈商业 IP 原生解锁日区主流流媒体，但实测 IPv4 国际与本地带宽上限仅约 115–121 Mbps（未达常规标称 300Mbps 且跨洋重传高），IPv6 更是严重拥塞丢包（吞吐仅 0.2–6.1 Mbps）。'
+verdict: '早在 2015–2016 年就用过的老牌商家 StarryDNS，但这台 $20/年黑五特惠日本大阪 VPS（BF2026-1，100Mbps 端口，目前黑五款很可能已售罄）实际表现并没有理想那么好：EPYC-Milan 单核、NVMe 读写与大阪原生商业 IP 流媒体解锁固然扎实，IPv4 也能跑满标称 100Mbps，但跨区 TCP 重传偏高、对华凌晨非高峰仍有丢包限速，且 IPv6 严重拥塞（吞吐仅 0.2–6.1 Mbps、连东京本地都丢包 50%），双栈网络体验打折。'
 ---
 
 ## 买
 
-| 套餐       | CPU    | 内存 | 硬盘      | 流量           | 价格                          | 购买                                                                          |
-| ---------- | ------ | ---- | --------- | -------------- | ----------------------------- | ----------------------------------------------------------------------------- |
-| JP-KVM-1GB | 1 vCPU | 1GB  | 20GB SSD  | 1000GB@300Mbps | $10/月 · $100/年（HK$77/月）  | [立即购买](https://my.starrydns.com/index.php?rp=/store/japan-vps/jp-kvm-1gb) |
-| JP-KVM-2GB | 2 vCPU | 2GB  | 50GB SSD  | 1500GB@300Mbps | $19/月 · $190/年（HK$148/月） | [立即购买](https://my.starrydns.com/index.php?rp=/store/japan-vps/jp-kvm-2gb) |
-| JP-KVM-3GB | 2 vCPU | 3GB  | 100GB SSD | 2000GB@300Mbps | $28/月 · $280/年（HK$218/月） | [立即购买](https://my.starrydns.com/index.php?rp=/store/japan-vps/jp-kvm-3gb) |
-| JP-KVM-6GB | 4 vCPU | 6GB  | 200GB SSD | 3000GB@300Mbps | $40/月 · $400/年（HK$310/月） | [立即购买](https://my.starrydns.com/index.php?rp=/store/japan-vps/jp-kvm-6gb) |
+| 套餐            | CPU    | 内存 | 硬盘      | 流量           | 价格                             | 购买                                                                                                   |
+| --------------- | ------ | ---- | --------- | -------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| BF2026-1 黑五款 | 1 vCPU | 1GB  | 20GB SSD  | 1TB@100Mbps    | $20/年（码 LEB2026BF，可能售罄） | [立即购买](https://my.starrydns.com/index.php?rp=%2Fstore%2Fpromotion%2Fbf2026-1&utm_source=lowendaff) |
+| BF2026-2 黑五款 | 2 vCPU | 6GB  | 60GB SSD  | 3TB@200Mbps    | $50/年（限量，可能售罄）         | [立即购买](https://my.starrydns.com/index.php?rp=%2Fstore%2Fpromotion%2Fbf2026-2&utm_source=lowendaff) |
+| JP-KVM-1GB      | 1 vCPU | 1GB  | 20GB SSD  | 1000GB@300Mbps | $10/月 · $100/年                 | [立即购买](https://my.starrydns.com/index.php?rp=/store/japan-vps/jp-kvm-1gb)                          |
+| JP-KVM-2GB      | 2 vCPU | 2GB  | 50GB SSD  | 1500GB@300Mbps | $19/月 · $190/年                 | [立即购买](https://my.starrydns.com/index.php?rp=/store/japan-vps/jp-kvm-2gb)                          |
+| JP-KVM-3GB      | 2 vCPU | 3GB  | 100GB SSD | 2000GB@300Mbps | $28/月 · $280/年                 | [立即购买](https://my.starrydns.com/index.php?rp=/store/japan-vps/jp-kvm-3gb)                          |
+| JP-KVM-6GB      | 4 vCPU | 6GB  | 200GB SSD | 3000GB@300Mbps | $40/月 · $400/年                 | [立即购买](https://my.starrydns.com/index.php?rp=/store/japan-vps/jp-kvm-6gb)                          |
 
-上表为官网当前在售 Japan VPS 常规档位（免初装费，年付按 10 个月计费，结算支持切换 USD / HKD / CNY）；本次实测机器为黑五活动折扣入手款（1 vCPU AMD EPYC-Milan / 1 GB 内存 / 挂载 20 GB 系统盘 + 20 GB 数据盘）。
+前两档 BF2026-1（1C1G / 100Mbps，原价 $25/年，结账输入优惠码 `LEB2026BF` 后 $20/年）与 BF2026-2（2C6G / 200Mbps，$50/年免码）为 2026 黑五限时特惠方案（详见 [LowEndTalk 活动原帖](https://lowendtalk.com/discussion/comment/4959414/#Comment_4959414)，下单可选日本大阪、中国香港、新加坡或荷兰阿姆斯特丹机房，标配 KVM 虚拟化与 1 IPv4 + IPv6 双栈），**注意黑五特惠套餐很可能已经售罄**；本次实测即为 BF2026-1 日本大阪节点（系统内实测挂载 20 GB 系统盘 + 20 GB 数据盘）。下方 JP-KVM-\* 为官网常驻在售的日本大阪常规套餐（300Mbps 端口）。
 
 商家条款：[服务条款（ToS）](https://www.starrydns.com/en/tos) · [合理使用政策（AUP）](https://www.starrydns.com/en/aup) · [隐私政策（Privacy Policy）](https://www.starrydns.com/en/privacy-policy)
 
 ## 评
 
-StarryDNS（Starry Network Limited）是早在 2015–2016 年间就曾使用过的亚太老牌主机商，常年经营日本、香港、韩国、新加坡等地机房。不过就本次黑五折扣入手的这台日本大阪 KVM VPS 实测来看，整体体验并没有理想中那么好——算力、硬盘和 IP 纯净度虽在线，但公网端口限速偏紧且 IPv6 链路质量拉胯，拉低了实用表现。
+StarryDNS（Starry Network Limited）是早在 2015–2016 年间就曾使用过的亚太老牌主机商，今年黑五放出了可选日本大阪、香港、新加坡、阿姆斯特丹四地机房的限量年付特惠（1C1G / 100Mbps 码后仅 $20/年，目前该黑五特惠库存很可能已经售罄）。不过就本次入手的日本大阪 BF2026-1 实测结果来看，整体表现并没有理想中那么好——算力、磁盘和原生 IP 解锁虽然亮眼，但国际与对华路由欠佳，尤其 IPv6 链路近乎不可用，拉低了综合体验。
 
-客观来看，IP 资质与流媒体解锁确实是这台机器最拿得出手的部分：IPv4（/24，APNIC 登记 Osaka1）与 IPv6（/32，APNIC 登记 Osaka）均由自有自治域 AS134835（Starry Network，RPKI 有效）始发宣告，上游经 PacketFabric Japan（AS24295）衔接 KDDI（AS2516）、Lumen（AS3356）与 NTT（AS2914）。四家地理库全票识别为日本大阪原生商业网络（Business）IP，Scamalytics 与 ProxyCheck 双栈欺诈评分均为 0/100（低风险），零代理/VPN/Tor/滥用标记，IPv4 出站 25 端口实测对 Gmail、Outlook 等 8 家主流邮局全部返回 220 可达（须遵守 AUP 反垃圾邮件条款）。流媒体方面，双栈原生解锁日区 Netflix、YouTube Premium、Disney+、Apple TV+、Spotify、Max 及日本本土 U-NEXT、Lemino、NHK+，IPv4 另原生解锁 TVer、Niconico、radiko、DAZN、Twitch、MUBI 与 Viaplay。
+客观来看，IP 资质与流媒体解锁确实对得起 $20/年的票价：IPv4（/24，APNIC 登记 Osaka1）与 IPv6（/32，APNIC 登记 Osaka）均由自有自治域 AS134835（Starry Network，RPKI 有效）始发宣告，上游经 PacketFabric Japan（AS24295）衔接 KDDI（AS2516）、Lumen（AS3356）与 NTT（AS2914）。四家地理库全票识别为日本大阪原生商业网络（Business）IP，Scamalytics 与 ProxyCheck 双栈欺诈评分均为 0/100（低风险），零代理/VPN/Tor/滥用标记，IPv4 出站 25 端口实测对 Gmail、Outlook 等 8 家主流邮局全部返回 220 可达（须遵守 AUP 反垃圾邮件条款）。流媒体方面，双栈原生解锁日区 Netflix、YouTube Premium、Disney+、Apple TV+、Spotify、Max 及日本本土 U-NEXT、Lemino、NHK+，IPv4 另原生解锁 TVer、Niconico、radiko、DAZN、Twitch、MUBI 与 Viaplay。
 
-宿主机硬件与磁盘底子同样不差：实测分配 1 vCPU AMD EPYC-Milan（近 3.0GHz，32 MiB L3 缓存，透传 AES-NI）、1 GB 内存（自带 1 GB Swap）及 20 GB + 20 GB 双 virtio 磁盘。CPU 单核跑出 Sysbench 3734.05 events/s、7-Zip 总评 5894 MIPS、UnixBench 1209.1、PassMark 单线程高达 2459.7、HPL 45.11 GFLOP/s、y-cruncher 2500 万位圆周率仅 4.91 秒（因可用内存加空闲空间未满 Geekbench 6 所需的 2 GiB 阈值而跳过）；50 分钟全量测试期间宿主机 %st（steal）均值仅 0.094%、峰值 0.87%。磁盘 fio 4K 随机读写达 31,261 / 31,343 IOPS（约 122 MiB/s），1M 顺序读写高达 4.10 / 4.37 GiB/s，底层 NVMe 阵列余量充足。
+宿主机硬件与磁盘底子同样扎实：实测分配 1 vCPU AMD EPYC-Milan（近 3.0GHz，32 MiB L3 缓存，透传 AES-NI）、1 GB 内存（自带 1 GB Swap）及 20 GB + 20 GB 双 virtio 磁盘。CPU 单核跑出 Sysbench 3734.05 events/s、7-Zip 总评 5894 MIPS、UnixBench 1209.1、PassMark 单线程高达 2459.7、HPL 45.11 GFLOP/s、y-cruncher 2500 万位圆周率仅 4.91 秒（因可用内存加空闲空间未满 Geekbench 6 所需的 2 GiB 阈值而跳过）；50 分钟全量测试期间宿主机 %st（steal）均值仅 0.094%、峰值 0.87%。磁盘 fio 4K 随机读写达 31,261 / 31,343 IOPS（约 122 MiB/s），1M 顺序读写高达 4.10 / 4.37 GiB/s，底层 NVMe 阵列余量充足。
 
-真正拖后腿的是公网带宽与 IPv6 质量：官网常规套餐标称 300Mbps 端口，但本台黑五款在大阪本地关西机场 Cloudflare（KIX）IPv4 实测下行仅 115.3 Mbps，Apple CDN（空载延迟 1.49 ms）单线程与四线程双向全部平顶卡在 114.7–118.8 Mbps，iperf3 至东京、洛杉矶、纽约、法兰克福 IPv4 吞吐也仅有 66.2–121.1 Mbps 且伴随 2.6 万至 4.2 万次 TCP 重传。IPv6 侧问题更为突出——iperf3 至东京仅 2.94 / 6.15 Mbps、至欧美低至 0.21–4.27 Mbps，Cloudflare IPv6 测速直接失败，连东京本地 IPv6 TCP 延迟测试都出现 50% 丢包（中位延迟跳至 85.2 ms），对华 IPv6 普遍丢包 10%–60%，甚至导致路由追踪工具经 IPv6 查询跳点归属 API 时全程报 Network Error。对华 IPv4 走日本普通国际 BGP（经 PacketFabric、KDDI、NTT 等转接），泰尔三网实测下行 26.2–108.1 Mbps / 上行 125.6–146.5 Mbps，上海联通 9929 TCP 延迟 41.9 ms、北京电信 CN2 59.8 ms、京沪穗普通三网约 69.8–145.6 ms（晚高峰上海 CN2 与广州 9929 探测点分别有 30% 与 80% 丢包）。
+真正令人失望的是网络细节与 IPv6 质量：本机标称 100Mbps 端口，IPv4 峰值吞吐本身达标且略有冗余（大阪关西机场 Cloudflare KIX 下行 115.3 Mbps，Apple CDN 空载延迟 1.49 ms、双向 114.7–118.8 Mbps，泰尔三网上行突发 125.6–146.5 Mbps），但路由质量粗糙——大阪至近邻东京 Leaseweb 的 IPv4 iperf3 往返延迟竟绕行至 105.7 ms，且至东京、美西、美东、法兰克福全部伴随 2.6 万至 4.29 万次 TCP 重传（纽约下行掉至 66.2 Mbps）。对华 IPv4 走普通国际 BGP（经 PacketFabric、KDDI、NTT 等转接），即便在凌晨 04:19 CST 非高峰时段采样，广州电信泰尔下行也仅有 26.2 Mbps，上海电信 CN2 与广州联通 9929 TCP 探测分别出现 30% 与 80% 丢包，沪穗联通 4837 中位延迟达 123.9–145.6 ms。更糟心的是 IPv6 侧严重拥塞：iperf3 至东京仅 2.94 / 6.15 Mbps、至欧美低至 0.21–4.27 Mbps，Cloudflare IPv6 测速直接失败，连东京本地 IPv6 TCP 探测都有 50% 丢包（中位延迟跳至 85.2 ms），对华 IPv6 普遍丢包 10%–60%，甚至导致路由追踪工具经 IPv6 查询跳点归属 API 时全程报 Network Error。
 
-付款方式覆盖相当全面：支持 Credit/Debit Card（信用卡/借记卡）、PayPal、Alipay（支付宝）、Bank Transfer（银行转账）、Crypto（USDT 加密货币）以及韩国 Naver Pay。根据官网服务条款（ToS）、退款政策与合理使用守则（AUP），新用户首台 VPS 首笔付款支持 3 天无理由退款（流量用尽、遭受攻击被封禁或违反 AUP 除外，非首单按未使用天数 9 折扣除通道费折算）；实例若遭受 DDoS 攻击，对应 IP 将被黑洞封堵 24 小时，严禁公开代理、BT/P2P 下载、Tor 节点、挖矿及长期持续占满硬件或网络资源，重要数据需用户自行异地备份。
+付款方式覆盖相当全面：支持 Credit/Debit Card（信用卡/借记卡）、PayPal、Alipay（支付宝）、Bank Transfer（银行转账）、Crypto（USDT 加密货币）以及韩国 Naver Pay。根据官网服务条款（ToS）、退款政策与合理使用守则（AUP），新用户首台 VPS 首笔付款支持 3 天无理由退款（流量用尽、遭受攻击被封禁或违反 AUP 除外，非首单按未使用天数 9 折扣除通道费折算）；实例若遭受 DDoS 攻击，对应 IP 将被黑洞封堵 24 小时，严禁公开代理、BT/P2P 下载、Tor 节点、挖矿及长期持续占满硬件或网络资源。总体而言，该黑五特惠套餐大概率已经售罄，而就实测网络表现来看，除非只图 $20/年低价拿日本大阪原生干净 IP 做低流量解锁落地，否则即便没抢到也无需觉得可惜。
 
 ## 系统信息
 
