@@ -26,11 +26,16 @@ async function verifyGlobeMotion(page) {
   try {
     await p.goto('http://127.0.0.1:4321/map/');
     await p.waitForSelector('[data-globe-controls]:not([hidden])');
+    const box = await p.locator('.atlas-globe-stage').boundingBox();
+    const centerX = box ? box.x + box.width / 2 : 526;
+    const centerY = box ? box.y + box.height / 2 : 480;
+    const blankX = box ? box.x + 18 : 168;
+    const blankY = box ? box.y + 18 : 230;
     await p.mouse.move(5, 5);
     await verify('idle rotation', true);
-    await p.mouse.move(720, 480);
+    await p.mouse.move(centerX, centerY);
     await verify('sphere hover pauses', false);
-    await p.mouse.move(180, 400);
+    await p.mouse.move(blankX, blankY);
     await verify('blank map area resumes', true);
     await p.mouse.move(5, 5);
     await p.keyboard.press('Tab');
@@ -38,17 +43,18 @@ async function verifyGlobeMotion(page) {
     await verify('keyboard focus pauses', false);
     await p.mouse.move(5, 8);
     await verify('returning to mouse resumes', true);
-    await p.mouse.move(720, 480);
+    await p.mouse.move(centerX, centerY);
     await p.waitForTimeout(100);
     await p.locator('.atlas-marker').first().click();
     await p.waitForSelector('[data-map-clear]:not([hidden])');
-    await p.waitForTimeout(1000);
     await p.mouse.move(5, 5);
-    await verify('selected city pauses', false);
+    await p.waitForTimeout(2300);
+    await verify('selected city resumes spin after focus hold', true);
     await p.locator('[data-map-clear]').click();
     await p.waitForSelector('[data-map-clear][hidden]', { state: 'attached' });
     await p.mouse.move(5, 8);
-    await verify('clearing selection resumes', true);
+    await p.waitForTimeout(2300);
+    await verify('clearing selection continues spin', true);
     await p.emulateMedia({ reducedMotion: 'reduce' });
     await verify('reduced motion pauses', false);
     if (results.some((result) => !result.passed)) {

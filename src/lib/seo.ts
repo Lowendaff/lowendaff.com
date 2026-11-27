@@ -5,7 +5,11 @@ export const siteIdentity = {
     '全球 VPS 与独立服务器测试记录，涵盖硬件性能、三网回程、BGP 与服务解锁，提供测试条件和原始数据供读者核对。',
   logo: '/brand/lowendaff-avatar.jpg',
   defaultOgImage: '/og/default.png',
-  sameAs: ['https://github.com/Lowendaff', 'https://t.me/lowendaff_blog'],
+  sameAs: [
+    'https://github.com/Lowendaff',
+    'https://t.me/lowendaff_blog',
+    'https://x.com/jam23ly',
+  ],
 };
 
 export interface ArticleMetadata {

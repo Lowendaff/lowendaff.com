@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
+import { comparePostOrder } from './post-sort.ts';
 import { reviewTypeLabels } from './review-types.ts';
 
 const localPostPath = (permalink: string) => encodeURI(permalink);
@@ -39,7 +40,9 @@ export function getRecords(posts: CollectionEntry<'posts'>[]) {
       reviewTypeLabel: reviewTypeLabels[data.reviewType],
       location: data.location,
       country: data.country,
+      pinned: Boolean(data.pinned),
       date: data.publishedAt,
+      updatedAt: data.updatedAt || '',
       testedAt: data.testedAt || '',
       href:
         data.kind === 'archive-reference'
@@ -49,5 +52,22 @@ export function getRecords(posts: CollectionEntry<'posts'>[]) {
       merchant: data.vendor,
       countryTag: data.country || 'unspecified',
     }))
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) =>
+      comparePostOrder(
+        {
+          id: a.id,
+          pinned: a.pinned,
+          publishedAt: a.date,
+          updatedAt: a.updatedAt,
+          testedAt: a.testedAt,
+        },
+        {
+          id: b.id,
+          pinned: b.pinned,
+          publishedAt: b.date,
+          updatedAt: b.updatedAt,
+          testedAt: b.testedAt,
+        },
+      ),
+    );
 }

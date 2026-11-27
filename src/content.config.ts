@@ -190,6 +190,7 @@ const posts = defineCollection({
         .optional(),
       coverAlt: z.string().trim().min(1).optional(),
       draft: z.boolean().default(false),
+      pinned: z.boolean().default(false),
       country: z.string().regex(/^([A-Z]{2})?$/),
       location: z.string(),
       geo: reviewGeoSchema,

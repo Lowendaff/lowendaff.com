@@ -5,7 +5,7 @@ import { reviewTypeLabels } from '../lib/review-types';
 import { escapeXml as xml } from '../lib/site';
 
 export const GET: APIRoute = async ({ site }) => {
-  const posts = await getPublishedPosts();
+  const posts = await getPublishedPosts({ honorPinned: false });
   const items = posts
     .map(({ data }) => {
       const url = xml(new URL(postPath({ data }), site).href);

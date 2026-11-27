@@ -8,6 +8,10 @@ import {
 } from '../src/lib/seo.ts';
 import { buildTopicHubs } from '../src/lib/topic-hubs.ts';
 import { buildShareLinks } from '../src/lib/share.ts';
+import {
+  comparePostOrder,
+  parseReviewTimestampMs,
+} from '../src/lib/post-sort.ts';
 
 test('Article graph links real authorship, dates, publisher, canonical page and breadcrumbs', () => {
   const canonical = new URL('https://lowendaff.com/reviews/example/');
@@ -185,4 +189,61 @@ test('Social share links encode Twitter and Telegram intents safely and clamp lo
   const tg = new URL(links.telegramHref);
   assert.equal(tg.origin + tg.pathname, 'https://t.me/share/url');
   assert.equal(tg.searchParams.get('url'), canonical);
+});
+
+test('Post ordering honors pinned posts first and strictly sorts timestamps with CST timezone awareness', () => {
+  // CST must be interpreted as UTC+8 (not US Central UTC-6): 2026-11-27 08:00 CST === 2026-11-27 00:00 UTC
+  assert.equal(
+    parseReviewTimestampMs('2026-11-27 08:00 CST'),
+    parseReviewTimestampMs('2026-11-27 00:00 UTC'),
+  );
+
+  const items = [
+    {
+      id: 'ccihosting-pa-vps',
+      pinned: false,
+      publishedAt: '2026-11-27',
+      testedAt: '2026-11-27 02:37 CST',
+    },
+    {
+      id: 'gomami-hkg-turin-vps',
+      pinned: true,
+      publishedAt: '2026-11-25',
+      updatedAt: '2026-11-26',
+      testedAt: '2026-11-26 23:56 CST',
+    },
+    {
+      id: 'viafacil-ar-vps',
+      pinned: false,
+      publishedAt: '2026-11-27',
+      testedAt: '2026-11-27 01:19 CST',
+    },
+    {
+      id: 'funom-vn-vps',
+      pinned: false,
+      publishedAt: '2026-11-27',
+      testedAt: '2026-11-27 06:36 CST',
+    },
+  ];
+
+  assert.deepEqual(
+    [...items].sort((a, b) => comparePostOrder(a, b)).map((x) => x.id),
+    [
+      'gomami-hkg-turin-vps',
+      'funom-vn-vps',
+      'ccihosting-pa-vps',
+      'viafacil-ar-vps',
+    ],
+  );
+  assert.deepEqual(
+    [...items]
+      .sort((a, b) => comparePostOrder(a, b, { honorPinned: false }))
+      .map((x) => x.id),
+    [
+      'funom-vn-vps',
+      'ccihosting-pa-vps',
+      'viafacil-ar-vps',
+      'gomami-hkg-turin-vps',
+    ],
+  );
 });

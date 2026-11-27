@@ -161,7 +161,7 @@ export async function createReviewGlobe(
   const baseHalfTan = Math.tan((40 * Math.PI) / 360);
   const camera = new PerspectiveCamera(40, 1, 0.1, 30);
   let home = initialPlaces[0] ?? { latitude: 20, longitude: 25 };
-  const homeDistance = () => (stageBox.clientWidth < 500 ? 3.8 : 3.35);
+  const homeDistance = () => (stageBox.clientWidth < 500 ? 3.8 : 3.4);
   camera.position.fromArray(
     globePoint(home.latitude, home.longitude, homeDistance()),
   );
@@ -185,15 +185,21 @@ export async function createReviewGlobe(
   const pointers = new Set<number>();
   let previousFrame: number | undefined;
   let spinVelocity = 0;
-  // Two degrees per second: a full turn in three minutes, independent of frame rate.
-  const spinRate = Math.PI / 90;
+  let holdUntil = 0;
+  let holdTimer = 0;
+  // Gentle, clearly perceptible planetary drift (~95s per full revolution).
+  const spinRate = (Math.PI * 2) / 95;
   let flight:
     | {
         start: number;
-        from: Vector3;
-        to: Vector3;
+        duration: number;
+        fromLat: number;
+        fromLon: number;
+        deltaLat: number;
+        deltaLon: number;
         fromDistance: number;
         toDistance: number;
+        arcLift: number;
       }
     | undefined;
   let markers: {
@@ -220,68 +226,104 @@ export async function createReviewGlobe(
   function pointerOverGlobe() {
     if (!pointer) return false;
     if (pointer.overAction) return true;
+    const stageBounds = stageBox.getBoundingClientRect();
     const bounds = viewport.getBoundingClientRect();
-    // The projected sphere silhouette, rather than the surrounding rectangular canvas.
-    const radius =
+    // The projected sphere silhouette, capped to the stage lens when zoomed in.
+    const rawRadius =
       bounds.height /
       (2 *
         Math.tan((camera.fov * Math.PI) / 360) *
-        Math.sqrt(camera.position.lengthSq() - 1));
-    const x = pointer.x - bounds.left - bounds.width / 2;
-    const y = pointer.y - bounds.top - bounds.height / 2;
+        Math.sqrt(Math.max(0.04, camera.position.lengthSq() - 1)));
+    const maxStageRadius = Math.max(
+      80,
+      Math.floor(Math.min(stageBounds.width, stageBounds.height) / 2 - 8),
+    );
+    const radius = Math.min(rawRadius, maxStageRadius);
+    const x = pointer.x - stageBounds.left - stageBounds.width / 2;
+    const y = pointer.y - stageBounds.top - stageBounds.height / 2;
     return (
-      pointer.x >= bounds.left &&
-      pointer.x <= bounds.right &&
-      pointer.y >= bounds.top &&
-      pointer.y <= bounds.bottom &&
+      pointer.x >= stageBounds.left &&
+      pointer.x <= stageBounds.right &&
+      pointer.y >= stageBounds.top &&
+      pointer.y <= stageBounds.bottom &&
       x * x + y * y <= radius * radius
     );
   }
-  function canSpin() {
+  function vectorToLatLon(vec: Vector3) {
+    const dir = vec.clone().normalize();
+    const lat = (Math.asin(Math.max(-1, Math.min(1, dir.y))) * 180) / Math.PI;
+    const lon = (Math.atan2(-dir.z, dir.x) * 180) / Math.PI;
+    return { lat, lon };
+  }
+  function shortestDeltaLon(fromLon: number, toLon: number) {
+    return ((((toLon - fromLon) % 360) + 540) % 360) - 180;
+  }
+  function easeInOutCubic(t: number) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+  function canSpin(now = performance.now()) {
     return (
       !reducedMotion.matches &&
       !pointerOverGlobe() &&
       !paused &&
       !pointers.size &&
       !flight &&
+      now >= holdUntil &&
       !(keyboardNavigation && stage.contains(document.activeElement))
     );
+  }
+  function scheduleHoldWakeup(delayMs: number) {
+    window.clearTimeout(holdTimer);
+    holdTimer = window.setTimeout(() => {
+      holdTimer = 0;
+      requestDraw();
+    }, delayMs);
   }
   function draw(now: number) {
     frame = 0;
     if (disposed || !visible || document.hidden) return;
+    const wallNow = performance.now();
     const delta =
       previousFrame === undefined
         ? 0
         : Math.min((now - previousFrame) / 1000, 0.05);
     previousFrame = now;
-    const spinning = canSpin();
+    const spinning = canSpin(wallNow);
     if (spinning) {
-      spinVelocity += (spinRate - spinVelocity) * (1 - Math.exp(-delta / 0.6));
+      spinVelocity += (spinRate - spinVelocity) * (1 - Math.exp(-delta / 0.75));
       camera.position.applyAxisAngle(originalUp, spinVelocity * delta);
     } else spinVelocity = 0;
     if (flight) {
-      const t = Math.min(1, (performance.now() - flight.start) / 850);
-      const ease = 1 - Math.pow(1 - t, 4);
-      // Spherical interpolation follows the surface instead of passing through Earth.
-      const angle = flight.from.angleTo(flight.to);
-      const axis = new Vector3()
-        .crossVectors(flight.from, flight.to)
-        .normalize();
-      if (axis.lengthSq() < 0.001) axis.copy(originalUp);
-      camera.position
-        .copy(flight.from)
-        .applyAxisAngle(axis, angle * ease)
-        .multiplyScalar(
-          flight.fromDistance +
-            (flight.toDistance - flight.fromDistance) * ease,
+      const t = Math.min(1, (wallNow - flight.start) / flight.duration);
+      const ease = easeInOutCubic(t);
+      const lat = flight.fromLat + flight.deltaLat * ease;
+      const lon = flight.fromLon + flight.deltaLon * ease;
+      const radius =
+        flight.fromDistance +
+        (flight.toDistance - flight.fromDistance) * ease +
+        Math.sin(Math.PI * ease) * flight.arcLift;
+      camera.position.fromArray(globePoint(lat, lon, radius));
+      if (t >= 1) {
+        camera.position.fromArray(
+          globePoint(
+            flight.fromLat + flight.deltaLat,
+            flight.fromLon + flight.deltaLon,
+            flight.toDistance,
+          ),
         );
-      if (t === 1) {
-        camera.position.copy(flight.to).multiplyScalar(flight.toDistance);
         flight = undefined;
+        if (!reducedMotion.matches && !paused) {
+          holdUntil = wallNow + 1100;
+          scheduleHoldWakeup(1120);
+        }
       }
+      const wasDamping = controls.enableDamping;
+      controls.enableDamping = false;
+      controls.update();
+      controls.enableDamping = wasDamping;
+    } else {
+      controls.update();
     }
-    controls.update();
     renderer.render(scene, camera);
     const width = viewport.clientWidth;
     const height = viewport.clientHeight;
@@ -295,7 +337,19 @@ export async function createReviewGlobe(
       (2 *
         Math.tan((camera.fov * Math.PI) / 360) *
         Math.sqrt(Math.max(0.04, distance * distance - 1)));
-    canvas.style.clipPath = `circle(${Math.ceil(sphereRadius + 14)}px at 50% 50%)`;
+    const maxStageRadius = Math.max(
+      80,
+      Math.floor(Math.min(stageWidth, stageHeight) / 2 - 8),
+    );
+    const rawClipRadius = Math.ceil(sphereRadius + 2);
+    const clippedByStage = rawClipRadius > maxStageRadius;
+    const activeClipRadius = clippedByStage ? maxStageRadius : rawClipRadius;
+    canvas.style.clipPath = `circle(${activeClipRadius}px at 50% 50%)`;
+    stageBox.dataset.zoomClipped = String(clippedByStage);
+    stageBox.style.setProperty(
+      '--globe-clip-diameter',
+      `${activeClipRadius * 2}px`,
+    );
     const facing = camera.position.clone().normalize();
     const occupied: { x: number; y: number }[] = [];
     for (const { button, position, label } of [...markers].sort(
@@ -306,12 +360,16 @@ export async function createReviewGlobe(
       projected.copy(position).project(camera);
       const x = (projected.x * 0.5 + 0.5) * width - offsetX;
       const y = (-projected.y * 0.5 + 0.5) * height - offsetY;
+      const dx = x - stageWidth / 2;
+      const dy = y - stageHeight / 2;
+      const maxMarkerRadius = Math.max(0, activeClipRadius - 4);
       const hidden =
         position.clone().normalize().dot(facing) < 1 / distance + 0.025 ||
-        x < -60 ||
+        dx * dx + dy * dy > maxMarkerRadius * maxMarkerRadius ||
+        x < 12 ||
         x > stageWidth - 12 ||
-        y < -40 ||
-        y > stageHeight + 24;
+        y < 18 ||
+        y > stageHeight - 18;
       button.hidden = hidden;
       if (!hidden) {
         button.style.left = `${x}px`;
@@ -347,6 +405,8 @@ export async function createReviewGlobe(
   controls.addEventListener('change', requestDraw);
   controls.addEventListener('start', () => {
     flight = undefined;
+    holdUntil = 0;
+    window.clearTimeout(holdTimer);
     requestDraw();
   });
   window.addEventListener(
@@ -444,7 +504,7 @@ export async function createReviewGlobe(
       frame = 0;
     }
   });
-  intersection.observe(viewport);
+  intersection.observe(stageBox);
   document.addEventListener(
     'visibilitychange',
     () => {
@@ -462,7 +522,13 @@ export async function createReviewGlobe(
     () => {
       controls.enableDamping = !reducedMotion.matches;
       if (flight) {
-        camera.position.copy(flight.to).multiplyScalar(flight.toDistance);
+        camera.position.fromArray(
+          globePoint(
+            flight.fromLat + flight.deltaLat,
+            flight.fromLon + flight.deltaLon,
+            flight.toDistance,
+          ),
+        );
         flight = undefined;
       }
       requestDraw();
@@ -470,22 +536,35 @@ export async function createReviewGlobe(
     { signal: events.signal },
   );
   function move(latitude: number, longitude: number, distance: number) {
+    window.clearTimeout(holdTimer);
+    holdUntil = 0;
     // Clear remaining drag inertia before starting a guided camera movement.
     controls.enableDamping = false;
     controls.update();
     controls.enableDamping = !reducedMotion.matches;
-    const to = new Vector3(...globePoint(latitude, longitude)).normalize();
-    if (reducedMotion.matches) {
-      camera.position.copy(to).multiplyScalar(distance);
+    const fromVec = camera.position.clone().normalize();
+    const toVec = new Vector3(...globePoint(latitude, longitude)).normalize();
+    const angularRad = fromVec.angleTo(toVec);
+    if (reducedMotion.matches || angularRad < 0.004) {
+      camera.position.fromArray(globePoint(latitude, longitude, distance));
       flight = undefined;
-    } else
+    } else {
+      const { lat: fromLat, lon: fromLon } = vectorToLatLon(camera.position);
+      const deltaLat = latitude - fromLat;
+      const deltaLon = shortestDeltaLon(fromLon, longitude);
+      const ratio = Math.min(1, angularRad / Math.PI);
       flight = {
         start: performance.now(),
-        from: camera.position.clone().normalize(),
-        to,
+        duration: Math.round(680 + ratio * 620),
+        fromLat,
+        fromLon,
+        deltaLat,
+        deltaLon,
         fromDistance: camera.position.length(),
         toDistance: distance,
+        arcLift: ratio * 0.42,
       };
+    }
     requestDraw();
   }
   function zoom(direction: string) {
@@ -552,7 +631,7 @@ export async function createReviewGlobe(
       move(
         place.latitude,
         place.longitude,
-        stageBox.clientWidth < 500 ? 3.4 : 2.7,
+        stageBox.clientWidth < 500 ? 3.45 : 3.08,
       );
     },
     resetHome() {
@@ -605,6 +684,7 @@ export async function createReviewGlobe(
     destroy() {
       disposed = true;
       cancelAnimationFrame(frame);
+      window.clearTimeout(holdTimer);
       events.abort();
       themeObserver.disconnect();
       resize.disconnect();

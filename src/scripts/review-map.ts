@@ -152,7 +152,6 @@ export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
     );
     if (selected && !filteredById.has(selected)) {
       selected = '';
-      globe?.setPaused(false);
     }
     if (hovered && !filteredById.has(hovered)) {
       hovered = '';
@@ -262,8 +261,8 @@ export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
   function select(id: string, fromGlobe = false) {
     if (!fromGlobe && selected === id) {
       selected = '';
-      globe?.setPaused(false);
       render();
+      globe?.resetHome();
       return;
     }
     const place = filteredPlaces.find((entry) => entry.id === id);
@@ -271,15 +270,12 @@ export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
     selected = id;
     render();
     globe?.focus(place);
-    globe?.setPaused(true);
     if (articlesScroll) articlesScroll.scrollTop = 0;
 
-    if (fromGlobe) {
-      const btn = regionButtonById.get(id);
-      btn?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      if (window.innerWidth <= 960) {
-        articlesPanel?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
+    const btn = regionButtonById.get(id);
+    btn?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (fromGlobe && window.innerWidth <= 960) {
+      articlesPanel?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   }
 
@@ -299,8 +295,8 @@ export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
 
   clearBtn?.addEventListener('click', () => {
     selected = '';
-    globe?.setPaused(false);
     render();
+    globe?.resetHome();
   });
 
   typeButtons.forEach((button, index) => {
@@ -332,9 +328,6 @@ export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
       const place = filteredPlaces.find((entry) => entry.id === id);
       if (!place) return;
       hovered = id;
-      if (!selected) {
-        globe?.focus(place);
-      }
       globe?.setPlaces(filteredPlaces, id);
     });
     button.addEventListener('pointerleave', () => {
@@ -363,7 +356,6 @@ export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
       globe = await createGlobe(root!, filteredPlaces, (id) =>
         select(id, true),
       );
-      globe.setPaused(Boolean(selected));
       status.hidden = true;
       controls.hidden = false;
       render(false);
@@ -383,7 +375,6 @@ export function initReviewMap(loadGlobe?: typeof createReviewGlobe) {
     restoreFromUrl();
     render(false);
     const activePlace = filteredPlaces.find((entry) => entry.id === selected);
-    globe?.setPaused(Boolean(activePlace));
     if (activePlace) globe?.focus(activePlace);
     else if (filteredPlaces.length > 0) globe?.resetHome();
   });

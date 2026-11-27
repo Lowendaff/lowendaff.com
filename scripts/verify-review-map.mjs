@@ -421,6 +421,16 @@ test('VPS and dedicated perspectives isolate cities across globe markers, region
     assert.equal(h.singletons['[data-map-article-count]'][0].textContent, '1');
     assert.equal(h.singletons['[data-map-region-badge]'][0].textContent, '1');
 
+    // Hovering a region button highlights its globe marker without hijacking camera focus
+    vpsTab.click();
+    h.globeState.focused = null;
+    laBtn.trigger('pointerenter');
+    assert.equal(h.globeState.selected, 'us-洛杉矶');
+    assert.equal(h.globeState.focused, null);
+    assert.equal(h.globeState.paused, false);
+    laBtn.trigger('pointerleave');
+    assert.equal(h.globeState.selected, '');
+
     // Switch to Dedicated perspective: Los Angeles must NOT appear in globe or region list
     dedTab.click();
     assert.deepEqual(
@@ -434,9 +444,10 @@ test('VPS and dedicated perspectives isolate cities across globe markers, region
     assert.equal(h.singletons['[data-map-article-count]'][0].textContent, '1');
     assert.equal(h.singletons['[data-map-region-badge]'][0].textContent, '1');
 
-    // Selecting Hong Kong in Dedicated view and switching to VPS must clear stale HK selection
+    // Selecting Hong Kong focuses camera without permanently freezing auto-spin, and switching to VPS clears stale HK selection
     hkBtn.click();
-    assert.equal(h.globeState.paused, true);
+    assert.equal(h.globeState.focused?.id, 'hk-香港');
+    assert.equal(h.globeState.paused, false);
     assert.equal(
       h.singletons['[data-map-title]'][0].textContent,
       '香港 测评文章',

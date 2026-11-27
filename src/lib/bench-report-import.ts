@@ -97,6 +97,7 @@ export const benchPlanSchema = z.object({
 export const benchEditorialSchema = z.object({
   reviewType: z.enum(['vps', 'dedicated']).optional(),
   draft: z.boolean().default(true),
+  pinned: z.boolean().default(false),
   title: z.string().trim().min(1).optional(),
   permalink: z
     .string()
@@ -2747,6 +2748,7 @@ export function renderBenchReport(
     reviewType,
     ...(omittedSections.length > 0 ? { omittedSections } : {}),
     draft: editorial.draft,
+    ...(editorial.pinned ? { pinned: true } : {}),
     permalink,
     title,
     description,

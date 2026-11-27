@@ -73,8 +73,15 @@ const cleanTitle = (raw: string) =>
         data-merchant={post.merchant}
         data-id={post.id}
         data-type={post.reviewType}
+        data-pinned={post.pinned ? 'true' : undefined}
       >
         <div class="journal-card-meta">
+          {post.pinned && (
+            <span class="pinned-badge">
+              <Icon name="pin-line" size={12} />
+              <span>置顶</span>
+            </span>
+          )}
           <span class="journal-location">
             <Flag code={post.country} size={14} />
             <span>{post.location}</span>

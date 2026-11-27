@@ -1,4 +1,5 @@
 import { z } from 'astro/zod';
+import { comparePostOrder } from './post-sort.ts';
 import type { ReviewType } from './review-types';
 
 /** City-level reference coordinates, never a datacenter's exact address. */
@@ -17,6 +18,8 @@ export interface MapArticle {
   country: string;
   location: string;
   date: string;
+  testedAt?: string;
+  pinned?: boolean;
   reviewType: ReviewType;
 }
 export interface ReviewPlace {
@@ -62,6 +65,7 @@ interface MapPost {
     location: string;
     publishedAt: string;
     testedAt?: string;
+    pinned?: boolean;
     reviewType: ReviewType;
     kind: 'review' | 'archive-reference';
     draft: boolean;
@@ -97,6 +101,8 @@ export function buildReviewMap(posts: MapPost[]) {
       country: data.country,
       location: data.location,
       date: data.publishedAt,
+      testedAt: data.testedAt,
+      pinned: Boolean(data.pinned),
       reviewType: data.reviewType,
     };
     const geo = reviewGeoSchema.parse(data.geo);
@@ -111,7 +117,20 @@ export function buildReviewMap(posts: MapPost[]) {
     places.set(id, place);
   }
   const newest = (a: MapArticle, b: MapArticle) =>
-    b.date.localeCompare(a.date) || a.href.localeCompare(b.href);
+    comparePostOrder(
+      {
+        id: a.href,
+        pinned: a.pinned,
+        publishedAt: a.date,
+        testedAt: a.testedAt,
+      },
+      {
+        id: b.href,
+        pinned: b.pinned,
+        publishedAt: b.date,
+        testedAt: b.testedAt,
+      },
+    );
   for (const place of places.values()) place.articles.sort(newest);
   return {
     places: [...places.values()].sort(
