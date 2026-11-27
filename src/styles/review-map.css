@@ -115,7 +115,7 @@
   align-items: center;
   gap: 8px;
   min-height: var(--control-h-md);
-  padding: 0 10px 0 0;
+  padding: 0;
   border: none;
   background: none;
   color: var(--text);
@@ -124,11 +124,36 @@
   text-align: left;
   white-space: nowrap;
   pointer-events: auto;
-  transform: translate(-14px, -50%);
+  transform: translate(-8px, -50%);
+}
+.atlas-marker[data-anchor='left'] {
+  flex-direction: row-reverse;
+  transform: translate(calc(-100% + 8px), -50%);
+}
+.atlas-marker[data-anchor='top'] {
+  flex-direction: column-reverse;
+  gap: 6px;
+  min-height: 0;
+  transform: translate(-50%, calc(-100% + 8px));
+}
+.atlas-marker[data-anchor='bottom'] {
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  transform: translate(-50%, -8px);
+}
+.atlas-marker[data-label-hidden='true'] {
+  min-height: 16px;
+  transform: translate(-8px, -8px);
+}
+.atlas-marker[aria-pressed='true'],
+.atlas-marker:hover,
+.atlas-marker:focus-visible {
+  z-index: 2;
 }
 .atlas-marker-dot {
-  width: 28px;
-  height: 28px;
+  width: 16px;
+  height: 16px;
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -140,6 +165,10 @@
   border-radius: var(--radius-full);
   background: var(--accent);
   border: 2px solid var(--raised);
+  transition: box-shadow var(--transition-base);
+}
+.atlas-marker[aria-pressed='true'] .atlas-marker-dot::before {
+  box-shadow: 0 0 0 2px var(--accent);
 }
 .atlas-marker-label {
   background: var(--surface);

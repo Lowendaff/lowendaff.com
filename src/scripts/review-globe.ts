@@ -1,6 +1,8 @@
 import {
   decodeGeographicArc,
   globePoint,
+  layoutGlobeLabels,
+  type GlobeLabelAnchor,
   unwrapGeographicLine,
   unwrapLandRing,
 } from '../lib/globe-geometry';
@@ -595,12 +597,17 @@ export async function createReviewGlobe(
         arcLift: number;
       }
     | undefined;
+  let selectedId = '';
+  let hoveredId = '';
   let markers: {
     button: HTMLButtonElement;
     position: Vec3;
     normal: Vec3;
     place: Place;
     label: HTMLSpanElement;
+    labelWidth: number;
+    labelHeight: number;
+    prevAnchor?: GlobeLabelAnchor;
   }[] = [];
 
   const events = new AbortController();
@@ -862,12 +869,13 @@ export async function createReviewGlobe(
     );
 
     const facing = vecNormalize(cameraPos);
-    const occupied: { x: number; y: number }[] = [];
-    for (const { button, position, normal, label } of [...markers].sort(
-      (a, b) =>
-        Number(b.button.getAttribute('aria-pressed') === 'true') -
-        Number(a.button.getAttribute('aria-pressed') === 'true'),
-    )) {
+    const visibleMarkers: {
+      marker: (typeof markers)[number];
+      x: number;
+      y: number;
+    }[] = [];
+    for (const marker of markers) {
+      const { button, position, normal } = marker;
       const vx =
         viewMatrix[0] * position[0] +
         viewMatrix[4] * position[1] +
@@ -898,21 +906,50 @@ export async function createReviewGlobe(
         x > stageWidth - 12 ||
         y < 18 ||
         y > stageHeight - 18;
-      button.hidden = hidden;
+      if (button.hidden !== hidden) button.hidden = hidden;
       if (!hidden) {
         button.style.left = `${x}px`;
         button.style.top = `${y}px`;
-        const crowded = occupied.some(
-          (p) => Math.abs(p.x - x) < 140 && Math.abs(p.y - y) < 38,
-        );
-        label.hidden = crowded;
-        if (!crowded) occupied.push({ x, y });
-        button.style.transform =
-          x > stageWidth - 170
-            ? 'translate(calc(-100% + 14px), -50%)'
-            : 'translate(-14px, -50%)';
-        button.style.flexDirection =
-          x > stageWidth - 170 ? 'row-reverse' : 'row';
+        visibleMarkers.push({ marker, x, y });
+      }
+    }
+
+    for (const { marker } of visibleMarkers) {
+      if (!marker.labelWidth) {
+        if (marker.label.hidden) marker.label.hidden = false;
+        marker.labelWidth = marker.label.offsetWidth;
+        marker.labelHeight = marker.label.offsetHeight;
+      }
+    }
+
+    const placements = layoutGlobeLabels(
+      visibleMarkers.map(({ marker, x, y }) => ({
+        id: marker.place.id,
+        x,
+        y,
+        labelWidth: marker.labelWidth,
+        labelHeight: marker.labelHeight,
+        count: marker.place.count,
+        active: selectedId === marker.place.id || hoveredId === marker.place.id,
+        prevAnchor: marker.prevAnchor,
+      })),
+      stageWidth,
+      stageHeight,
+    );
+
+    for (let i = 0; i < visibleMarkers.length; i++) {
+      const { marker } = visibleMarkers[i];
+      const placement = placements[i];
+      marker.prevAnchor = placement.anchor;
+      if (marker.button.dataset.anchor !== placement.anchor) {
+        marker.button.dataset.anchor = placement.anchor;
+      }
+      const hiddenAttr = String(placement.labelHidden);
+      if (marker.button.dataset.labelHidden !== hiddenAttr) {
+        marker.button.dataset.labelHidden = hiddenAttr;
+      }
+      if (marker.label.hidden !== placement.labelHidden) {
+        marker.label.hidden = placement.labelHidden;
       }
     }
 
@@ -1182,6 +1219,26 @@ export async function createReviewGlobe(
     },
     setPlaces(places: Place[], selected = '') {
       home = places[0] ?? { latitude: 20, longitude: 25 };
+      selectedId = selected;
+      const samePlaces =
+        markers.length === places.length &&
+        markers.every(
+          (m, idx) =>
+            m.place.id === places[idx].id &&
+            m.place.count === places[idx].count,
+        );
+      if (samePlaces) {
+        for (let i = 0; i < markers.length; i++) {
+          markers[i].place = places[i];
+          markers[i].button.setAttribute(
+            'aria-pressed',
+            String(selected === places[i].id),
+          );
+        }
+        requestDraw();
+        return;
+      }
+      hoveredId = '';
       const focused = markerLayer.contains(document.activeElement)
         ? (document.activeElement as HTMLElement).dataset.placeId
         : undefined;
@@ -1191,6 +1248,7 @@ export async function createReviewGlobe(
         button.type = 'button';
         button.className = 'atlas-marker';
         button.dataset.placeId = place.id;
+        button.dataset.anchor = 'right';
         button.setAttribute('aria-controls', 'map-records');
         button.setAttribute(
           'aria-label',
@@ -1208,16 +1266,42 @@ export async function createReviewGlobe(
         label.append(count);
         button.append(dot, label);
         button.addEventListener('click', () => onSelect(place.id));
+        button.addEventListener('pointerenter', () => {
+          hoveredId = place.id;
+          requestDraw();
+        });
+        button.addEventListener('pointerleave', () => {
+          if (hoveredId === place.id) {
+            hoveredId = '';
+            requestDraw();
+          }
+        });
+        button.addEventListener('focusin', () => {
+          hoveredId = place.id;
+          requestDraw();
+        });
+        button.addEventListener('focusout', () => {
+          if (hoveredId === place.id) {
+            hoveredId = '';
+            requestDraw();
+          }
+        });
         markerLayer.append(button);
         const position = globePoint(place.latitude, place.longitude, 1.006);
         return {
           place,
           button,
           label,
+          labelWidth: 0,
+          labelHeight: 0,
           position,
           normal: vecNormalize(position),
         };
       });
+      for (const marker of markers) {
+        marker.labelWidth = marker.label.offsetWidth;
+        marker.labelHeight = marker.label.offsetHeight;
+      }
       if (focused)
         markers
           .find(({ place }) => place.id === focused)

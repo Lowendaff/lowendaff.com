@@ -11,6 +11,7 @@ import { initReviewMap } from '../src/scripts/review-map.ts';
 import {
   decodeGeographicArc,
   globePoint,
+  layoutGlobeLabels,
   unwrapGeographicLine,
   unwrapLandRing,
 } from '../src/lib/globe-geometry.ts';
@@ -635,4 +636,130 @@ test('article recommendation map link shares exact placeId normalization and rev
   assert.equal(params.get('type'), 'dedicated');
   assert.equal(params.get('place'), places[0].id);
   assert.equal(params.get('place'), reviewPlaceId('US', 'Los Angeles'));
+});
+
+test('layoutGlobeLabels fans close neighbors like Grand Rapids and Detroit into non-overlapping anchors', () => {
+  // Grand Rapids (west, x=240) and Detroit (east, x=256) 16px apart
+  const pair = layoutGlobeLabels(
+    [
+      {
+        id: 'us-大急流城',
+        x: 240,
+        y: 210,
+        labelWidth: 88,
+        labelHeight: 28,
+        count: 1,
+        active: false,
+      },
+      {
+        id: 'us-底特律',
+        x: 256,
+        y: 214,
+        labelWidth: 76,
+        labelHeight: 28,
+        count: 1,
+        active: false,
+      },
+    ],
+    560,
+    520,
+  );
+  assert.equal(pair[0].anchor, 'left');
+  assert.equal(pair[0].labelHidden, false);
+  assert.equal(pair[1].anchor, 'right');
+  assert.equal(pair[1].labelHidden, false);
+
+  // Near the left stage edge where 'left' would clip out of bounds, western city pivots to 'top' or 'bottom' while both stay visible
+  const nearLeftEdge = layoutGlobeLabels(
+    [
+      {
+        id: 'us-大急流城',
+        x: 60,
+        y: 210,
+        labelWidth: 88,
+        labelHeight: 28,
+        count: 1,
+        active: false,
+      },
+      {
+        id: 'us-底特律',
+        x: 76,
+        y: 214,
+        labelWidth: 76,
+        labelHeight: 28,
+        count: 1,
+        active: false,
+      },
+    ],
+    560,
+    520,
+  );
+  assert.notEqual(nearLeftEdge[0].anchor, 'left');
+  assert.notEqual(nearLeftEdge[0].anchor, 'right');
+  assert.equal(nearLeftEdge[0].labelHidden, false);
+  assert.equal(nearLeftEdge[1].anchor, 'right');
+  assert.equal(nearLeftEdge[1].labelHidden, false);
+
+  // 4-city regional cluster fans into all 4 cardinal anchors with 0 hidden labels
+  const quad = layoutGlobeLabels(
+    [
+      {
+        id: 'c-west',
+        x: 250,
+        y: 250,
+        labelWidth: 80,
+        labelHeight: 28,
+        count: 1,
+        active: false,
+      },
+      {
+        id: 'c-east',
+        x: 274,
+        y: 250,
+        labelWidth: 80,
+        labelHeight: 28,
+        count: 1,
+        active: false,
+      },
+      {
+        id: 'c-north',
+        x: 262,
+        y: 234,
+        labelWidth: 80,
+        labelHeight: 28,
+        count: 1,
+        active: false,
+      },
+      {
+        id: 'c-south',
+        x: 262,
+        y: 266,
+        labelWidth: 80,
+        labelHeight: 28,
+        count: 1,
+        active: false,
+      },
+    ],
+    560,
+    520,
+  );
+  assert(quad.every((p) => !p.labelHidden));
+  assert.equal(new Set(quad.map((p) => p.anchor)).size, 4);
+
+  // Active city always keeps its label visible even in a 6-city tight stack
+  const dense = layoutGlobeLabels(
+    Array.from({ length: 6 }, (_, idx) => ({
+      id: `city-${idx}`,
+      x: 260 + idx * 2,
+      y: 260 + idx * 2,
+      labelWidth: 90,
+      labelHeight: 28,
+      count: 1,
+      active: idx === 5,
+    })),
+    560,
+    520,
+  );
+  assert.equal(dense[5].labelHidden, false);
+  assert(dense.some((p) => p.labelHidden));
 });
